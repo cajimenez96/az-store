@@ -6,18 +6,18 @@ const currency = z
   .string()
   .refine(
     (value) => /^\d+(\.\d{2})?$/.test(formatNumberWithDecimal(Number(value))),
-    'Price must have exactly two decimal places'
+    'El precio debe tener exactamente dos decimales'
   );
 
 // Schema for inserting products
 export const insertProductSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  slug: z.string().min(3, 'Slug must be at least 3 characters'),
-  category: z.string().min(3, 'Category must be at least 3 characters'),
-  brand: z.string().min(3, 'Brand must be at least 3 characters'),
-  description: z.string().min(3, 'Description must be at least 3 characters'),
+  name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+  slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres'),
+  category: z.string().min(3, 'La categoría debe tener al menos 3 caracteres'),
+  brand: z.string().min(3, 'La marca debe tener al menos 3 caracteres'),
+  description: z.string().min(3, 'La descripción debe tener al menos 3 caracteres'),
   stock: z.coerce.number(),
-  images: z.array(z.string()).min(1, 'Product must have at least one image'),
+  images: z.array(z.string()).min(1, 'El producto debe tener al menos una imagen'),
   isFeatured: z.boolean(),
   banner: z.string().nullable(),
   price: currency,
@@ -25,37 +25,37 @@ export const insertProductSchema = z.object({
 
 // Schema for updating products
 export const updateProductSchema = insertProductSchema.extend({
-  id: z.string().min(1, 'Id is required'),
+  id: z.string().min(1, 'El ID es requerido'),
 });
 
 // Schema for signing users in
 export const signInFormSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Dirección de correo electrónico inválida'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 });
 
 // Schema for signing up a user
 export const signUpFormSchema = z
   .object({
-    name: z.string().min(3, 'Name must be at least 3 characters'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+    email: z.string().email('Dirección de correo electrónico inválida'),
+    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
     confirmPassword: z
       .string()
-      .min(6, 'Confirm password must be at least 6 characters'),
+      .min(6, 'La confirmación de contraseña debe tener al menos 6 caracteres'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   });
 
 // Cart Schemas
 export const cartItemSchema = z.object({
-  productId: z.string().min(1, 'Product is required'),
-  name: z.string().min(1, 'Name is required'),
-  slug: z.string().min(1, 'Slug is required'),
-  qty: z.number().int().nonnegative('Quantity must be a positive number'),
-  image: z.string().min(1, 'Image is required'),
+  productId: z.string().min(1, 'El producto es requerido'),
+  name: z.string().min(1, 'El nombre es requerido'),
+  slug: z.string().min(1, 'El slug es requerido'),
+  qty: z.number().int().nonnegative('La cantidad debe ser un número positivo'),
+  image: z.string().min(1, 'La imagen es requerida'),
   price: currency,
 });
 
@@ -65,17 +65,17 @@ export const insertCartSchema = z.object({
   totalPrice: currency,
   shippingPrice: currency,
   taxPrice: currency,
-  sessionCartId: z.string().min(1, 'Session cart id is required'),
+  sessionCartId: z.string().min(1, 'El ID del carrito de sesión es requerido'),
   userId: z.string().optional().nullable(),
 });
 
 // Schema for the shipping address
 export const shippingAddressSchema = z.object({
-  fullName: z.string().min(3, 'Name must be at least 3 characters'),
-  streetAddress: z.string().min(3, 'Address must be at least 3 characters'),
-  city: z.string().min(3, 'City must be at least 3 characters'),
-  postalCode: z.string().min(3, 'Postal code must be at least 3 characters'),
-  country: z.string().min(3, 'Country must be at least 3 characters'),
+  fullName: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+  streetAddress: z.string().min(3, 'La dirección debe tener al menos 3 caracteres'),
+  city: z.string().min(3, 'La ciudad debe tener al menos 3 caracteres'),
+  postalCode: z.string().min(3, 'El código postal debe tener al menos 3 caracteres'),
+  country: z.string().min(3, 'El país debe tener al menos 3 caracteres'),
   lat: z.number().optional(),
   lng: z.number().optional(),
 });
@@ -83,22 +83,22 @@ export const shippingAddressSchema = z.object({
 // Schema for payment method
 export const paymentMethodSchema = z
   .object({
-    type: z.string().min(1, 'Payment method is required'),
+    type: z.string().min(1, 'El método de pago es requerido'),
   })
   .refine((data) => PAYMENT_METHODS.includes(data.type), {
     path: ['type'],
-    message: 'Invalid payment method',
+    message: 'Método de pago inválido',
   });
 
 // Schema for inserting order
 export const insertOrderSchema = z.object({
-  userId: z.string().min(1, 'User is required'),
+  userId: z.string().min(1, 'El usuario es requerido'),
   itemsPrice: currency,
   shippingPrice: currency,
   taxPrice: currency,
   totalPrice: currency,
   paymentMethod: z.string().refine((data) => PAYMENT_METHODS.includes(data), {
-    message: 'Invalid payment method',
+    message: 'Método de pago inválido',
   }),
   shippingAddress: shippingAddressSchema,
 });
@@ -123,25 +123,25 @@ export const paymentResultSchema = z.object({
 
 // Schema for updating the user profile
 export const updateProfileSchema = z.object({
-  name: z.string().min(3, 'Name must be at leaast 3 characters'),
-  email: z.string().min(3, 'Email must be at leaast 3 characters'),
+  name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+  email: z.string().min(3, 'El correo debe tener al menos 3 caracteres'),
 });
 
 // Schema to update users
 export const updateUserSchema = updateProfileSchema.extend({
-  id: z.string().min(1, 'ID is required'),
-  role: z.string().min(1, 'Role is required'),
+  id: z.string().min(1, 'El ID es requerido'),
+  role: z.string().min(1, 'El rol es requerido'),
 });
 
 // Schema to insert reviews
 export const insertReviewSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters'),
-  description: z.string().min(3, 'Description must be at least 3 characters'),
-  productId: z.string().min(1, 'Product is required'),
-  userId: z.string().min(1, 'User is required'),
+  title: z.string().min(3, 'El título debe tener al menos 3 caracteres'),
+  description: z.string().min(3, 'La descripción debe tener al menos 3 caracteres'),
+  productId: z.string().min(1, 'El producto es requerido'),
+  userId: z.string().min(1, 'El usuario es requerido'),
   rating: z.coerce
     .number()
     .int()
-    .min(1, 'Rating must be at least 1')
-    .max(5, 'Rating must be at most 5'),
+    .min(1, 'La calificación debe ser al menos 1')
+    .max(5, 'La calificación debe ser como máximo 5'),
 });

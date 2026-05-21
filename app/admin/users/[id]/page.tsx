@@ -5,7 +5,7 @@ import UpdateUserForm from './update-user-form';
 import { requireAdmin } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
-  title: 'Update User',
+  title: 'Actualizar Usuario',
 };
 
 const AdminUserUpdatePage = async (props: {
@@ -23,7 +23,7 @@ const AdminUserUpdatePage = async (props: {
 
   return (
     <div className='space-y-8 max-w-lg mx-auto'>
-      <h1 className='h2-bold'>Update User</h1>
+      <h1 className='h2-bold'>Actualizar Usuario</h1>
       <UpdateUserForm user={user} />
     </div>
   );

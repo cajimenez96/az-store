@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
-  title: 'Update Product',
+  title: 'Actualizar Producto',
 };
 
 const AdminProductUpdatePage = async (props: {
@@ -23,7 +23,7 @@ const AdminProductUpdatePage = async (props: {
 
   return (
     <div className='space-y-8 max-w-5xl mx-auto'>
-      <h1 className='h2-bold'>Update Product</h1>
+      <h1 className='h2-bold'>Actualizar Producto</h1>
 
       <ProductForm type='Update' product={product} productId={product.id} />
     </div>

@@ -18,7 +18,7 @@ const Menu = () => {
         <ModeToggle />
         <Button asChild variant='ghost'>
           <Link href='/cart'>
-            <ShoppingCart /> Cart
+            <ShoppingCart /> Carrito
           </Link>
         </Button>
         <UserButton />
@@ -29,11 +29,11 @@ const Menu = () => {
             <EllipsisVertical />
           </SheetTrigger>
           <SheetContent className='flex flex-col items-start'>
-            <SheetTitle>Menu</SheetTitle>
+            <SheetTitle>Menú</SheetTitle>
             <ModeToggle />
             <Button asChild variant='ghost'>
               <Link href='/cart'>
-                <ShoppingCart /> Cart
+                <ShoppingCart /> Carrito
               </Link>
             </Button>
             <UserButton />

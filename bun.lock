@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "prostore",
+      "name": "az store",
       "dependencies": {
         "@auth/core": "0.37.4",
         "@auth/prisma-adapter": "^2.7.4",

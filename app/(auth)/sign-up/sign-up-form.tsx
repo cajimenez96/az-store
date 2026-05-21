@@ -24,7 +24,7 @@ const SignUpForm = () => {
 
     return (
       <Button disabled={pending} className='w-full' variant='default'>
-        {pending ? 'Submitting...' : 'Sign Up'}
+        {pending ? 'Registrando...' : 'Registrarse'}
       </Button>
     );
   };
@@ -34,7 +34,7 @@ const SignUpForm = () => {
       <input type='hidden' name='callbackUrl' value={callbackUrl} />
       <div className='space-y-6'>
         <div>
-          <Label htmlFor='email'>Name</Label>
+          <Label htmlFor='name'>Nombre</Label>
           <Input
             id='name'
             name='name'
@@ -44,7 +44,7 @@ const SignUpForm = () => {
           />
         </div>
         <div>
-          <Label htmlFor='email'>Email</Label>
+          <Label htmlFor='email'>Correo electrónico</Label>
           <Input
             id='email'
             name='email'
@@ -54,7 +54,7 @@ const SignUpForm = () => {
           />
         </div>
         <div>
-          <Label htmlFor='password'>Password</Label>
+          <Label htmlFor='password'>Contraseña</Label>
           <Input
             id='password'
             name='password'
@@ -65,7 +65,7 @@ const SignUpForm = () => {
           />
         </div>
         <div>
-          <Label htmlFor='confirmPassword'>Confirm Password</Label>
+          <Label htmlFor='confirmPassword'>Confirmar contraseña</Label>
           <Input
             id='confirmPassword'
             name='confirmPassword'
@@ -84,9 +84,9 @@ const SignUpForm = () => {
         )}
 
         <div className='text-sm text-center text-muted-foreground'>
-          Already have an account?{' '}
+          ¿Ya tenés una cuenta?{' '}
           <Link href='/sign-in' target='_self' className='link'>
-            Sign In
+            Iniciar Sesión
           </Link>
         </div>
       </div>

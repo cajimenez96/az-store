@@ -11,14 +11,14 @@ const NotFoundPage = () => {
         src='/images/logo.svg'
         width={48}
         height={48}
-        alt={`${APP_NAME} logo`}
+        alt={`Logo de ${APP_NAME}`}
         priority={true}
       />
       <div className='p-6 w-1/3 rounded-lg shadow-md text-center'>
-        <h1 className='text-3xl font-bold mb-4'>Not Found</h1>
-        <p className='text-destructive'>Could not find requested page</p>
+        <h1 className='text-3xl font-bold mb-4'>Página No Encontrada</h1>
+        <p className='text-destructive'>No se pudo encontrar la página solicitada.</p>
         <Button variant='outline' className='mt-4 ml-2' asChild>
-          <Link href='/'>Back To Home</Link>
+          <Link href='/'>Volver al Inicio</Link>
         </Button>
       </div>
     </div>

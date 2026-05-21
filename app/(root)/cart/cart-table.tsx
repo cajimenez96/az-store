@@ -88,10 +88,10 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
 
   return (
     <>
-      <h1 className='py-4 h2-bold'>Shopping Cart</h1>
+      <h1 className='py-4 h2-bold'>Carrito de Compras</h1>
       {!cart || cart.items.length === 0 ? (
         <div>
-          Cart is empty. <Link href='/'>Go Shopping</Link>
+          El carrito está vacío. <Link href='/'>Ir a comprar</Link>
         </div>
       ) : (
         <div className='grid md:grid-cols-4 md:gap-5'>
@@ -99,9 +99,9 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead className='text-center'>Quantity</TableHead>
-                  <TableHead className='text-right'>Price</TableHead>
+                  <TableHead>Producto</TableHead>
+                  <TableHead className='text-center'>Cantidad</TableHead>
+                  <TableHead className='text-right'>Precio</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -153,7 +153,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                 ) : (
                   <ArrowRight className='w-4 h-4' />
                 )}{' '}
-                Proceed to Checkout
+                Continuar Compra
               </Button>
             </CardContent>
           </Card>

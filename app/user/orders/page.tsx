@@ -13,7 +13,7 @@ import {
 import Pagination from '@/components/shared/pagination';
 
 export const metadata: Metadata = {
-  title: 'My Orders',
+  title: 'Mis Pedidos',
 };
 
 const OrdersPage = async (props: {
@@ -27,17 +27,17 @@ const OrdersPage = async (props: {
 
   return (
     <div className='space-y-2'>
-      <h2 className='h2-bold'>Orders</h2>
+      <h2 className='h2-bold'>Pedidos</h2>
       <div className='overflow-x-auto'>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              <TableHead>DATE</TableHead>
+              <TableHead>FECHA</TableHead>
               <TableHead>TOTAL</TableHead>
-              <TableHead>PAID</TableHead>
-              <TableHead>DELIVERED</TableHead>
-              <TableHead>ACTIONS</TableHead>
+              <TableHead>PAGADO</TableHead>
+              <TableHead>ENTREGADO</TableHead>
+              <TableHead>ACCIONES</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -51,16 +51,16 @@ const OrdersPage = async (props: {
                 <TableCell>
                   {order.isPaid && order.paidAt
                     ? formatDateTime(order.paidAt).dateTime
-                    : 'Not Paid'}
+                    : 'No Pagado'}
                 </TableCell>
                 <TableCell>
                   {order.isDelivered && order.deliveredAt
                     ? formatDateTime(order.deliveredAt).dateTime
-                    : 'Not Delivered'}
+                    : 'No Entregado'}
                 </TableCell>
                 <TableCell>
                   <Link href={`/order/${order.id}`}>
-                    <span className='px-2'>Details</span>
+                    <span className='px-2'>Detalles</span>
                   </Link>
                 </TableCell>
               </TableRow>

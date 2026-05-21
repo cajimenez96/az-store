@@ -17,7 +17,7 @@ import DeleteDialog from '@/components/shared/delete-dialog';
 import { requireAdmin } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
-  title: 'Admin Users',
+  title: 'Usuarios (Admin)',
 };
 
 const AdminUserPage = async (props: {
@@ -35,13 +35,13 @@ const AdminUserPage = async (props: {
   return (
     <div className='space-y-2'>
       <div className='flex items-center gap-3'>
-        <h1 className='h2-bold'>Users</h1>
+        <h1 className='h2-bold'>Usuarios</h1>
         {searchText && (
           <div>
-            Filtered by <i>&quot;{searchText}&quot;</i>{' '}
+            Filtrado por <i>&quot;{searchText}&quot;</i>{' '}
             <Link href='/admin/users'>
               <Button variant='outline' size='sm'>
-                Remove Filter
+                Quitar Filtro
               </Button>
             </Link>
           </div>
@@ -52,10 +52,10 @@ const AdminUserPage = async (props: {
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              <TableHead>NAME</TableHead>
+              <TableHead>NOMBRE</TableHead>
               <TableHead>EMAIL</TableHead>
-              <TableHead>ROLE</TableHead>
-              <TableHead>ACTIONS</TableHead>
+              <TableHead>ROL</TableHead>
+              <TableHead>ACCIONES</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -66,14 +66,14 @@ const AdminUserPage = async (props: {
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   {user.role === 'user' ? (
-                    <Badge variant='secondary'>User</Badge>
+                    <Badge variant='secondary'>Usuario</Badge>
                   ) : (
-                    <Badge variant='default'>Admin</Badge>
+                    <Badge variant='default'>Administrador</Badge>
                   )}
                 </TableCell>
                 <TableCell>
                   <Button asChild variant='outline' size='sm'>
-                    <Link href={`/admin/users/${user.id}`}>Edit</Link>
+                    <Link href={`/admin/users/${user.id}`}>Editar</Link>
                   </Button>
                   <DeleteDialog id={user.id} action={deleteUser} />
                 </TableCell>

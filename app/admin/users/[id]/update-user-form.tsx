@@ -87,7 +87,7 @@ const UpdateUserForm = ({
                 <FormControl>
                   <Input
                     disabled={true}
-                    placeholder='Enter user email'
+                    placeholder='Ingresá el correo electrónico'
                     {...field}
                   />
                 </FormControl>
@@ -110,9 +110,9 @@ const UpdateUserForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Nombre</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter user name' {...field} />
+                  <Input placeholder='Ingresá el nombre' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,20 +133,20 @@ const UpdateUserForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Role</FormLabel>
+                <FormLabel>Rol</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value.toString()}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder='Select a role' />
+                      <SelectValue placeholder='Seleccioná un rol' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {USER_ROLES.map((role) => (
                       <SelectItem key={role} value={role}>
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                        {role === 'user' ? 'Usuario' : role === 'admin' ? 'Administrador' : role}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -162,7 +162,7 @@ const UpdateUserForm = ({
             className='w-full'
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? 'Submitting...' : 'Update User'}
+            {form.formState.isSubmitting ? 'Guardando...' : 'Actualizar Usuario'}
           </Button>
         </div>
       </form>

@@ -6,7 +6,7 @@ import { ShippingAddress } from '@/types';
 import { auth } from '@/auth';
 
 export const metadata: Metadata = {
-  title: 'Order Details',
+  title: 'Detalles del Pedido',
 };
 
 const OrderDetailsPage = async (props: {

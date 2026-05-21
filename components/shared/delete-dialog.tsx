@@ -47,25 +47,25 @@ const DeleteDialog = ({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button size='sm' variant='destructive' className='ml-2'>
-          Delete
+          Eliminar
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone
+            Esta acción no se puede deshacer.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <Button
             variant='destructive'
             size='sm'
             disabled={isPending}
             onClick={handleDeleteClick}
           >
-            {isPending ? 'Deleting...' : 'Delete'}
+            {isPending ? 'Eliminando...' : 'Eliminar'}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

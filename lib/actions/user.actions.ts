@@ -32,12 +32,12 @@ export async function signInWithCredentials(
 
     await signIn('credentials', user);
 
-    return { success: true, message: 'Signed in successfully' };
+    return { success: true, message: 'Sesión iniciada exitosamente' };
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
     }
-    return { success: false, message: 'Invalid email or password' };
+    return { success: false, message: 'Correo o contraseña incorrectos' };
   }
 }
 
@@ -81,7 +81,7 @@ export async function signUpUser(prevState: unknown, formData: FormData) {
       password: plainPassword,
     });
 
-    return { success: true, message: 'User registered successfully' };
+    return { success: true, message: 'Usuario registrado exitosamente' };
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
@@ -95,7 +95,7 @@ export async function getUserById(userId: string) {
   const user = await prisma.user.findFirst({
     where: { id: userId },
   });
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error('Usuario no encontrado');
   return user;
 }
 
@@ -108,7 +108,7 @@ export async function updateUserAddress(data: ShippingAddress) {
       where: { id: session?.user?.id },
     });
 
-    if (!currentUser) throw new Error('User not found');
+    if (!currentUser) throw new Error('Usuario no encontrado');
 
     const address = shippingAddressSchema.parse(data);
 
@@ -119,7 +119,7 @@ export async function updateUserAddress(data: ShippingAddress) {
 
     return {
       success: true,
-      message: 'User updated successfully',
+      message: 'Usuario actualizado exitosamente',
     };
   } catch (error) {
     return { success: false, message: formatError(error) };
@@ -136,7 +136,7 @@ export async function updateUserPaymentMethod(
       where: { id: session?.user?.id },
     });
 
-    if (!currentUser) throw new Error('User not found');
+    if (!currentUser) throw new Error('Usuario no encontrado');
 
     const paymentMethod = paymentMethodSchema.parse(data);
 
@@ -147,7 +147,7 @@ export async function updateUserPaymentMethod(
 
     return {
       success: true,
-      message: 'User updated successfully',
+      message: 'Usuario actualizado exitosamente',
     };
   } catch (error) {
     return { success: false, message: formatError(error) };
@@ -165,7 +165,7 @@ export async function updateProfile(user: { name: string; email: string }) {
       },
     });
 
-    if (!currentUser) throw new Error('User not found');
+    if (!currentUser) throw new Error('Usuario no encontrado');
 
     await prisma.user.update({
       where: {
@@ -178,7 +178,7 @@ export async function updateProfile(user: { name: string; email: string }) {
 
     return {
       success: true,
-      message: 'User updated successfully',
+      message: 'Usuario actualizado exitosamente',
     };
   } catch (error) {
     return { success: false, message: formatError(error) };
@@ -231,7 +231,7 @@ export async function deleteUser(id: string) {
 
     return {
       success: true,
-      message: 'User deleted successfully',
+      message: 'Usuario eliminado exitosamente',
     };
   } catch (error) {
     return {
@@ -256,7 +256,7 @@ export async function updateUser(user: z.infer<typeof updateUserSchema>) {
 
     return {
       success: true,
-      message: 'User updated successfully',
+      message: 'Usuario actualizado exitosamente',
     };
   } catch (error) {
     return { success: false, message: formatError(error) };

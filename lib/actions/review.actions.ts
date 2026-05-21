@@ -13,7 +13,7 @@ export async function createUpdateReview(
 ) {
   try {
     const session = await auth();
-    if (!session) throw new Error('User is not authenticated');
+    if (!session) throw new Error('Usuario no autenticado');
 
     // Validate and store the review
     const review = insertReviewSchema.parse({
@@ -26,7 +26,7 @@ export async function createUpdateReview(
       where: { id: review.productId },
     });
 
-    if (!product) throw new Error('Product not found');
+    if (!product) throw new Error('Producto no encontrado');
 
     // Check if user already reviewed
     const reviewExists = await prisma.review.findFirst({
@@ -77,7 +77,7 @@ export async function createUpdateReview(
 
     return {
       success: true,
-      message: 'Review Updated Successfully',
+      message: 'Reseña guardada exitosamente',
     };
   } catch (error) {
     return { success: false, message: formatError(error) };
@@ -113,7 +113,7 @@ export async function getReviewByProductId({
 }) {
   const session = await auth();
 
-  if (!session) throw new Error('User is not authenticated');
+  if (!session) throw new Error('Usuario no autenticado');
 
   return await prisma.review.findFirst({
     where: {

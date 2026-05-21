@@ -115,9 +115,9 @@ const ProductForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Nombre</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter product name' {...field} />
+                  <Input placeholder='Ingresá el nombre del producto' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -136,10 +136,10 @@ const ProductForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Slug</FormLabel>
                 <FormControl>
                   <div className='relative'>
-                    <Input placeholder='Enter slug' {...field} />
+                    <Input placeholder='Ingresá el slug' {...field} />
                     <Button
                       type='button'
                       className='bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 mt-2'
@@ -150,7 +150,7 @@ const ProductForm = ({
                         );
                       }}
                     >
-                      Generate
+                      Generar
                     </Button>
                   </div>
                 </FormControl>
@@ -173,9 +173,9 @@ const ProductForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>Categoría</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter category' {...field} />
+                  <Input placeholder='Ingresá la categoría' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -194,9 +194,9 @@ const ProductForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Brand</FormLabel>
+                <FormLabel>Marca</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter brand' {...field} />
+                  <Input placeholder='Ingresá la marca' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -217,9 +217,9 @@ const ProductForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Price</FormLabel>
+                <FormLabel>Precio</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter product price' {...field} />
+                  <Input placeholder='Ingresá el precio del producto' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -240,7 +240,7 @@ const ProductForm = ({
               <FormItem className='w-full'>
                 <FormLabel>Stock</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter stock' {...field} />
+                  <Input placeholder='Ingresá el stock' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -254,7 +254,7 @@ const ProductForm = ({
             name='images'
             render={() => (
               <FormItem className='w-full'>
-                <FormLabel>Images</FormLabel>
+                <FormLabel>Imágenes</FormLabel>
                 <Card>
                   <CardContent className='space-y-2 mt-2 min-h-48'>
                     <div className='flex-start space-x-2'>
@@ -262,7 +262,7 @@ const ProductForm = ({
                         <Image
                           key={image}
                           src={image}
-                          alt='product image'
+                          alt='Imagen del producto'
                           className='w-20 h-20 object-cover object-center rounded-sm'
                           width={100}
                           height={100}
@@ -292,7 +292,7 @@ const ProductForm = ({
         </div>
         <div className='upload-field'>
           {/* isFeatured */}
-          Featured Product
+          Producto Destacado
           <Card>
             <CardContent className='space-y-2 mt-2'>
               <FormField
@@ -306,14 +306,14 @@ const ProductForm = ({
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel>Is Featured?</FormLabel>
+                    <FormLabel>¿Es destacado?</FormLabel>
                   </FormItem>
                 )}
               />
               {isFeatured && banner && (
                 <Image
                   src={banner}
-                  alt='banner image'
+                  alt='Imagen del banner'
                   className='w-full object-cover object-center rounded-sm'
                   width={1920}
                   height={680}
@@ -351,10 +351,10 @@ const ProductForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Descripción</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder='Enter product description'
+                    placeholder='Ingresá la descripción del producto'
                     className='resize-none'
                     {...field}
                   />
@@ -371,7 +371,7 @@ const ProductForm = ({
             disabled={form.formState.isSubmitting}
             className='button col-span-2 w-full'
           >
-            {form.formState.isSubmitting ? 'Submitting' : `${type} Product`}
+            {form.formState.isSubmitting ? 'Enviando...' : `${type === 'Create' ? 'Crear' : 'Actualizar'} Producto`}
           </Button>
         </div>
       </form>

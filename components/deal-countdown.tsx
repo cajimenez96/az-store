@@ -50,7 +50,7 @@ const DealCountdown = () => {
     return (
       <section className='grid grid-cols-1 md:grid-cols-2 my-20'>
         <div className='flex flex-col gap-2 justify-center'>
-          <h3 className='text-3xl font-bold'>Loading Countdown...</h3>
+          <h3 className='text-3xl font-bold'>Cargando cuenta regresiva...</h3>
         </div>
       </section>
     );
@@ -65,14 +65,14 @@ const DealCountdown = () => {
     return (
       <section className='grid grid-cols-1 md:grid-cols-2 my-20'>
         <div className='flex flex-col gap-2 justify-center'>
-          <h3 className='text-3xl font-bold'>Deal Has Ended</h3>
+          <h3 className='text-3xl font-bold'>La oferta ha terminado</h3>
           <p>
-            This deal is no longer available. Check out our latest promotions!
+            Esta oferta ya no está disponible. ¡Mirá nuestras últimas promociones!
           </p>
 
           <div className='text-center'>
             <Button asChild>
-              <Link href='/search'>View Products</Link>
+              <Link href='/search'>Ver Productos</Link>
             </Button>
           </div>
         </div>
@@ -91,22 +91,22 @@ const DealCountdown = () => {
   return (
     <section className='grid grid-cols-1 md:grid-cols-2 my-20'>
       <div className='flex flex-col gap-2 justify-center'>
-        <h3 className='text-3xl font-bold'>Deal Of The Month</h3>
+        <h3 className='text-3xl font-bold'>Oferta del Mes</h3>
         <p>
-          Get ready for a shopping experience like never before with our Deals
-          of the Month! Every purchase comes with exclusive perks and offers,
-          making this month a celebration of savvy choices and amazing deals.
-          Don&apos;t miss out! 🎁🛒
+          ¡Preparate para una experiencia de compra única con nuestras Ofertas
+          del Mes! Cada compra viene con beneficios y ofertas exclusivas,
+          haciendo de este mes una celebración de decisiones inteligentes y ahorros increíbles.
+          ¡No te lo pierdas! 🎁🛒
         </p>
         <ul className='grid grid-cols-4'>
-          <StatBox label='Days' value={time.days} />
-          <StatBox label='Hours' value={time.hours} />
-          <StatBox label='Minutes' value={time.minutes} />
-          <StatBox label='Seconds' value={time.seconds} />
+          <StatBox label='Días' value={time.days} />
+          <StatBox label='Horas' value={time.hours} />
+          <StatBox label='Minutos' value={time.minutes} />
+          <StatBox label='Segundos' value={time.seconds} />
         </ul>
         <div className='text-center'>
           <Button asChild>
-            <Link href='/search'>View Products</Link>
+            <Link href='/search'>Ver Productos</Link>
           </Button>
         </div>
       </div>

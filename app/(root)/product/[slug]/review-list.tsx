@@ -45,7 +45,7 @@ const ReviewList = ({
 
   return (
     <div className='space-y-4'>
-      {reviews.length === 0 && <div>No reviews yet</div>}
+      {reviews.length === 0 && <div>Aún no hay opiniones</div>}
       {userId ? (
         <ReviewForm
           userId={userId}
@@ -54,14 +54,14 @@ const ReviewList = ({
         />
       ) : (
         <div>
-          Please
+          Por favor,
           <Link
             className='text-blue-700 px-2'
             href={`/sign-in?callbackUrl=/product/${productSlug}`}
           >
-            sign in
+            iniciá sesión
           </Link>
-          to write a review
+          para escribir una opinión
         </div>
       )}
       <div className='flex flex-col gap-3'>
@@ -78,7 +78,7 @@ const ReviewList = ({
                 <Rating value={review.rating} />
                 <div className='flex items-center'>
                   <User className='mr-1 h-3 w-3' />
-                  {review.user ? review.user.name : 'User'}
+                  {review.user ? review.user.name : 'Usuario'}
                 </div>
                 <div className='flex items-center'>
                   <Calendar className='mr-1 h-3 w-3' />

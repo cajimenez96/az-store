@@ -18,11 +18,11 @@ const Search = async () => {
       <div className='flex w-full max-w-sm items-center space-x-2'>
         <Select name='category'>
           <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder='All' />
+            <SelectValue placeholder='Todas' />
           </SelectTrigger>
           <SelectContent>
             <SelectItem key='All' value='all'>
-              All
+              Todas
             </SelectItem>
             {categories.map((x) => (
               <SelectItem key={x.category} value={x.category}>
@@ -34,7 +34,7 @@ const Search = async () => {
         <Input
           name='q'
           type='text'
-          placeholder='Search...'
+          placeholder='Buscar...'
           className='md:w-[100px] lg:w-[300px]'
         />
         <Button>

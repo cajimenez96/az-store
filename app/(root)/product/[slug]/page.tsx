@@ -39,7 +39,7 @@ const ProductDetailsPage = async (props: {
               </p>
               <h1 className='h3-bold'>{product.name}</h1>
               <Rating value={Number(product.rating)} />
-              <p>{product.numReviews} reviews</p>
+              <p>{product.numReviews} opiniones</p>
               <div className='flex flex-col sm:flex-row sm:items-center gap-3'>
                 <ProductPrice
                   value={Number(product.price)}
@@ -48,7 +48,7 @@ const ProductDetailsPage = async (props: {
               </div>
             </div>
             <div className='mt-10'>
-              <p className='font-semibold'>Description</p>
+              <p className='font-semibold'>Descripción</p>
               <p>{product.description}</p>
             </div>
           </div>
@@ -57,17 +57,17 @@ const ProductDetailsPage = async (props: {
             <Card>
               <CardContent className='p-4'>
                 <div className='mb-2 flex justify-between'>
-                  <div>Price</div>
+                  <div>Precio</div>
                   <div>
                     <ProductPrice value={Number(product.price)} />
                   </div>
                 </div>
                 <div className='mb-2 flex justify-between'>
-                  <div>Status</div>
+                  <div>Estado</div>
                   {product.stock > 0 ? (
-                    <Badge variant='outline'>In Stock</Badge>
+                    <Badge variant='outline'>Con stock</Badge>
                   ) : (
-                    <Badge variant='destructive'>Out Of Stock</Badge>
+                    <Badge variant='destructive'>Sin stock</Badge>
                   )}
                 </div>
                 {product.stock > 0 && (
@@ -91,7 +91,7 @@ const ProductDetailsPage = async (props: {
         </div>
       </section>
       <section className='mt-10'>
-        <h2 className='h2-bold mb-5'>Customer Reviews</h2>
+        <h2 className='h2-bold mb-5'>Opiniones de los clientes</h2>
         <ReviewList
           userId={userId || ''}
           productId={product.id}

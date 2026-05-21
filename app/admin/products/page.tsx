@@ -39,20 +39,20 @@ const AdminProductsPage = async (props: {
     <div className='space-y-2'>
       <div className='flex-between'>
         <div className='flex items-center gap-3'>
-          <h1 className='h2-bold'>Products</h1>
+          <h1 className='h2-bold'>Productos</h1>
           {searchText && (
             <div>
-              Filtered by <i>&quot;{searchText}&quot;</i>{' '}
+              Filtrado por <i>&quot;{searchText}&quot;</i>{' '}
               <Link href='/admin/products'>
                 <Button variant='outline' size='sm'>
-                  Remove Filter
+                  Quitar Filtro
                 </Button>
               </Link>
             </div>
           )}
         </div>
         <Button asChild variant='default'>
-          <Link href='/admin/products/create'>Create Product</Link>
+          <Link href='/admin/products/create'>Crear Producto</Link>
         </Button>
       </div>
 
@@ -60,12 +60,12 @@ const AdminProductsPage = async (props: {
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>NAME</TableHead>
-            <TableHead className='text-right'>PRICE</TableHead>
-            <TableHead>CATEGORY</TableHead>
+            <TableHead>NOMBRE</TableHead>
+            <TableHead className='text-right'>PRECIO</TableHead>
+            <TableHead>CATEGORÍA</TableHead>
             <TableHead>STOCK</TableHead>
-            <TableHead>RATING</TableHead>
-            <TableHead className='w-[100px]'>ACTIONS</TableHead>
+            <TableHead>CALIFICACIÓN</TableHead>
+            <TableHead className='w-[100px]'>ACCIONES</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,7 +81,7 @@ const AdminProductsPage = async (props: {
               <TableCell>{product.rating}</TableCell>
               <TableCell className='flex gap-1'>
                 <Button asChild variant='outline' size='sm'>
-                  <Link href={`/admin/products/${product.id}`}>Edit</Link>
+                  <Link href={`/admin/products/${product.id}`}>Editar</Link>
                 </Button>
                 <DeleteDialog id={product.id} action={deleteProduct} />
               </TableCell>

@@ -32,10 +32,10 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
         action: (
           <ToastAction
             className='bg-primary text-white hover:bg-gray-800'
-            altText='Go To Cart'
+            altText='Ir al Carrito'
             onClick={() => router.push('/cart')}
           >
-            Go To Cart
+            Ir al Carrito
           </ToastAction>
         ),
       });
@@ -85,7 +85,7 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
       ) : (
         <Plus className='w-4 h-4' />
       )}{' '}
-      Add To Cart
+      Agregar al Carrito
     </Button>
   );
 };

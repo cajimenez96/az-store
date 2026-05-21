@@ -1,4 +1,4 @@
-NEXT_PUBLIC_APP_NAME = "Prostore"
+NEXT_PUBLIC_APP_NAME = "AZ Store"
 NEXT_PUBLIC_APP_DESCRIPTION = "A modern ecommerce store built with Next.js"
 NEXT_PUBLIC_SERVER_URL = "http://localhost:3000"
 

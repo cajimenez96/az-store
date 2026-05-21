@@ -42,9 +42,6 @@ const OrderDetailsTable = ({
     paidAt,
     deliveredAt,
   } = order;
-
-  const { toast } = useToast();
-
   // Button to mark order as paid (used by admin for TransferenciaBancaria)
   const MarkAsPaidButton = () => {
     const [isPending, startTransition] = useTransition();
