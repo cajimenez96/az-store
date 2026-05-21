@@ -90,6 +90,9 @@
 @layer base {
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss03" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -99,6 +102,63 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Design System Classes (DESIGN.md) */
+@layer utilities {
+  .font-ss03 {
+    font-feature-settings: "ss03" 1;
+  }
+
+  /* Font Families & Weights */
+  .font-display {
+    font-family: "NeueHaasGrotesk Display", "Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  .font-weight-330 {
+    font-weight: 330;
+  }
+
+  /* Display Tiers */
+  .display-xxl {
+    @apply font-display text-[96px] leading-[1.0] font-ss03;
+    font-weight: 330;
+    letter-spacing: 2.4px;
+  }
+
+  .display-xl {
+    @apply font-display text-[70px] leading-[1.0] font-ss03;
+    font-weight: 330;
+    letter-spacing: 0;
+  }
+
+  .display-lg {
+    @apply font-display text-[55px] leading-[1.16] font-ss03;
+    font-weight: 330;
+    letter-spacing: 0;
+  }
+
+  .display-md {
+    @apply font-display text-[48px] leading-[1.14] font-ss03;
+    font-weight: 330;
+    letter-spacing: 0;
+  }
+
+  /* Brand Elevation & Borders */
+  .shadow-level-3 {
+    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.015), 
+                0 4px 4px rgba(0, 0, 0, 0.015), 
+                0 2px 2px rgba(0, 0, 0, 0.015), 
+                0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+
+  .hairline-light-border {
+    border: 1px solid #e4e4e7;
+  }
+
+  .hairline-dark-border {
+    border: 1px solid #1e2c31;
   }
 }
 

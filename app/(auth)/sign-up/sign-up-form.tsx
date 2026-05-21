@@ -23,7 +23,7 @@ const SignUpForm = () => {
     const { pending } = useFormStatus();
 
     return (
-      <Button disabled={pending} className='w-full' variant='default'>
+      <Button disabled={pending} className='w-full' variant='primaryPill'>
         {pending ? 'Registrando...' : 'Registrarse'}
       </Button>
     );
@@ -34,27 +34,29 @@ const SignUpForm = () => {
       <input type='hidden' name='callbackUrl' value={callbackUrl} />
       <div className='space-y-6'>
         <div>
-          <Label htmlFor='name'>Nombre</Label>
+          <Label htmlFor='name' className='text-sm font-medium text-black mb-1.5 block'>Nombre</Label>
           <Input
             id='name'
             name='name'
             type='text'
             autoComplete='name'
             defaultValue={signUpDefaultValues.name}
+            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
           />
         </div>
         <div>
-          <Label htmlFor='email'>Correo electrónico</Label>
+          <Label htmlFor='email' className='text-sm font-medium text-black mb-1.5 block'>Correo electrónico</Label>
           <Input
             id='email'
             name='email'
             type='text'
             autoComplete='email'
             defaultValue={signUpDefaultValues.email}
+            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
           />
         </div>
         <div>
-          <Label htmlFor='password'>Contraseña</Label>
+          <Label htmlFor='password' className='text-sm font-medium text-black mb-1.5 block'>Contraseña</Label>
           <Input
             id='password'
             name='password'
@@ -62,10 +64,11 @@ const SignUpForm = () => {
             required
             autoComplete='password'
             defaultValue={signUpDefaultValues.password}
+            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
           />
         </div>
         <div>
-          <Label htmlFor='confirmPassword'>Confirmar contraseña</Label>
+          <Label htmlFor='confirmPassword' className='text-sm font-medium text-black mb-1.5 block'>Confirmar contraseña</Label>
           <Input
             id='confirmPassword'
             name='confirmPassword'
@@ -73,6 +76,7 @@ const SignUpForm = () => {
             required
             autoComplete='confirmPassword'
             defaultValue={signUpDefaultValues.confirmPassword}
+            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
           />
         </div>
         <div>
@@ -80,12 +84,12 @@ const SignUpForm = () => {
         </div>
 
         {data && !data.success && (
-          <div className='text-center text-destructive'>{data.message}</div>
+          <div className='text-center text-destructive font-medium text-sm'>{data.message}</div>
         )}
 
-        <div className='text-sm text-center text-muted-foreground'>
+        <div className='text-sm text-center text-zinc-500'>
           ¿Ya tenés una cuenta?{' '}
-          <Link href='/sign-in' target='_self' className='link'>
+          <Link href='/sign-in' target='_self' className='text-black underline hover:text-zinc-700 transition-colors font-medium'>
             Iniciar Sesión
           </Link>
         </div>

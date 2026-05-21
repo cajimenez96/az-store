@@ -10,10 +10,10 @@ export default function UserLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-      <div className='flex flex-col'>
-        <div className='border-b container mx-auto'>
-          <div className='flex items-center h-16 px-4'>
+    <div className='bg-canvas-cream dark:bg-canvas-night min-h-screen flex flex-col text-black dark:text-white'>
+      <div className='border-b border-hairline-light dark:border-hairline-dark bg-white dark:bg-canvas-night-elevated'>
+        <div className='container mx-auto px-4'>
+          <div className='flex items-center h-16'>
             <Link href='/' className='w-22'>
               <Image
                 src='/images/logo.svg'
@@ -28,11 +28,11 @@ export default function UserLayout({
             </div>
           </div>
         </div>
-
-        <div className='flex-1 space-y-4 p-8 pt-6 container mx-auto'>
-          {children}
-        </div>
       </div>
-    </>
+
+      <div className='flex-1 space-y-4 p-8 pt-6 container mx-auto max-w-7xl'>
+        {children}
+      </div>
+    </div>
   );
 }

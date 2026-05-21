@@ -57,6 +57,8 @@ PurchaseReceiptEmail.PreviewProps = {
       pricePaid: '100',
       email_address: 'test@test.com',
     },
+    receiptUrl: null,
+    expiresAt: null,
   },
 } satisfies OrderInformationProps;
 

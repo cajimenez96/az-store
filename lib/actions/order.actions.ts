@@ -13,6 +13,8 @@ import { revalidatePath } from 'next/cache';
 import { PAGE_SIZE } from '../constants';
 import { Prisma } from '@prisma/client';
 import { sendPurchaseReceipt } from '@/email';
+import { Preference } from 'mercadopago';
+import { mpClient } from '../mercadopago';
 
 // Create order and create the order items
 export async function createOrder() {
@@ -251,12 +253,14 @@ export async function updateOrderToPaid({
 
   // Transaction to update order and account for product stock
   await prisma.$transaction(async (tx) => {
-    // Iterate over products and update stock
-    for (const item of order.orderitems) {
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { stock: { increment: -item.qty } },
-      });
+    // Iterate over products and update stock only if it wasn't decremented on creation
+    if (order.paymentMethod !== 'TransferenciaBancaria') {
+      for (const item of order.orderitems) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: -item.qty } },
+        });
+      }
     }
 
     // Set the order to paid
@@ -458,6 +462,200 @@ export async function deliverOrder(orderId: string) {
     return {
       success: true,
       message: 'Orden marcada como entregada',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Update order receipt URL (client upload)
+export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
+  try {
+    const session = await auth();
+    if (!session) throw new Error('Usuario no autenticado');
+
+    const order = await prisma.order.findFirst({
+      where: { id: orderId },
+    });
+
+    if (!order) throw new Error('Orden no encontrada');
+
+    if (order.userId !== session.user.id && session.user.role !== 'admin') {
+      throw new Error('No autorizado');
+    }
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { receiptUrl },
+    });
+
+    revalidatePath(`/order/${orderId}`);
+
+    return {
+      success: true,
+      message: 'Comprobante de pago guardado correctamente',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Approve bank transfer (admin)
+export async function approveBankTransfer(orderId: string) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== 'admin') {
+      throw new Error('No autorizado');
+    }
+
+    const order = await prisma.order.findFirst({
+      where: { id: orderId },
+    });
+
+    if (!order) throw new Error('Orden no encontrada');
+
+    if (order.paymentMethod !== 'TransferenciaBancaria') {
+      throw new Error('El método de pago no es transferencia bancaria');
+    }
+
+    if (!order.receiptUrl) {
+      throw new Error('No se ha subido ningún comprobante para esta orden');
+    }
+
+    await updateOrderToPaid({ orderId });
+
+    revalidatePath(`/order/${orderId}`);
+    revalidatePath('/admin/orders');
+
+    return {
+      success: true,
+      message: 'Transferencia bancaria aprobada exitosamente',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Reject bank transfer (admin)
+export async function rejectBankTransfer(orderId: string) {
+  try {
+    const session = await auth();
+    if (session?.user?.role !== 'admin') {
+      throw new Error('No autorizado');
+    }
+
+    const order = await prisma.order.findFirst({
+      where: { id: orderId },
+      include: { orderitems: true },
+    });
+
+    if (!order) throw new Error('Orden no encontrada');
+
+    if (order.paymentMethod !== 'TransferenciaBancaria') {
+      throw new Error('El método de pago no es transferencia bancaria');
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Restore product stock
+      for (const item of order.orderitems) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.qty } },
+        });
+      }
+
+      // Mark order as cancelled (clear receiptUrl and update status in paymentResult)
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          receiptUrl: null,
+          paymentResult: { status: 'CANCELLED' },
+        },
+      });
+    });
+
+    revalidatePath(`/order/${orderId}`);
+    revalidatePath('/admin/orders');
+
+    return {
+      success: true,
+      message: 'Transferencia rechazada y stock restaurado',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Create Mercado Pago Preference
+export async function createMercadoPagoOrder(orderId: string) {
+  try {
+    const order = await prisma.order.findFirst({
+      where: { id: orderId },
+      include: { orderitems: true, user: { select: { email: true } } },
+    });
+
+    if (!order) throw new Error('Orden no encontrada');
+
+    const preference = new Preference(mpClient);
+    
+    // Prepare items for Mercado Pago
+    const items = order.orderitems.map((item) => ({
+      id: item.productId,
+      title: item.name,
+      quantity: item.qty,
+      unit_price: Number(item.price),
+      currency_id: 'ARS',
+    }));
+
+    if (Number(order.shippingPrice) > 0) {
+      items.push({
+        id: 'shipping',
+        title: 'Costo de Envío',
+        quantity: 1,
+        unit_price: Number(order.shippingPrice),
+        currency_id: 'ARS',
+      });
+    }
+
+    if (Number(order.taxPrice) > 0) {
+      items.push({
+        id: 'tax',
+        title: 'Impuestos',
+        quantity: 1,
+        unit_price: Number(order.taxPrice),
+        currency_id: 'ARS',
+      });
+    }
+
+    const response = await preference.create({
+      body: {
+        items,
+        back_urls: {
+          success: `${process.env.NEXT_PUBLIC_SERVER_URL}/order/${orderId}`,
+          failure: `${process.env.NEXT_PUBLIC_SERVER_URL}/order/${orderId}`,
+          pending: `${process.env.NEXT_PUBLIC_SERVER_URL}/order/${orderId}`,
+        },
+        auto_return: 'approved',
+        external_reference: orderId,
+        metadata: { orderId },
+      },
+    });
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentResult: {
+          id: response.id,
+          status: 'PENDING',
+          email_address: order.user.email,
+        },
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Preferencia de pago de Mercado Pago creada',
+      initPoint: response.init_point,
     };
   } catch (error) {
     return { success: false, message: formatError(error) };

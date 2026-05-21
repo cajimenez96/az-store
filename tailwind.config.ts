@@ -49,7 +49,17 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+  			'canvas-night': '#000000',
+  			'canvas-night-elevated': '#0a0a0a',
+  			'canvas-cream': '#fbfbf5',
+  			'aloe-10': '#c1fbd4',
+  			'pistachio-10': '#d4f9e0',
+  			'shade-70': '#3f3f46',
+  			'shade-30': '#d4d4d8',
+  			'hairline-light': '#e4e4e7',
+  			'hairline-dark': '#1e2c31',
+  			'ink': '#000000'
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

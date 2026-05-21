@@ -31,8 +31,8 @@ const SignInPage = async (props: {
   }
 
   return (
-    <div className='w-full max-w-md mx-auto'>
-      <Card>
+    <div className='w-full max-w-md mx-auto px-4'>
+      <Card className='shadow-level-3 border-0 bg-white'>
         <CardHeader className='space-y-4'>
           <Link href='/' className='flex-center'>
             <Image
@@ -43,8 +43,8 @@ const SignInPage = async (props: {
               priority={true}
             />
           </Link>
-          <CardTitle className='text-center'>Iniciar Sesión</CardTitle>
-          <CardDescription className='text-center'>
+          <CardTitle className='text-center font-display font-[330] text-3xl text-black font-ss03'>Iniciar Sesión</CardTitle>
+          <CardDescription className='text-center text-zinc-500 text-sm'>
             Ingresá a tu cuenta
           </CardDescription>
         </CardHeader>

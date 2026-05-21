@@ -23,7 +23,7 @@ const CredentialsSignInForm = () => {
     const { pending } = useFormStatus();
 
     return (
-      <Button disabled={pending} className='w-full' variant='default'>
+      <Button disabled={pending} className='w-full' variant='primaryPill'>
         {pending ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </Button>
     );
@@ -34,7 +34,7 @@ const CredentialsSignInForm = () => {
       <input type='hidden' name='callbackUrl' value={callbackUrl} />
       <div className='space-y-6'>
         <div>
-          <Label htmlFor='email'>Correo electrónico</Label>
+          <Label htmlFor='email' className='text-sm font-medium text-black mb-1.5 block'>Correo electrónico</Label>
           <Input
             id='email'
             name='email'
@@ -42,10 +42,11 @@ const CredentialsSignInForm = () => {
             required
             autoComplete='email'
             defaultValue={signInDefaultValues.email}
+            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
           />
         </div>
         <div>
-          <Label htmlFor='password'>Contraseña</Label>
+          <Label htmlFor='password' className='text-sm font-medium text-black mb-1.5 block'>Contraseña</Label>
           <Input
             id='password'
             name='password'
@@ -53,6 +54,7 @@ const CredentialsSignInForm = () => {
             required
             autoComplete='password'
             defaultValue={signInDefaultValues.password}
+            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
           />
         </div>
         <div>
@@ -60,12 +62,12 @@ const CredentialsSignInForm = () => {
         </div>
 
         {data && !data.success && (
-          <div className='text-center text-destructive'>{data.message}</div>
+          <div className='text-center text-destructive font-medium text-sm'>{data.message}</div>
         )}
 
-        <div className='text-sm text-center text-muted-foreground'>
+        <div className='text-sm text-center text-zinc-500'>
           ¿No tenés una cuenta?{' '}
-          <Link href='/sign-up' target='_self' className='link'>
+          <Link href='/sign-up' target='_self' className='text-black underline hover:text-zinc-700 transition-colors font-medium'>
             Registrate
           </Link>
         </div>

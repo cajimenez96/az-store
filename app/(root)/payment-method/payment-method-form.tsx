@@ -54,67 +54,78 @@ const PaymentMethodForm = ({
   };
 
   return (
-    <>
-      <div className='max-w-md mx-auto space-y-4'>
-        <h1 className='h2-bold mt-4'>Método de Pago</h1>
-        <p className='text-sm text-muted-foreground'>
-          Por favor, seleccioná un método de pago
-        </p>
+    <div className='max-w-xl mx-auto px-4'>
+      <div className='bg-white shadow-level-3 rounded-lg border-0 p-6 md:p-8 space-y-6'>
+        <div className='space-y-2 border-b border-hairline-light pb-4'>
+          <h1 className='font-display font-[330] text-2xl md:text-3xl text-black font-ss03'>
+            Método de Pago
+          </h1>
+          <p className='text-xs text-zinc-500'>
+            Por favor, seleccioná la opción que prefieras para realizar el pago de tu pedido.
+          </p>
+        </div>
+
         <Form {...form}>
           <form
             method='post'
-            className='space-y-4'
+            className='space-y-6'
             onSubmit={form.handleSubmit(onSubmit)}
           >
-            <div className='flex flex-col md:flex-row gap-5'>
-              <FormField
-                control={form.control}
-                name='type'
-                render={({ field }) => (
-                  <FormItem className='space-y-3'>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        className='flex flex-col space-y-2'
-                      >
-                        {PAYMENT_METHODS.map((paymentMethod) => (
-                          <FormItem
-                            key={paymentMethod}
-                            className='flex items-center space-x-3 space-y-0'
-                          >
-                            <FormControl>
-                              <RadioGroupItem
-                                value={paymentMethod}
-                                checked={field.value === paymentMethod}
-                              />
-                            </FormControl>
-                            <FormLabel className='font-normal'>
-                              {paymentMethod}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name='type'
+              render={({ field }) => (
+                <FormItem className='space-y-3'>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className='flex flex-col gap-3'
+                    >
+                      {PAYMENT_METHODS.map((paymentMethod) => (
+                        <FormItem
+                          key={paymentMethod}
+                          className='flex items-center space-x-3 space-y-0 rounded-md border border-hairline-light p-4 hover:bg-zinc-50/50 cursor-pointer transition-all duration-150'
+                        >
+                          <FormControl>
+                            <RadioGroupItem
+                              value={paymentMethod}
+                              checked={field.value === paymentMethod}
+                              className='focus:ring-black text-black border-zinc-300'
+                            />
+                          </FormControl>
+                          <FormLabel className='font-medium text-black cursor-pointer flex-1 select-none'>
+                            {paymentMethod}
+                          </FormLabel>
+                        </FormItem>
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <div className='flex gap-2'>
-              <Button type='submit' disabled={isPending}>
-                {isPending ? (
-                  <Loader className='w-4 h-4 animate-spin' />
-                ) : (
-                  <ArrowRight className='w-4 h-4' />
-                )}{' '}
-                Continuar
-              </Button>
-            </div>
+            <Button
+              type='submit'
+              variant='primaryPill'
+              size='lg'
+              className='w-full mt-4'
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Loader className='w-4 h-4 animate-spin' />
+              ) : (
+                <>
+                  Continuar
+                  <ArrowRight className='w-4 h-4 ml-2' />
+                </>
+              )}
+            </Button>
           </form>
         </Form>
       </div>
-    </>
+    </div>
   );
 };
 
