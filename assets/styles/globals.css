@@ -113,52 +113,104 @@
 
   /* Font Families & Weights */
   .font-display {
-    font-family: "NeueHaasGrotesk Display", "Helvetica Now Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: var(--font-inter-display), "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
   .font-weight-330 {
-    font-weight: 330;
+    font-weight: 300;
   }
 
-  /* Display Tiers */
+  /* Display Tiers — Cinematic Track */
   .display-xxl {
-    @apply font-display text-[96px] leading-[1.0] font-ss03;
-    font-weight: 330;
+    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 300;
+    line-height: 1.0;
     letter-spacing: 2.4px;
+    font-feature-settings: "ss03" 1;
   }
 
   .display-xl {
-    @apply font-display text-[70px] leading-[1.0] font-ss03;
-    font-weight: 330;
+    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
+    font-size: clamp(36px, 6vw, 70px);
+    font-weight: 300;
+    line-height: 1.0;
     letter-spacing: 0;
+    font-feature-settings: "ss03" 1;
   }
 
   .display-lg {
-    @apply font-display text-[55px] leading-[1.16] font-ss03;
-    font-weight: 330;
+    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
+    font-size: clamp(32px, 5vw, 55px);
+    font-weight: 300;
+    line-height: 1.16;
     letter-spacing: 0;
+    font-feature-settings: "ss03" 1;
   }
 
   .display-md {
-    @apply font-display text-[48px] leading-[1.14] font-ss03;
-    font-weight: 330;
+    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 300;
+    line-height: 1.14;
     letter-spacing: 0;
+    font-feature-settings: "ss03" 1;
   }
 
-  /* Brand Elevation & Borders */
+  /* Elevation — Light Track */
   .shadow-level-3 {
-    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.015), 
-                0 4px 4px rgba(0, 0, 0, 0.015), 
-                0 2px 2px rgba(0, 0, 0, 0.015), 
-                0 0 0 1px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1), 
+                0 4px 4px rgba(0, 0, 0, 0.1), 
+                0 2px 2px rgba(0, 0, 0, 0.1), 
+                0 0 0 1px rgba(0, 0, 0, 0.1);
   }
 
+  /* Elevation — Dark Track (Level 1: subtle inset top highlight) */
+  .shadow-level-1-dark {
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  /* Elevation — Dark Track (Level 2: card with hairline + drop) */
+  .shadow-level-2-dark {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
+                0 1px 3px rgba(0, 0, 0, 0.3),
+                0 5px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Section padding — Cinematic Track (generous negative space) */
+  .section-cinematic {
+    @apply py-24 md:py-32 lg:py-40;
+  }
+
+  /* Section padding — Transactional Track (dense, action-focused) */
+  .section-transactional {
+    @apply py-10 md:py-12;
+  }
+
+  /* Hairlines */
   .hairline-light-border {
     border: 1px solid #e4e4e7;
   }
 
   .hairline-dark-border {
     border: 1px solid #1e2c31;
+  }
+
+  /* Full-bleed helper for cinematic sections */
+  .full-bleed {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+  }
+
+  /* Eyebrow cap label */
+  .eyebrow-cap {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.72px;
+    text-transform: uppercase;
+    font-feature-settings: "ss03" 1;
   }
 }
 

@@ -50,23 +50,57 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
+  			// DESIGN.md — Cinematic Track
   			'canvas-night': '#000000',
   			'canvas-night-elevated': '#0a0a0a',
+  			'surface-elevated-dark': '#1e2c31',
+  			// DESIGN.md — Transactional Track
   			'canvas-cream': '#fbfbf5',
+  			'canvas-light': '#ffffff',
+  			// DESIGN.md — Brand Accents (light track only)
   			'aloe-10': '#c1fbd4',
   			'pistachio-10': '#d4f9e0',
-  			'shade-70': '#3f3f46',
+  			// DESIGN.md — Shade Ladder
   			'shade-30': '#d4d4d8',
+  			'shade-40': '#a1a1aa',
+  			'shade-50': '#71717a',
+  			'shade-60': '#52525b',
+  			'shade-70': '#3f3f46',
+  			// DESIGN.md — Hairlines
   			'hairline-light': '#e4e4e7',
   			'hairline-dark': '#1e2c31',
-  			'ink': '#000000'
+  			// DESIGN.md — Link tones (dark track)
+  			'link-cool-1': '#9dabad',
+  			'link-cool-2': '#9797a2',
+  			'link-cool-3': '#bdbdca',
+  			'link-mint': '#99b3ad',
+  			// Base
+  			'ink': '#000000',
+  		},
+  		fontFamily: {
+  			display: [
+  				'var(--font-inter-display)',
+  				'Helvetica Neue',
+  				'Helvetica',
+  				'Arial',
+  				'sans-serif',
+  			],
+  			sans: [
+  				'var(--font-inter)',
+  				'Inter',
+  				'Helvetica',
+  				'Arial',
+  				'sans-serif',
+  			],
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			sm: 'calc(var(--radius) - 4px)',
+  			pill: '9999px',
   		}
   	}
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
