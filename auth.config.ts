@@ -3,6 +3,10 @@ import { NextResponse } from 'next/server';
 
 export const authConfig = {
   providers: [], // Required by NextAuthConfig type
+  pages: {
+    signIn: '/sign-in',
+    error: '/sign-in',
+  },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   callbacks: {
     authorized({ request, auth }) {

@@ -13,6 +13,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const ProductCarousel = ({ data }: { data: Product[] }) => {
+  const featuredWithBanner = data.filter((product) => product.banner);
+
+  if (featuredWithBanner.length === 0) return null;
+
   return (
     <Carousel
       className='w-full mb-12'
@@ -28,7 +32,7 @@ const ProductCarousel = ({ data }: { data: Product[] }) => {
       ]}
     >
       <CarouselContent>
-        {data.map((product: Product) => (
+        {featuredWithBanner.map((product: Product, index: number) => (
           <CarouselItem key={product.id}>
             <Link href={`/product/${product.slug}`}>
               <div className='relative mx-auto'>
@@ -39,6 +43,7 @@ const ProductCarousel = ({ data }: { data: Product[] }) => {
                   width='0'
                   sizes='100vw'
                   className='w-full h-auto'
+                  priority={index === 0}
                 />
                 <div className='absolute inset-0 flex items-end justify-center'>
                   <h2 className='bg-gray-900 bg-opacity-50 text-2xl font-bold px-2 text-white'>
