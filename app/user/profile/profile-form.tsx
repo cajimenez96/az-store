@@ -18,6 +18,12 @@ import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ShippingAddress } from '@/types';
+import provincias from '@/lib/data/argentina.json';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface ProfileFormProps {
   address?: ShippingAddress;
@@ -29,13 +35,18 @@ const profileFormSchema = z.object({
   fullName: z.string().optional(),
   streetAddress: z.string().optional(),
   city: z.string().optional(),
+  province: z.string().optional(),
   postalCode: z.string().optional(),
   country: z.string().optional(),
+  phone: z.string().optional(),
+  apartment: z.string().optional(),
+  floor: z.string().optional(),
 });
 
 const ProfileForm = ({ address }: ProfileFormProps) => {
   const { data: session, update } = useSession();
   const { toast } = useToast();
+  const [openProvince, setOpenProvince] = useState(false);
 
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -45,8 +56,12 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
       fullName: address?.fullName ?? '',
       streetAddress: address?.streetAddress ?? '',
       city: address?.city ?? '',
+      province: address?.province ?? '',
       postalCode: address?.postalCode ?? '',
-      country: address?.country ?? '',
+      country: address?.country ?? 'Argentina',
+      phone: address?.phone ?? '',
+      apartment: address?.apartment ?? '',
+      floor: address?.floor ?? '',
     },
   });
 
@@ -66,8 +81,9 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
       values.fullName ||
       values.streetAddress ||
       values.city ||
+      values.province ||
       values.postalCode ||
-      values.country
+      values.phone
     );
 
     if (hasAnyAddressField) {
@@ -75,14 +91,18 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
         fullName: values.fullName,
         streetAddress: values.streetAddress,
         city: values.city,
+        province: values.province,
         postalCode: values.postalCode,
         country: values.country,
+        phone: values.phone,
+        apartment: values.apartment,
+        floor: values.floor,
       });
 
       if (!addressValidation.success) {
         return toast({
           variant: 'destructive',
-          description: 'Por favor completá todos los campos de dirección de envío (mínimo 3 caracteres c/u).',
+          description: 'Por favor completá correctamente todos los campos obligatorios de la dirección (mínimo 3 caracteres, teléfono 8 caracteres).',
         });
       }
 
@@ -186,6 +206,7 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   )}
                 />
               </div>
+
               <div className='col-span-1 md:col-span-2'>
                 <FormField
                   control={form.control}
@@ -195,7 +216,7 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                       <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Calle y Altura</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder='Dirección de entrega'
+                          placeholder='Ej: Comb. de los Pozos 1026'
                           className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
                           {...field}
                         />
@@ -205,15 +226,16 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   )}
                 />
               </div>
+
               <FormField
                 control={form.control}
-                name='city'
+                name='floor'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Ciudad</FormLabel>
+                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Piso (Opcional)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='Ciudad / Localidad'
+                        placeholder='Ej: 2'
                         className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
                         {...field}
                       />
@@ -222,6 +244,42 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name='apartment'
+                render={({ field }) => (
+                  <FormItem className='w-full'>
+                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Depto (Opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Ej: B'
+                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='phone'
+                render={({ field }) => (
+                  <FormItem className='w-full'>
+                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Ej: +54 9 11 1234-5678'
+                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name='postalCode'
@@ -239,6 +297,84 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name='province'
+                render={({ field }) => (
+                  <FormItem className='flex flex-col mt-2'>
+                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300 mb-1'>Provincia</FormLabel>
+                    <Popover open={openProvince} onOpenChange={setOpenProvince}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant='outline'
+                            role='combobox'
+                            className={cn(
+                              'w-full justify-between bg-white dark:bg-black border-hairline-light dark:border-hairline-dark text-black dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            {field.value
+                              ? provincias.provinces.find((prov) => prov === field.value)
+                              : 'Seleccionar provincia...'}
+                            <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-white dark:bg-canvas-night-elevated border-hairline-light dark:border-hairline-dark' align="start">
+                        <Command className='bg-transparent'>
+                          <CommandInput placeholder='Buscar provincia...' className='border-none outline-none ring-0' />
+                          <CommandList>
+                            <CommandEmpty>No se encontró la provincia.</CommandEmpty>
+                            <CommandGroup>
+                              {provincias.provinces.map((prov) => (
+                                <CommandItem
+                                  value={prov}
+                                  key={prov}
+                                  onSelect={() => {
+                                    form.setValue('province', prov);
+                                    setOpenProvince(false);
+                                  }}
+                                  className='cursor-pointer text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10'
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4 text-aloe-10',
+                                      prov === field.value ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  {prov}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='city'
+                render={({ field }) => (
+                  <FormItem className='w-full'>
+                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Ciudad / Localidad</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Ciudad / Localidad'
+                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className='col-span-1 md:col-span-2'>
                 <FormField
                   control={form.control}
@@ -248,8 +384,9 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                       <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>País</FormLabel>
                       <FormControl>
                         <Input
+                          disabled
                           placeholder='País'
-                          className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                          className='bg-canvas-cream dark:bg-[#1a1a1a] border-hairline-light dark:border-hairline-dark rounded-md text-zinc-500 cursor-not-allowed'
                           {...field}
                         />
                       </FormControl>

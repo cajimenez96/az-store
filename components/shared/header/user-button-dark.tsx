@@ -62,11 +62,13 @@ const UserButtonDark = async () => {
               Mi Perfil
             </Link>
           </DropdownMenuItem>
+          {session?.user?.role !== 'admin' && (
           <DropdownMenuItem className='text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer'>
             <Link href='/user/orders' className='w-full'>
               Historial de Pedidos
             </Link>
           </DropdownMenuItem>
+          )}
 
           {session?.user?.role === 'admin' && (
             <DropdownMenuItem className='text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer'>

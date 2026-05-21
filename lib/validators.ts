@@ -74,8 +74,12 @@ export const shippingAddressSchema = z.object({
   fullName: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
   streetAddress: z.string().min(3, 'La dirección debe tener al menos 3 caracteres'),
   city: z.string().min(3, 'La ciudad debe tener al menos 3 caracteres'),
+  province: z.string().min(2, 'La provincia es requerida'),
   postalCode: z.string().min(3, 'El código postal debe tener al menos 3 caracteres'),
   country: z.string().min(3, 'El país debe tener al menos 3 caracteres'),
+  phone: z.string().optional(),
+  floor: z.string().optional(),
+  apartment: z.string().optional(),
   lat: z.number().optional(),
   lng: z.number().optional(),
 });

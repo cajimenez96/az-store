@@ -30,6 +30,7 @@ PurchaseReceiptEmail.PreviewProps = {
       fullName: 'John Doe',
       streetAddress: '123 Main st',
       city: 'New York',
+      province: 'NY',
       postalCode: '10001',
       country: 'US',
     },
