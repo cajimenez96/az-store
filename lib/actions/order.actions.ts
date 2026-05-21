@@ -61,10 +61,23 @@ export async function createOrder() {
       totalPrice: cart.totalPrice,
     });
 
+    const expirationHours = process.env.ORDER_EXPIRATION_HOURS
+      ? Number(process.env.ORDER_EXPIRATION_HOURS)
+      : 24;
+    const expiresAt =
+      user.paymentMethod === 'TransferenciaBancaria'
+        ? new Date(Date.now() + expirationHours * 60 * 60 * 1000)
+        : null;
+
     // Create a transaction to create order and order items in database
     const insertedOrderId = await prisma.$transaction(async (tx) => {
       // Create order
-      const insertedOrder = await tx.order.create({ data: order });
+      const insertedOrder = await tx.order.create({
+        data: {
+          ...order,
+          expiresAt,
+        },
+      });
       // Create order items from the cart items
       for (const item of cart.items as CartItem[]) {
         await tx.orderItem.create({
@@ -74,6 +87,14 @@ export async function createOrder() {
             orderId: insertedOrder.id,
           },
         });
+
+        // Decrement stock immediately if Bank Transfer
+        if (user.paymentMethod === 'TransferenciaBancaria') {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.qty } },
+          });
+        }
       }
       // Clear cart
       await tx.cart.update({

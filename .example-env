@@ -26,3 +26,6 @@ STRIPE_SECRET_KEY=""
 
 RESEND_API_KEY=""
 SENDER_EMAIL="onboarding@resend.dev"
+
+# Tiempo de expiración para órdenes de transferencia bancaria (en horas)
+ORDER_EXPIRATION_HOURS="24"

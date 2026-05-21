@@ -131,7 +131,7 @@ export async function getMyCart() {
 
   // Get user cart from database
   const cart = await prisma.cart.findFirst({
-    where: userId ? { userId: userId } : { sessionCartId: sessionCartId },
+    where: userId ? { userId: userId } : { sessionCartId: sessionCartId, userId: null },
   });
 
   if (!cart) return undefined;
@@ -198,5 +198,72 @@ export async function removeItemFromCart(productId: string) {
     };
   } catch (error) {
     return { success: false, message: formatError(error) };
+  }
+}
+
+// Merge anonymous cart into user cart
+export async function mergeCart(userId: string, sessionCartId: string) {
+  try {
+    // 1. Get user's cart
+    const userCart = await prisma.cart.findFirst({
+      where: { userId },
+    });
+
+    // 2. Get session cart
+    const sessionCart = await prisma.cart.findFirst({
+      where: { sessionCartId, userId: null },
+    });
+
+    if (!sessionCart) return;
+
+    if (!userCart) {
+      // If user has no cart, associate the session cart to the user
+      await prisma.cart.update({
+        where: { id: sessionCart.id },
+        data: { userId },
+      });
+    } else {
+      const userItems = userCart.items as CartItem[];
+      const sessionItems = sessionCart.items as CartItem[];
+
+      for (const sessionItem of sessionItems) {
+        const existItem = userItems.find((x) => x.productId === sessionItem.productId);
+
+        // Fetch product to verify stock
+        const product = await prisma.product.findFirst({
+          where: { id: sessionItem.productId },
+        });
+
+        const maxStock = product ? product.stock : 999;
+
+        if (existItem) {
+          const newQty = existItem.qty + sessionItem.qty;
+          existItem.qty = newQty > maxStock ? maxStock : newQty;
+        } else {
+          // Limit qty to stock
+          const newQty = sessionItem.qty > maxStock ? maxStock : sessionItem.qty;
+          userItems.push({
+            ...sessionItem,
+            qty: newQty,
+          });
+        }
+      }
+
+      // Update user cart with consolidated items and recalculated prices
+      await prisma.cart.update({
+        where: { id: userCart.id },
+        data: {
+          items: userItems as Prisma.CartUpdateitemsInput[],
+          ...calcPrice(userItems),
+        },
+      });
+
+      // Delete the anonymous session cart
+      await prisma.cart.delete({
+        where: { id: sessionCart.id },
+      });
+    }
+  } catch (error) {
+    console.error('Error merging carts:', error);
   }
 }
