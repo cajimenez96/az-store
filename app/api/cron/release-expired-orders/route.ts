@@ -49,14 +49,17 @@ export async function GET(request: NextRequest) {
       await prisma.$transaction(async (tx) => {
         // Restore product stock
         for (const item of order.orderitems) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: {
-                increment: item.qty,
-              },
-            },
-          });
+          if (item.size) {
+            const variant = await tx.productVariant.findFirst({
+              where: { productId: item.productId, size: { name: item.size } }
+            });
+            if (variant) {
+              await tx.productVariant.update({
+                where: { id: variant.id },
+                data: { stock: { increment: item.qty } },
+              });
+            }
+          }
         }
 
         // Cancel order in database (marking status in paymentResult)

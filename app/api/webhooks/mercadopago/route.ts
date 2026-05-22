@@ -60,6 +60,12 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     console.error('Mercado Pago webhook error:', error);
+    
+    // Si la orden ya estaba pagada, devolvemos 200 para que Mercado Pago no siga reintentando (Idempotencia)
+    if (message.includes('La orden ya está pagada')) {
+      return NextResponse.json({ success: true, message: 'Order already paid' });
+    }
+
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

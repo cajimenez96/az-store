@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import Pagination from '@/components/shared/pagination';
 import DeleteDialog from '@/components/shared/delete-dialog';
-import { requireAdmin } from '@/lib/auth-guard';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 
 const AdminProductsPage = async (props: {
   searchParams: Promise<{
@@ -21,7 +21,7 @@ const AdminProductsPage = async (props: {
     category: string;
   }>;
 }) => {
-  await requireAdmin();
+  await requireAdminOrSeller();
 
   const searchParams = await props.searchParams;
 

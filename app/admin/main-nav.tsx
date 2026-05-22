@@ -29,15 +29,24 @@ const links = [
 
 const MainNav = ({
   className,
+  role,
   ...props
-}: React.HTMLAttributes<HTMLElement>) => {
+}: React.HTMLAttributes<HTMLElement> & { role?: string }) => {
   const pathname = usePathname();
+
+  const filteredLinks = links.filter((item) => {
+    if (role === 'seller') {
+      if (item.title === 'Categorías' || item.title === 'Usuarios') return false;
+    }
+    return true;
+  });
+
   return (
     <nav
       className={cn('flex items-center space-x-4 lg:space-x-6', className)}
       {...props}
     >
-      {links.map((item) => (
+      {filteredLinks.map((item) => (
         <Link
           key={item.href}
           href={item.href}

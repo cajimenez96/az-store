@@ -1,6 +1,7 @@
 'use server';
 
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
+import { requireAdmin, requireAdminOrSeller } from '../auth-guard';
 import { convertToPlainObject, formatError } from '../utils';
 import { auth } from '@/auth';
 import { getMyCart } from './cart.actions';
@@ -12,7 +13,7 @@ import { paypal } from '../paypal';
 import { revalidatePath } from 'next/cache';
 import { PAGE_SIZE } from '../constants';
 import { Prisma } from '@prisma/client';
-import { sendPurchaseReceipt } from '@/email';
+import { sendPurchaseReceipt, sendNewSaleNotification, sendShippingUpdate } from '@/email';
 import { Preference } from 'mercadopago';
 import { mpClient } from '../mercadopago';
 
@@ -299,12 +300,17 @@ export async function updateOrderToPaid({
 
   if (!updatedOrder) throw new Error('Orden no encontrada');
 
+  const orderData = {
+    ...updatedOrder,
+    shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
+    paymentResult: updatedOrder.paymentResult as PaymentResult,
+  };
+
   sendPurchaseReceipt({
-    order: {
-      ...updatedOrder,
-      shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
-      paymentResult: updatedOrder.paymentResult as PaymentResult,
-    },
+    order: orderData,
+  });
+  sendNewSaleNotification({
+    order: orderData,
   });
 }
 
@@ -425,6 +431,7 @@ export async function getAllOrders({
 // Delete an order
 export async function deleteOrder(id: string) {
   try {
+    await requireAdmin();
     await prisma.order.delete({ where: { id } });
 
     revalidatePath('/admin/orders');
@@ -441,6 +448,7 @@ export async function deleteOrder(id: string) {
 // Update COD order to paid
 export async function updateOrderToPaidCOD(orderId: string) {
   try {
+    await requireAdminOrSeller();
     await updateOrderToPaid({ orderId });
 
     revalidatePath(`/order/${orderId}`);
@@ -454,6 +462,7 @@ export async function updateOrderToPaidCOD(orderId: string) {
 // Update COD order to delivered
 export async function deliverOrder(orderId: string) {
   try {
+    await requireAdminOrSeller();
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
@@ -473,9 +482,75 @@ export async function deliverOrder(orderId: string) {
 
     revalidatePath(`/order/${orderId}`);
 
+    const updatedOrder = await prisma.order.findFirst({
+      where: { id: orderId },
+      include: {
+        orderitems: true,
+        user: { select: { name: true, email: true } },
+      },
+    });
+
+    if (updatedOrder) {
+      sendShippingUpdate({
+        order: {
+          ...updatedOrder,
+          shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
+          paymentResult: updatedOrder.paymentResult as PaymentResult,
+        },
+      });
+    }
+
     return {
       success: true,
       message: 'Orden marcada como entregada',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Update shipping status
+export async function updateShippingStatus(orderId: string, status: string, notes?: string) {
+  try {
+    await requireAdminOrSeller();
+    
+    const order = await prisma.order.findFirst({
+      where: { id: orderId },
+    });
+
+    if (!order) throw new Error('Orden no encontrada');
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        shippingStatus: status,
+        shippingNotes: notes || null,
+      },
+    });
+
+    revalidatePath(`/order/${orderId}`);
+
+    const updatedOrder = await prisma.order.findFirst({
+      where: { id: orderId },
+      include: {
+        orderitems: true,
+        user: { select: { name: true, email: true } },
+      },
+    });
+
+    if (updatedOrder) {
+      sendShippingUpdate({
+        order: {
+          ...updatedOrder,
+          shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
+          paymentResult: updatedOrder.paymentResult as PaymentResult,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      message: 'Estado de envío actualizado',
     };
   } catch (error) {
     return { success: false, message: formatError(error) };
@@ -494,7 +569,7 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
 
     if (!order) throw new Error('Orden no encontrada');
 
-    if (order.userId !== session.user.id && session.user.role !== 'admin') {
+    if (order.userId !== session.user.id && session.user.role !== 'admin' && session.user.role !== 'seller') {
       throw new Error('No autorizado');
     }
 
@@ -518,7 +593,7 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
 export async function approveBankTransfer(orderId: string) {
   try {
     const session = await auth();
-    if (session?.user?.role !== 'admin') {
+    if (session?.user?.role !== 'admin' && session?.user?.role !== 'seller') {
       throw new Error('No autorizado');
     }
 
@@ -554,7 +629,7 @@ export async function approveBankTransfer(orderId: string) {
 export async function rejectBankTransfer(orderId: string) {
   try {
     const session = await auth();
-    if (session?.user?.role !== 'admin') {
+    if (session?.user?.role !== 'admin' && session?.user?.role !== 'seller') {
       throw new Error('No autorizado');
     }
 

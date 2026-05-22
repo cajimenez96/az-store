@@ -26,6 +26,7 @@ import {
 } from '@/lib/actions/order.actions';
 import { BANK_TRANSFER_INFO } from '@/lib/constants';
 import { UploadButton } from '@/lib/uploadthing';
+import ShippingStatusForm from './shipping-status-form';
 
 const OrderDetailsTable = ({
   order,
@@ -188,9 +189,17 @@ const OrderDetailsTable = ({
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h1 className='text-2xl font-light tracking-wide text-zinc-900'>Orden {formatId(id)}</h1>
-          <Link href="/user/orders" className="text-sm font-medium underline text-zinc-600 hover:text-zinc-900 transition-colors">
-            Volver a mis pedidos
-          </Link>
+          <div className="flex gap-4">
+            <button
+              onClick={() => window.print()}
+              className="text-sm font-medium text-aloe-500 hover:text-aloe-600 transition-colors"
+            >
+              Imprimir Comprobante
+            </button>
+            <Link href="/user/orders" className="text-sm font-medium underline text-zinc-600 hover:text-zinc-900 transition-colors">
+              Volver a mis pedidos
+            </Link>
+          </div>
         </div>
 
         <div className='grid md:grid-cols-3 gap-6'>
@@ -314,12 +323,29 @@ const OrderDetailsTable = ({
                   </p>
                 </div>
                 <div>
-                  {isDelivered ? (
+                  <div className="flex items-center gap-2">
                     <Badge variant='secondary' className="bg-zinc-100 text-zinc-800 border-transparent">
-                      Entregado el {formatDateTime(deliveredAt!).dateTime}
+                      Estado: {order.shippingStatus || 'Pendiente'}
                     </Badge>
-                  ) : (
-                    <Badge variant='destructive'>No Entregado</Badge>
+                    {isDelivered ? (
+                      <Badge variant='secondary' className="bg-green-100 text-green-800 border-transparent">
+                        Entregado el {formatDateTime(deliveredAt!).dateTime}
+                      </Badge>
+                    ) : (
+                      <Badge variant='destructive'>No Entregado</Badge>
+                    )}
+                  </div>
+                  {order.shippingNotes && (
+                    <p className="text-sm text-zinc-600 mt-2">
+                      <span className="font-semibold">Notas:</span> {order.shippingNotes}
+                    </p>
+                  )}
+                  {isAdmin && (
+                    <ShippingStatusForm
+                      orderId={order.id}
+                      currentStatus={order.shippingStatus || 'Pendiente'}
+                      currentNotes={order.shippingNotes || ''}
+                    />
                   )}
                 </div>
               </CardContent>

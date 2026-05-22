@@ -12,7 +12,7 @@ export async function getLatestProducts() {
   const data = await prisma.product.findMany({
     take: LATEST_PRODUCTS_LIMIT,
     orderBy: { createdAt: 'desc' },
-    include: { category: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, variants: { include: { size: true } } },
   });
 
   return convertToPlainObject(data);
@@ -22,7 +22,7 @@ export async function getLatestProducts() {
 export async function getProductBySlug(slug: string) {
   const data = await prisma.product.findFirst({
     where: { slug: slug },
-    include: { category: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, variants: { include: { size: true } } },
   });
   return convertToPlainObject(data);
 }
@@ -31,7 +31,7 @@ export async function getProductBySlug(slug: string) {
 export async function getProductById(productId: string) {
   const data = await prisma.product.findFirst({
     where: { id: productId },
-    include: { category: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, variants: { include: { size: true } } },
   });
 
   return convertToPlainObject(data);
@@ -43,6 +43,7 @@ export async function getAllProducts({
   limit = PAGE_SIZE,
   page,
   category,
+  subCategory,
   price,
   rating,
   sort,
@@ -51,6 +52,7 @@ export async function getAllProducts({
   limit?: number;
   page: number;
   category?: string;
+  subCategory?: string;
   price?: string;
   rating?: string;
   sort?: string;
@@ -71,6 +73,12 @@ export async function getAllProducts({
   const categoryFilter: Prisma.ProductWhereInput =
     category && category !== 'all'
       ? { category: { slug: category } }
+      : {};
+
+  // SubCategory filter
+  const subCategoryFilter: Prisma.ProductWhereInput =
+    subCategory && subCategory !== 'all'
+      ? { subCategory: { slug: subCategory } }
       : {};
 
   // Price filter
@@ -98,10 +106,11 @@ export async function getAllProducts({
     where: {
       ...queryFilter,
       ...categoryFilter,
+      ...subCategoryFilter,
       ...priceFilter,
       ...ratingFilter,
     },
-    include: { category: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, variants: { include: { size: true } } },
     orderBy:
       sort === 'lowest'
         ? { price: 'asc' }
@@ -129,9 +138,12 @@ export async function getAllProducts({
   };
 }
 
+import { requireAdmin, requireAdminOrSeller } from '@/lib/auth-guard';
+
 // Delete a product
 export async function deleteProduct(id: string) {
   try {
+    await requireAdmin();
     const productExists = await prisma.product.findFirst({
       where: { id },
     });
@@ -154,6 +166,7 @@ export async function deleteProduct(id: string) {
 // Create a product
 export async function createProduct(data: z.infer<typeof insertProductSchema>) {
   try {
+    await requireAdmin();
     const productData = insertProductSchema.parse(data);
     
     // We separate the variants from the product core data
@@ -161,7 +174,10 @@ export async function createProduct(data: z.infer<typeof insertProductSchema>) {
 
     await prisma.$transaction(async (tx) => {
       const product = await tx.product.create({
-        data: coreData,
+        data: {
+          ...coreData,
+          subCategoryId: coreData.subCategoryId || null,
+        },
       });
 
       if (variants && variants.length > 0) {
@@ -190,6 +206,7 @@ export async function createProduct(data: z.infer<typeof insertProductSchema>) {
 // Update a product
 export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
   try {
+    const session = await requireAdminOrSeller();
     const productData = updateProductSchema.parse(data);
     const productExists = await prisma.product.findFirst({
       where: { id: productData.id },
@@ -197,13 +214,34 @@ export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
 
     if (!productExists) throw new Error('Producto no encontrado');
 
-    const { variants, id, ...coreData } = productData;
+    const { variants, id, ...restData } = productData;
+    let coreData = { ...restData };
+
+    if (session?.user?.role === 'seller') {
+      // Seller cannot change critical fields like price, category, name.
+      // We override coreData with existing data, only allowing description to be updated.
+      coreData = {
+        ...coreData,
+        name: productExists.name,
+        slug: productExists.slug,
+        categoryId: productExists.categoryId,
+        subCategoryId: productExists.subCategoryId,
+        images: productExists.images,
+        brand: productExists.brand,
+        price: productExists.price.toString(),
+        isFeatured: productExists.isFeatured,
+        banner: productExists.banner,
+      };
+    }
 
     await prisma.$transaction(async (tx) => {
       // 1. Update core product info
       await tx.product.update({
         where: { id: id },
-        data: coreData,
+        data: {
+          ...coreData,
+          subCategoryId: coreData.subCategoryId || null,
+        },
       });
 
       // 2. Clear existing variants

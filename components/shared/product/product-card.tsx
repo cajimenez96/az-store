@@ -2,11 +2,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import ProductPrice from './product-price';
-import { Product } from '@/types';
 import Rating from './rating';
 
-const ProductCard = ({ product }: { product: any }) => {
-  const stock = product.variants?.reduce((acc: number, v: any) => acc + v.stock, 0) || 0;
+const ProductCard = ({ product }: { product: { slug: string; images: string[]; name: string; brand: string; rating: string | number; price: string | number; variants?: { stock: number }[] } }) => {
+  const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) || 0;
   return (
     <Card className='w-full max-w-sm'>
       <CardHeader className='p-0 items-center'>

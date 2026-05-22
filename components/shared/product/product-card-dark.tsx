@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Product } from '@/types';
 import Rating from './rating';
 import ProductPrice from './product-price';
 
-const ProductCardDark = ({ product }: { product: any }) => {
-  const stock = product.variants?.reduce((acc: number, v: any) => acc + v.stock, 0) || 0;
+const ProductCardDark = ({ product }: { product: { slug: string; images: string[]; name: string; brand: string; rating: string | number; price: string | number; variants?: { stock: number }[] } }) => {
+  const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) || 0;
   return (
     <Link href={`/product/${product.slug}`} className='group block'>
       <div className='bg-canvas-night-elevated rounded-xl overflow-hidden shadow-level-2-dark border border-hairline-dark hover:border-white/20 transition-all duration-300 hover:-translate-y-1'>

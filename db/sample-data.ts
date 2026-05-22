@@ -1,15 +1,21 @@
 const sampleData = {
   users: [
     {
-      name: 'John',
+      name: 'Admin',
       email: 'admin@example.com',
-      password: '123456',
+      password: 'password123',
       role: 'admin',
     },
     {
-      name: 'Jane',
+      name: 'Vendedor',
+      email: 'seller@example.com',
+      password: 'password123',
+      role: 'seller',
+    },
+    {
+      name: 'Cliente',
       email: 'user@example.com',
-      password: '123456',
+      password: 'password123',
       role: 'user',
     },
   ],

@@ -26,21 +26,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import Image from 'next/image';
 import { Checkbox } from '../ui/checkbox';
 import ProductCard from '../shared/product/product-card';
-import { Category, Size } from '@prisma/client';
-import { useEffect } from 'react';
+import { Category, Size, SubCategory } from '@prisma/client';
+import { useEffect, useState } from 'react';
 
-type CategoryWithSizes = Category & { sizes: Size[] };
+type CategoryWithSizes = Category & { sizes: Size[]; subCategories: SubCategory[] };
 
 const ProductForm = ({
   type,
   product,
   productId,
   categories = [],
+  userRole,
 }: {
   type: 'Create' | 'Update';
   product?: Product;
   productId?: string;
   categories?: CategoryWithSizes[];
+  userRole?: string;
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -53,9 +55,7 @@ const ProductForm = ({
     defaultValues:
       product && type === 'Update' ? {
         ...product,
-        // En update, variants viene dentro de product si es tipo Product extendido. 
-        // @ts-expect-error - ignorando error temporal si no tipeamos Product con variants en constants
-        variants: product.variants || []
+        variants: (product as Product & { variants?: unknown[] }).variants || []
       } : productDefaultValues,
   });
 
@@ -115,6 +115,16 @@ const ProductForm = ({
   const categoryId = form.watch('categoryId');
   const brand = form.watch('brand');
   const slug = form.watch('slug');
+
+  // Available sub-categories for the selected category
+  const [availableSubCategories, setAvailableSubCategories] = useState<SubCategory[]>([]);
+
+  useEffect(() => {
+    const cat = categories.find((c) => c.id === categoryId);
+    setAvailableSubCategories(cat?.subCategories ?? []);
+    // Clear sub-category when parent changes
+    form.setValue('subCategoryId', null as unknown as string);
+  }, [categoryId, categories, form]);
 
   // Preview Object
   const previewProduct = {
@@ -186,6 +196,7 @@ const ProductForm = ({
                               form.setValue('slug', slugify(e.target.value, { lower: true, strict: true }));
                             }
                           }}
+                          disabled={userRole === 'seller'}
                         />
                       </FormControl>
                       <FormMessage />
@@ -201,10 +212,11 @@ const ProductForm = ({
                       <FormLabel>Slug</FormLabel>
                       <FormControl>
                         <div className='relative flex gap-2'>
-                          <Input placeholder='Ingresá el slug' {...field} />
+                          <Input placeholder='Ingresá el slug' {...field} disabled={userRole === 'seller'} />
                           <Button
                             type='button'
                             variant='outline'
+                            disabled={userRole === 'seller'}
                             onClick={() => {
                               form.setValue(
                                 'slug',
@@ -233,6 +245,7 @@ const ProductForm = ({
                         <select 
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           {...field}
+                          disabled={userRole === 'seller'}
                         >
                           <option value="">Seleccione una categoría</option>
                           {categories.map((cat) => (
@@ -244,6 +257,34 @@ const ProductForm = ({
                     </FormItem>
                   )}
                 />
+
+                {/* Sub-Category (only when parent has sub-categories) */}
+                {availableSubCategories.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name='subCategoryId'
+                    render={({ field }) => (
+                      <FormItem className='w-full'>
+                        <FormLabel>Sub-categoría</FormLabel>
+                        <FormControl>
+                          <select
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            {...field}
+                            value={field.value ?? ''}
+                            disabled={userRole === 'seller'}
+                          >
+                            <option value="">Sin sub-categoría</option>
+                            {availableSubCategories.map((sub) => (
+                              <option key={sub.id} value={sub.id}>{sub.name}</option>
+                            ))}
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 {/* Brand */}
                 <FormField
                   control={form.control}
@@ -252,7 +293,7 @@ const ProductForm = ({
                     <FormItem className='w-full'>
                       <FormLabel>Marca</FormLabel>
                       <FormControl>
-                        <Input placeholder='Ingresá la marca' list='brands' {...field} />
+                        <Input placeholder='Ingresá la marca' list='brands' {...field} disabled={userRole === 'seller'} />
                       </FormControl>
                       <datalist id="brands">
                         <option value="AZ Brand" />
@@ -272,7 +313,7 @@ const ProductForm = ({
                     <FormItem className='w-full md:w-1/2'>
                       <FormLabel>Precio</FormLabel>
                       <FormControl>
-                        <Input placeholder='Ingresá el precio del producto' {...field} />
+                        <Input placeholder='Ingresá el precio del producto' {...field} disabled={userRole === 'seller'} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -360,40 +401,44 @@ const ProductForm = ({
                                 width={100}
                                 height={100}
                               />
-                              <button 
-                                type="button" 
-                                className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => {
-                                  const newImages = [...images];
-                                  newImages.splice(idx, 1);
-                                  form.setValue('images', newImages);
-                                }}
-                              >
-                                &times;
-                              </button>
+                              {userRole !== 'seller' && (
+                                <button 
+                                  type="button" 
+                                  className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => {
+                                    const newImages = [...images];
+                                    newImages.splice(idx, 1);
+                                    form.setValue('images', newImages);
+                                  }}
+                                >
+                                  &times;
+                                </button>
+                              )}
                             </div>
                           ))}
-                          <FormControl>
-                            <div className="flex items-center justify-center w-24 h-24 border-2 border-dashed border-zinc-300 rounded-sm hover:bg-zinc-50 transition-colors">
-                              <UploadButton
-                                endpoint='imageUploader'
-                                onClientUploadComplete={(res: { url: string }[]) => {
-                                  form.setValue('images', [...images, res[0].url]);
-                                }}
-                                onUploadError={(error: Error) => {
-                                  toast({
-                                    variant: 'destructive',
-                                    description: `ERROR! ${error.message}`,
-                                  });
-                                }}
-                                appearance={{
-                                  button: "bg-transparent text-black text-xs font-medium w-full h-full",
-                                  allowedContent: "hidden"
-                                }}
-                                content={{ button: "+" }}
-                              />
-                            </div>
-                          </FormControl>
+                          {userRole !== 'seller' && (
+                            <FormControl>
+                              <div className="flex items-center justify-center w-24 h-24 border-2 border-dashed border-zinc-300 rounded-sm hover:bg-zinc-50 transition-colors">
+                                <UploadButton
+                                  endpoint='imageUploader'
+                                  onClientUploadComplete={(res: { url: string }[]) => {
+                                    form.setValue('images', [...images, res[0].url]);
+                                  }}
+                                  onUploadError={(error: Error) => {
+                                    toast({
+                                      variant: 'destructive',
+                                      description: `ERROR! ${error.message}`,
+                                    });
+                                  }}
+                                  appearance={{
+                                    button: "bg-transparent text-black text-xs font-medium w-full h-full",
+                                    allowedContent: "hidden"
+                                  }}
+                                  content={{ button: "+" }}
+                                />
+                              </div>
+                            </FormControl>
+                          )}
                         </div>
                       </div>
                       <FormMessage />
@@ -412,6 +457,7 @@ const ProductForm = ({
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          disabled={userRole === 'seller'}
                         />
                       </FormControl>
                       <FormLabel className="font-semibold text-base">¿Es producto destacado?</FormLabel>
@@ -431,15 +477,17 @@ const ProductForm = ({
                           width={1920}
                           height={680}
                         />
-                        <button 
-                          type="button" 
-                          className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => form.setValue('banner', '')}
-                        >
-                          &times;
-                        </button>
+                        {userRole !== 'seller' && (
+                          <button 
+                            type="button" 
+                            className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => form.setValue('banner', '')}
+                          >
+                            &times;
+                          </button>
+                        )}
                       </div>
-                    ) : (
+                    ) : userRole !== 'seller' ? (
                       <UploadButton
                         endpoint='imageUploader'
                         onClientUploadComplete={(res: { url: string }[]) => {
@@ -452,7 +500,7 @@ const ProductForm = ({
                           });
                         }}
                       />
-                    )}
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -469,7 +517,6 @@ const ProductForm = ({
               </CardHeader>
               <CardContent className="p-6 flex justify-center bg-zinc-50">
                 <div className="w-full max-w-[300px] pointer-events-none">
-                  {/* @ts-expect-error - Ignoring TS for preview mock product */}
                   <ProductCard product={previewProduct} />
                 </div>
               </CardContent>

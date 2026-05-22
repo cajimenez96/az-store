@@ -35,6 +35,7 @@ export async function generateMetadata(props: {
   searchParams: Promise<{
     q: string;
     category: string;
+    subCategory: string;
     price: string;
     rating: string;
   }>;
@@ -42,6 +43,7 @@ export async function generateMetadata(props: {
   const {
     q = 'all',
     category = 'all',
+    subCategory = 'all',
     price = 'all',
     rating = 'all',
   } = await props.searchParams;
@@ -49,14 +51,17 @@ export async function generateMetadata(props: {
   const isQuerySet = q && q !== 'all' && q.trim() !== '';
   const isCategorySet =
     category && category !== 'all' && category.trim() !== '';
+  const isSubCategorySet =
+    subCategory && subCategory !== 'all' && subCategory.trim() !== '';
   const isPriceSet = price && price !== 'all' && price.trim() !== '';
   const isRatingSet = rating && rating !== 'all' && rating.trim() !== '';
 
-  if (isQuerySet || isCategorySet || isPriceSet || isRatingSet) {
+  if (isQuerySet || isCategorySet || isSubCategorySet || isPriceSet || isRatingSet) {
     return {
       title: `
       Search ${isQuerySet ? q : ''} 
       ${isCategorySet ? `: Category ${category}` : ''}
+      ${isSubCategorySet ? `: Sub-category ${subCategory}` : ''}
       ${isPriceSet ? `: Price ${price}` : ''}
       ${isRatingSet ? `: Rating ${rating}` : ''}`,
     };
@@ -71,6 +76,7 @@ const SearchPage = async (props: {
   searchParams: Promise<{
     q?: string;
     category?: string;
+    subCategory?: string;
     price?: string;
     rating?: string;
     sort?: string;
@@ -80,6 +86,7 @@ const SearchPage = async (props: {
   const {
     q = 'all',
     category = 'all',
+    subCategory = 'all',
     price = 'all',
     rating = 'all',
     sort = 'newest',
@@ -89,20 +96,26 @@ const SearchPage = async (props: {
   // Construct filter url
   const getFilterUrl = ({
     c,
+    sc,
     p,
     s,
     r,
     pg,
   }: {
     c?: string;
+    sc?: string;
     p?: string;
     s?: string;
     r?: string;
     pg?: string;
   }) => {
-    const params = { q, category, price, rating, sort, page };
+    const params = { q, category, subCategory, price, rating, sort, page };
 
     if (c) params.category = c;
+    // If category is cleared or changed without explicitly providing a subcategory, reset subcategory
+    if (c && c !== category && !sc) params.subCategory = 'all';
+    else if (sc) params.subCategory = sc;
+    
     if (p) params.price = p;
     if (s) params.sort = s;
     if (r) params.rating = r;
@@ -114,6 +127,7 @@ const SearchPage = async (props: {
   const products = await getAllProducts({
     query: q,
     category,
+    subCategory,
     price,
     rating,
     sort,
@@ -202,14 +216,16 @@ const SearchPage = async (props: {
       </div>
       <div className='md:col-span-4 space-y-4'>
         <div className='flex-between flex-col md:flex-row my-4'>
-          <div className='flex items-center'>
-            {q !== 'all' && q !== '' && 'Query: ' + q}
-            {category !== 'all' && category !== '' && 'Category: ' + category}
-            {price !== 'all' && ' Price: ' + price}
-            {rating !== 'all' && ' Rating: ' + rating + ' stars & up'}
-            &nbsp;
+          <div className='flex items-center flex-wrap gap-2'>
+            {q !== 'all' && q !== '' && <span>Query: {q}</span>}
+            {category !== 'all' && category !== '' && <span>Category: {category}</span>}
+            {subCategory !== 'all' && subCategory !== '' && <span>Sub-category: {subCategory}</span>}
+            {price !== 'all' && <span>Price: {price}</span>}
+            {rating !== 'all' && <span>Rating: {rating} stars & up</span>}
+            
             {(q !== 'all' && q !== '') ||
             (category !== 'all' && category !== '') ||
+            (subCategory !== 'all' && subCategory !== '') ||
             rating !== 'all' ||
             price !== 'all' ? (
               <Button variant={'link'} asChild>

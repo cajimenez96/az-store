@@ -5,11 +5,15 @@ import Menu from '@/components/shared/header/menu';
 import MainNav from './main-nav';
 import AdminSearch from '@/components/admin/admin-search';
 
-export default function AdminLayout({
+import { auth } from '@/auth';
+
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  
   return (
     <>
       <div className='flex flex-col'>
@@ -23,7 +27,7 @@ export default function AdminLayout({
                 alt={APP_NAME}
               />
             </Link>
-            <MainNav className='mx-6' />
+            <MainNav className='mx-6' role={session?.user?.role} />
             <div className='ml-auto items-center flex space-x-4'>
               <AdminSearch />
               <Menu />

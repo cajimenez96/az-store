@@ -12,9 +12,10 @@ import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { hash } from '../encrypt';
 import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
+import { PAGE_SIZE } from '../constants';
 import { ShippingAddress } from '@/types';
 import { z } from 'zod';
-import { PAGE_SIZE } from '../constants';
+import { requireAdmin } from '@/lib/auth-guard';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 
@@ -186,6 +187,7 @@ export async function getAllUsers({
   page: number;
   query: string;
 }) {
+  await requireAdmin();
   const queryFilter: Prisma.UserWhereInput =
     query && query !== 'all'
       ? {
@@ -216,6 +218,7 @@ export async function getAllUsers({
 // Delete a user
 export async function deleteUser(id: string) {
   try {
+    await requireAdmin();
     await prisma.user.delete({ where: { id } });
 
     revalidatePath('/admin/users');
@@ -235,6 +238,7 @@ export async function deleteUser(id: string) {
 // Update a user
 export async function updateUser(user: z.infer<typeof updateUserSchema>) {
   try {
+    await requireAdmin();
     await prisma.user.update({
       where: { id: user.id },
       data: {

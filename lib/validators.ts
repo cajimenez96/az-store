@@ -14,6 +14,7 @@ export const insertProductSchema = z.object({
   name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
   slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres'),
   categoryId: z.string().min(1, 'La categoría es requerida'),
+  subCategoryId: z.string().nullable().optional(),
   brand: z.string().min(3, 'La marca debe tener al menos 3 caracteres'),
   description: z.string().min(3, 'La descripción debe tener al menos 3 caracteres'),
   variants: z.array(z.object({
@@ -119,7 +120,7 @@ export const insertOrderItemSchema = z.object({
   name: z.string(),
   price: currency,
   qty: z.number(),
-  size: z.string().optional(),
+  size: z.string().nullish().transform((v) => v ?? undefined),
 });
 
 // Schema for the PayPal paymentResult

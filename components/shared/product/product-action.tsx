@@ -4,14 +4,33 @@ import { useState } from 'react';
 import AddToCart from './add-to-cart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-
 import { Cart } from '@/types';
-import { Prisma } from '@prisma/client';
 
-type ProductWithVariants = Prisma.ProductGetPayload<{
-  include: { variants: { include: { size: true } } }
-}>;
+// Type that matches the plain object returned by convertToPlainObject(getProductBySlug(...))
+// Decimal fields become strings after serialization
+type ProductWithVariants = {
+  id: string;
+  name: string;
+  slug: string;
+  categoryId: string;
+  subCategoryId?: string | null;
+  images: string[];
+  brand: string;
+  description: string;
+  price: string | number;
+  rating: string | number;
+  numReviews: number;
+  isFeatured: boolean;
+  banner?: string | null;
+  createdAt: Date | string;
+  variants: {
+    id: string;
+    productId: string;
+    sizeId: string;
+    stock: number;
+    size: { id: string; name: string; categoryId: string };
+  }[];
+};
 
 export default function ProductAction({
   product,
@@ -86,7 +105,7 @@ export default function ProductAction({
                   productId: product.id,
                   name: product.name,
                   slug: product.slug,
-                  price: product.price,
+                  price: String(product.price),
                   qty: 1,
                   image: product.images![0],
                   size: selectedSize,
@@ -111,9 +130,6 @@ export default function ProductAction({
             Sin stock
           </Button>
         )}
-        {/* <Button asChild variant='ghost' className='rounded-pill text-white/60 hover:text-white hover:bg-white/10'>
-          <Link href='/search'>← Ver más</Link>
-        </Button> */}
       </div>
     </div>
   );

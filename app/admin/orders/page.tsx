@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Pagination from '@/components/shared/pagination';
 import DeleteDialog from '@/components/shared/delete-dialog';
-import { requireAdmin } from '@/lib/auth-guard';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Pedidos (Admin)',
@@ -24,7 +24,7 @@ const AdminOrdersPage = async (props: {
 }) => {
   const { page = '1', query: searchText } = await props.searchParams;
 
-  await requireAdmin();
+  await requireAdminOrSeller();
 
   const orders = await getAllOrders({
     page: Number(page),

@@ -13,14 +13,14 @@ import { BadgeDollarSign, Barcode, CreditCard, Users } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Charts from './charts';
-import { requireAdmin } from '@/lib/auth-guard';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Panel de Control',
 };
 
 const AdminOverviewPage = async () => {
-  await requireAdmin();
+  await requireAdminOrSeller();
 
   const summary = await getOrderSummary();
 

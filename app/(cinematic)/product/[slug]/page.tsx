@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation';
 import ProductImages from '@/components/shared/product/product-images';
 import { getMyCart } from '@/lib/actions/cart.actions';
 import ProductAction from '@/components/shared/product/product-action';
-import ReviewList from './review-list';
-import { auth } from '@/auth';
-import Rating from '@/components/shared/product/rating';
+
+// Reviews are temporarily hidden — components kept in place for future re-enablement
+// import ReviewList from './review-list';
+// import { auth } from '@/auth';
+// import Rating from '@/components/shared/product/rating';
 
 const ProductDetailsPage = async (props: {
   params: Promise<{ slug: string }>;
@@ -15,8 +17,6 @@ const ProductDetailsPage = async (props: {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const session = await auth();
-  const userId = session?.user?.id;
   const cart = await getMyCart();
 
   const price = new Intl.NumberFormat('es-AR', {
@@ -41,18 +41,11 @@ const ProductDetailsPage = async (props: {
             <div>
               <p className='eyebrow-cap text-link-cool-1 mb-4'>
                 {product.brand} — {product.category.name}
+                {product.subCategory ? ` › ${product.subCategory.name}` : ''}
               </p>
               <h1 className='display-lg text-white mb-6 leading-tight'>
                 {product.name}
               </h1>
-
-              {/* Rating row */}
-              <div className='flex items-center gap-3'>
-                <Rating value={Number(product.rating)} />
-                <span className='text-shade-40 text-sm'>
-                  {product.numReviews} {product.numReviews === 1 ? 'opinión' : 'opiniones'}
-                </span>
-              </div>
             </div>
 
             {/* Price */}
@@ -74,20 +67,13 @@ const ProductDetailsPage = async (props: {
         </div>
       </section>
 
-      {/* ─── Reviews ──────────────────────────────────────────────── */}
+      {/* ─── Reviews section (hidden — re-enable when needed) ─────────
       <section className='bg-canvas-night-elevated border-t border-hairline-dark'>
         <div className='wrapper py-16'>
-          <p className='eyebrow-cap text-link-cool-1 mb-4'>Comunidad</p>
-          <h2 className='display-md text-white mb-10'>
-            Opiniones de los clientes
-          </h2>
-          <ReviewList
-            userId={userId || ''}
-            productId={product.id}
-            productSlug={product.slug}
-          />
+          <ReviewList userId={userId} productId={product.id} productSlug={product.slug} />
         </div>
       </section>
+      ──────────────────────────────────────────────────────────────── */}
     </div>
   );
 };

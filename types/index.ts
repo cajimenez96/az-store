@@ -20,7 +20,7 @@ export type Product = z.infer<typeof insertProductSchema> & {
 export type Cart = z.infer<typeof insertCartSchema>;
 export type CartItem = z.infer<typeof cartItemSchema>;
 export type ShippingAddress = z.infer<typeof shippingAddressSchema>;
-export type OrderItem = z.infer<typeof insertOrderItemSchema>;
+export type OrderItem = Omit<z.infer<typeof insertOrderItemSchema>, 'size'> & { size?: string | null };
 export type Order = z.infer<typeof insertOrderSchema> & {
   id: string;
   createdAt: Date;
@@ -28,6 +28,8 @@ export type Order = z.infer<typeof insertOrderSchema> & {
   paidAt: Date | null;
   isDelivered: boolean;
   deliveredAt: Date | null;
+  shippingStatus: string | null;
+  shippingNotes: string | null;
   orderitems: OrderItem[];
   user: { name: string; email: string };
   paymentResult: PaymentResult;
