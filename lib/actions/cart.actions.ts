@@ -34,7 +34,15 @@ export async function addItemToCart(data: CartItem) {
 
     // Get session and user ID
     const session = await auth();
-    const userId = session?.user?.id ? (session.user.id as string) : undefined;
+    let userId = session?.user?.id ? (session.user.id as string) : undefined;
+
+    // Verify user exists to prevent foreign key errors with stale sessions
+    if (userId) {
+      const userExists = await prisma.user.findFirst({ where: { id: userId } });
+      if (!userExists) {
+        userId = undefined;
+      }
+    }
 
     // Get cart
     const cart = await getMyCart();
@@ -45,8 +53,19 @@ export async function addItemToCart(data: CartItem) {
     // Find product in database
     const product = await prisma.product.findFirst({
       where: { id: item.productId },
+      include: { variants: { include: { size: true } } },
     });
     if (!product) throw new Error('Producto no encontrado');
+
+    let maxStock = 0;
+    if (item.size && product.variants && product.variants.length > 0) {
+      const variant = product.variants.find((v) => v.size.name === item.size);
+      if (!variant) throw new Error('Talle no encontrado');
+      maxStock = variant.stock;
+    } else {
+      // If no variants, maybe just fallback to a generic stock or assume 0
+      maxStock = 0; // Or whatever fallback
+    }
 
     if (!cart) {
       // Create new cart object
@@ -72,23 +91,23 @@ export async function addItemToCart(data: CartItem) {
     } else {
       // Check if item is already in cart
       const existItem = (cart.items as CartItem[]).find(
-        (x) => x.productId === item.productId
+        (x) => x.productId === item.productId && x.size === item.size
       );
 
       if (existItem) {
         // Check stock
-        if (product.stock < existItem.qty + 1) {
+        if (maxStock < existItem.qty + 1) {
           throw new Error('No hay suficiente stock');
         }
 
         // Increase the quantity
         (cart.items as CartItem[]).find(
-          (x) => x.productId === item.productId
+          (x) => x.productId === item.productId && x.size === item.size
         )!.qty = existItem.qty + 1;
       } else {
         // If item does not exist in cart
         // Check stock
-        if (product.stock < 1) throw new Error('No hay suficiente stock');
+        if (maxStock < 1) throw new Error('No hay suficiente stock');
 
         // Add item to the cart.items
         cart.items.push(item);
@@ -127,7 +146,15 @@ export async function getMyCart() {
 
   // Get session and user ID
   const session = await auth();
-  const userId = session?.user?.id ? (session.user.id as string) : undefined;
+  let userId = session?.user?.id ? (session.user.id as string) : undefined;
+
+  // Verify user exists to prevent foreign key errors with stale sessions
+  if (userId) {
+    const userExists = await prisma.user.findFirst({ where: { id: userId } });
+    if (!userExists) {
+      userId = undefined;
+    }
+  }
 
   // Get user cart from database
   const cart = await prisma.cart.findFirst({
@@ -147,7 +174,7 @@ export async function getMyCart() {
   });
 }
 
-export async function removeItemFromCart(productId: string) {
+export async function removeItemFromCart(productId: string, size?: string) {
   try {
     // Check for cart cookie
     const sessionCartId = (await cookies()).get('sessionCartId')?.value;
@@ -165,7 +192,7 @@ export async function removeItemFromCart(productId: string) {
 
     // Check for item
     const exist = (cart.items as CartItem[]).find(
-      (x) => x.productId === productId
+      (x) => x.productId === productId && x.size === size
     );
     if (!exist) throw new Error('Artículo no encontrado');
 
@@ -173,12 +200,13 @@ export async function removeItemFromCart(productId: string) {
     if (exist.qty === 1) {
       // Remove from cart
       cart.items = (cart.items as CartItem[]).filter(
-        (x) => x.productId !== exist.productId
+        (x) => !(x.productId === exist.productId && x.size === exist.size)
       );
     } else {
       // Decrease qty
-      (cart.items as CartItem[]).find((x) => x.productId === productId)!.qty =
-        exist.qty - 1;
+      (cart.items as CartItem[]).find(
+        (x) => x.productId === productId && x.size === size
+      )!.qty = exist.qty - 1;
     }
 
     // Update cart in database
@@ -227,14 +255,21 @@ export async function mergeCart(userId: string, sessionCartId: string) {
       const sessionItems = sessionCart.items as CartItem[];
 
       for (const sessionItem of sessionItems) {
-        const existItem = userItems.find((x) => x.productId === sessionItem.productId);
+        const existItem = userItems.find((x) => x.productId === sessionItem.productId && x.size === sessionItem.size);
 
         // Fetch product to verify stock
         const product = await prisma.product.findFirst({
           where: { id: sessionItem.productId },
+          include: { variants: { include: { size: true } } }
         });
 
-        const maxStock = product ? product.stock : 999;
+        let maxStock = 0;
+        if (sessionItem.size && product?.variants && product.variants.length > 0) {
+          const variant = product.variants.find((v) => v.size.name === sessionItem.size);
+          if (variant) {
+            maxStock = variant.stock;
+          }
+        }
 
         if (existItem) {
           const newQty = existItem.qty + sessionItem.qty;

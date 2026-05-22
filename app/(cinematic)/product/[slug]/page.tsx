@@ -1,14 +1,11 @@
-import { Badge } from '@/components/ui/badge';
 import { getProductBySlug } from '@/lib/actions/product.actions';
 import { notFound } from 'next/navigation';
 import ProductImages from '@/components/shared/product/product-images';
-import AddToCart from '@/components/shared/product/add-to-cart';
 import { getMyCart } from '@/lib/actions/cart.actions';
+import ProductAction from '@/components/shared/product/product-action';
 import ReviewList from './review-list';
 import { auth } from '@/auth';
 import Rating from '@/components/shared/product/rating';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 const ProductDetailsPage = async (props: {
   params: Promise<{ slug: string }>;
@@ -43,7 +40,7 @@ const ProductDetailsPage = async (props: {
             {/* Eyebrow */}
             <div>
               <p className='eyebrow-cap text-link-cool-1 mb-4'>
-                {product.brand} — {product.category}
+                {product.brand} — {product.category.name}
               </p>
               <h1 className='display-lg text-white mb-6 leading-tight'>
                 {product.name}
@@ -64,61 +61,15 @@ const ProductDetailsPage = async (props: {
               <p className='display-md text-white'>{price}</p>
             </div>
 
-            {/* Stock status */}
-            <div className='flex items-center gap-3'>
-              {product.stock > 0 ? (
-                <>
-                  <Badge className='bg-aloe-10/10 text-aloe-10 border border-aloe-10/20 rounded-pill px-4 py-1 text-xs font-medium'>
-                    Con stock
-                  </Badge>
-                  <span className='text-shade-40 text-sm'>
-                    {product.stock} disponibles
-                  </span>
-                </>
-              ) : (
-                <Badge className='bg-red-500/10 text-red-400 border border-red-500/20 rounded-pill px-4 py-1 text-xs font-medium'>
-                  Sin stock
-                </Badge>
-              )}
-            </div>
-
             {/* Description */}
-            <div className='border-t border-hairline-dark pt-8'>
+            <div className='border-t border-hairline-dark pt-8 mb-8'>
               <p className='eyebrow-cap text-shade-50 mb-3'>Descripción</p>
               <p className='text-shade-30 text-base leading-relaxed'>
                 {product.description}
               </p>
             </div>
 
-            {/* CTA */}
-            <div className='border-t border-hairline-dark pt-8 flex flex-col sm:flex-row gap-3'>
-              {product.stock > 0 ? (
-                <div className='w-full'>
-                  <AddToCart
-                    cart={cart}
-                    item={{
-                      productId: product.id,
-                      name: product.name,
-                      slug: product.slug,
-                      price: product.price,
-                      qty: 1,
-                      image: product.images![0],
-                    }}
-                  />
-                </div>
-              ) : (
-                <Button
-                  variant='outlineOnDark'
-                  disabled
-                  className='rounded-pill w-full opacity-40 cursor-not-allowed'
-                >
-                  Sin stock
-                </Button>
-              )}
-              <Button asChild variant='ghost' className='rounded-pill text-white/60 hover:text-white hover:bg-white/10'>
-                <Link href='/search'>← Ver más</Link>
-              </Button>
-            </div>
+            <ProductAction product={product} cart={cart} />
           </div>
         </div>
       </section>

@@ -37,7 +37,6 @@ const OrderDetailsTable = ({
   const {
     id,
     shippingAddress,
-    orderitems,
     itemsPrice,
     shippingPrice,
     taxPrice,
@@ -339,9 +338,9 @@ const OrderDetailsTable = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orderitems.map((item) => (
-                      <TableRow key={item.slug} className="border-b border-zinc-100 hover:bg-zinc-50/50">
-                        <TableCell>
+                    {order.orderitems.map((item) => (
+                      <TableRow key={`${item.slug}-${item.size || ''}`} className='border-b border-hairline-light last:border-0 hover:bg-zinc-50/50 transition-colors duration-150'>
+                        <TableCell className='py-4'>
                           <Link
                             href={`/product/${item.slug}`}
                             className='flex items-center gap-3 py-1'
@@ -354,7 +353,14 @@ const OrderDetailsTable = ({
                                 className="object-cover"
                               />
                             </div>
-                            <span className='font-medium text-zinc-800 hover:text-black transition-colors'>{item.name}</span>
+                            <div className="flex flex-col">
+                              <span className='font-medium text-black group-hover:underline transition duration-150'>
+                                {item.name}
+                              </span>
+                              {item.size && (
+                                <span className="text-sm text-zinc-500">Talle: {item.size}</span>
+                              )}
+                            </div>
                           </Link>
                         </TableCell>
                         <TableCell className="text-center font-medium text-zinc-600">

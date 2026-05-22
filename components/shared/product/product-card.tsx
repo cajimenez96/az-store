@@ -5,7 +5,8 @@ import ProductPrice from './product-price';
 import { Product } from '@/types';
 import Rating from './rating';
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = ({ product }: { product: any }) => {
+  const stock = product.variants?.reduce((acc: number, v: any) => acc + v.stock, 0) || 0;
   return (
     <Card className='w-full max-w-sm'>
       <CardHeader className='p-0 items-center'>
@@ -26,7 +27,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         </Link>
         <div className='flex-between gap-4'>
           <Rating value={Number(product.rating)} />
-          {product.stock > 0 ? (
+          {stock > 0 ? (
             <ProductPrice value={Number(product.price)} />
           ) : (
             <p className='text-destructive'>Sin stock</p>

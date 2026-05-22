@@ -93,6 +93,7 @@ const DealCountdownDark = () => {
                 src='/images/promo.jpg'
                 alt='Oferta del mes'
                 fill
+                sizes="100vw"
                 className='object-cover'
               />
               <div className='absolute inset-0 bg-gradient-to-t from-black/40 to-transparent' />

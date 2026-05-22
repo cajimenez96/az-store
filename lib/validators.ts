@@ -13,10 +13,13 @@ const currency = z
 export const insertProductSchema = z.object({
   name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
   slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres'),
-  category: z.string().min(3, 'La categoría debe tener al menos 3 caracteres'),
+  categoryId: z.string().min(1, 'La categoría es requerida'),
   brand: z.string().min(3, 'La marca debe tener al menos 3 caracteres'),
   description: z.string().min(3, 'La descripción debe tener al menos 3 caracteres'),
-  stock: z.coerce.number(),
+  variants: z.array(z.object({
+    sizeId: z.string(),
+    stock: z.coerce.number()
+  })).optional(),
   images: z.array(z.string()).min(1, 'El producto debe tener al menos una imagen'),
   isFeatured: z.boolean(),
   banner: z.string().nullable(),
@@ -57,6 +60,7 @@ export const cartItemSchema = z.object({
   qty: z.number().int().nonnegative('La cantidad debe ser un número positivo'),
   image: z.string().min(1, 'La imagen es requerida'),
   price: currency,
+  size: z.string().optional(),
 });
 
 export const insertCartSchema = z.object({
@@ -115,6 +119,7 @@ export const insertOrderItemSchema = z.object({
   name: z.string(),
   price: currency,
   qty: z.number(),
+  size: z.string().optional(),
 });
 
 // Schema for the PayPal paymentResult
@@ -149,3 +154,20 @@ export const insertReviewSchema = z.object({
     .min(1, 'La calificación debe ser al menos 1')
     .max(5, 'La calificación debe ser como máximo 5'),
 });
+
+// Category Schemas
+export const insertCategorySchema = z.object({
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  slug: z.string().min(2, 'El slug debe tener al menos 2 caracteres'),
+});
+
+export const updateCategorySchema = insertCategorySchema.extend({
+  id: z.string().min(1, 'El ID es requerido'),
+});
+
+// Size Schemas
+export const insertSizeSchema = z.object({
+  name: z.string().min(1, 'El nombre debe tener al menos 1 caracter'),
+  categoryId: z.string().min(1, 'La categoría es requerida'),
+});
+

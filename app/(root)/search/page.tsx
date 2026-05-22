@@ -1,9 +1,7 @@
 import ProductCard from '@/components/shared/product/product-card';
 import { Button } from '@/components/ui/button';
-import {
-  getAllProducts,
-  getAllCategories,
-} from '@/lib/actions/product.actions';
+import { getAllProducts } from '@/lib/actions/product.actions';
+import { getAllCategories } from '@/lib/actions/category.actions';
 import Link from 'next/link';
 
 const prices = [
@@ -122,7 +120,7 @@ const SearchPage = async (props: {
     page: Number(page),
   });
 
-  const categories = await getAllCategories();
+  const { data: categories = [] } = await getAllCategories();
 
   return (
     <div className='grid md:grid-cols-5 md:gap-5'>
@@ -142,12 +140,12 @@ const SearchPage = async (props: {
               </Link>
             </li>
             {categories.map((x) => (
-              <li key={x.category}>
+              <li key={x.id}>
                 <Link
-                  className={`${category === x.category && 'font-bold'}`}
-                  href={getFilterUrl({ c: x.category })}
+                  className={`${category === x.slug && 'font-bold'}`}
+                  href={getFilterUrl({ c: x.slug })}
                 >
-                  {x.category}
+                  {x.name}
                 </Link>
               </li>
             ))}

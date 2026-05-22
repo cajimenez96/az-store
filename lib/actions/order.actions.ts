@@ -92,10 +92,17 @@ export async function createOrder() {
 
         // Decrement stock immediately if Bank Transfer
         if (user.paymentMethod === 'TransferenciaBancaria') {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { stock: { decrement: item.qty } },
-          });
+          if (item.size) {
+            const variant = await tx.productVariant.findFirst({
+              where: { productId: item.productId, size: { name: item.size } }
+            });
+            if (variant) {
+              await tx.productVariant.update({
+                where: { id: variant.id },
+                data: { stock: { decrement: item.qty } },
+              });
+            }
+          }
         }
       }
       // Clear cart
@@ -256,10 +263,17 @@ export async function updateOrderToPaid({
     // Iterate over products and update stock only if it wasn't decremented on creation
     if (order.paymentMethod !== 'TransferenciaBancaria') {
       for (const item of order.orderitems) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: -item.qty } },
-        });
+        if (item.size) {
+          const variant = await tx.productVariant.findFirst({
+            where: { productId: item.productId, size: { name: item.size } }
+          });
+          if (variant) {
+            await tx.productVariant.update({
+              where: { id: variant.id },
+              data: { stock: { decrement: item.qty } },
+            });
+          }
+        }
       }
     }
 
@@ -558,10 +572,17 @@ export async function rejectBankTransfer(orderId: string) {
     await prisma.$transaction(async (tx) => {
       // Restore product stock
       for (const item of order.orderitems) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.qty } },
-        });
+        if (item.size) {
+          const variant = await tx.productVariant.findFirst({
+            where: { productId: item.productId, size: { name: item.size } }
+          });
+          if (variant) {
+            await tx.productVariant.update({
+              where: { id: variant.id },
+              data: { stock: { increment: item.qty } },
+            });
+          }
+        }
       }
 
       // Mark order as cancelled (clear receiptUrl and update status in paymentResult)

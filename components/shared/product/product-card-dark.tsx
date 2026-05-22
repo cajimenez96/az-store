@@ -4,7 +4,8 @@ import { Product } from '@/types';
 import Rating from './rating';
 import ProductPrice from './product-price';
 
-const ProductCardDark = ({ product }: { product: Product }) => {
+const ProductCardDark = ({ product }: { product: any }) => {
+  const stock = product.variants?.reduce((acc: number, v: any) => acc + v.stock, 0) || 0;
   return (
     <Link href={`/product/${product.slug}`} className='group block'>
       <div className='bg-canvas-night-elevated rounded-xl overflow-hidden shadow-level-2-dark border border-hairline-dark hover:border-white/20 transition-all duration-300 hover:-translate-y-1'>
@@ -17,7 +18,7 @@ const ProductCardDark = ({ product }: { product: Product }) => {
             className='object-cover object-center group-hover:scale-105 transition-transform duration-500'
             sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
           />
-          {product.stock === 0 && (
+          {stock === 0 && (
             <div className='absolute inset-0 bg-black/60 flex items-center justify-center'>
               <span className='text-white/70 text-sm font-medium tracking-widest uppercase'>Sin stock</span>
             </div>
@@ -32,7 +33,7 @@ const ProductCardDark = ({ product }: { product: Product }) => {
           </h3>
           <div className='flex items-center justify-between pt-1'>
             <Rating value={Number(product.rating)} />
-            {product.stock > 0 ? (
+            {stock > 0 ? (
               <ProductPrice
                 value={Number(product.price)}
                 className='text-white font-semibold text-sm'

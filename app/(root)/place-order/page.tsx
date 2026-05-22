@@ -97,7 +97,7 @@ const PlaceOrderPage = async () => {
                   </TableHeader>
                   <TableBody>
                     {cart.items.map((item) => (
-                      <TableRow key={item.slug} className='border-b border-hairline-light last:border-0 hover:bg-zinc-50/50 transition-colors duration-150'>
+                      <TableRow key={`${item.slug}-${item.size || ''}`} className='border-b border-hairline-light last:border-0 hover:bg-zinc-50/50 transition-colors duration-150'>
                         <TableCell className='py-3'>
                           <Link
                             href={`/product/${item.slug}`}
@@ -112,9 +112,14 @@ const PlaceOrderPage = async () => {
                                 className='object-contain rounded'
                               />
                             </div>
-                            <span className='font-medium text-black group-hover:underline transition duration-150'>
-                              {item.name}
-                            </span>
+                            <div className="flex flex-col">
+                              <span className='font-medium text-black group-hover:underline transition duration-150'>
+                                {item.name}
+                              </span>
+                              {item.size && (
+                                <span className="text-sm text-zinc-500">Talle: {item.size}</span>
+                              )}
+                            </div>
                           </Link>
                         </TableCell>
                         <TableCell className='py-3 text-center font-semibold text-black'>

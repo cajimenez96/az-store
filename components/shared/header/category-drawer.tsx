@@ -7,12 +7,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { getAllCategories } from '@/lib/actions/product.actions';
+import { getAllCategories } from '@/lib/actions/category.actions';
 import { MenuIcon } from 'lucide-react';
 import Link from 'next/link';
 
 const CategoryDrawer = async () => {
-  const categories = await getAllCategories();
+  const { data: categories = [] } = await getAllCategories();
 
   return (
     <Drawer direction='left'>
@@ -29,12 +29,12 @@ const CategoryDrawer = async () => {
               <Button
                 variant='ghost'
                 className='w-full justify-start'
-                key={x.category}
+                key={x.id}
                 asChild
               >
                 <DrawerClose asChild>
-                  <Link href={`/search?category=${x.category}`}>
-                    {x.category} ({x._count})
+                  <Link href={`/search?category=${x.slug}`}>
+                    {x.name}
                   </Link>
                 </DrawerClose>
               </Button>

@@ -6,7 +6,7 @@ import { insertProductSchema, updateProductSchema } from '@/lib/validators';
 import { Product } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import {
   Form,
@@ -26,15 +26,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import Image from 'next/image';
 import { Checkbox } from '../ui/checkbox';
 import ProductCard from '../shared/product/product-card';
+import { Category, Size } from '@prisma/client';
+import { useEffect } from 'react';
+
+type CategoryWithSizes = Category & { sizes: Size[] };
 
 const ProductForm = ({
   type,
   product,
   productId,
+  categories = [],
 }: {
   type: 'Create' | 'Update';
   product?: Product;
   productId?: string;
+  categories?: CategoryWithSizes[];
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -45,7 +51,17 @@ const ProductForm = ({
         ? zodResolver(updateProductSchema)
         : zodResolver(insertProductSchema),
     defaultValues:
-      product && type === 'Update' ? product : productDefaultValues,
+      product && type === 'Update' ? {
+        ...product,
+        // En update, variants viene dentro de product si es tipo Product extendido. 
+        // @ts-expect-error - ignorando error temporal si no tipeamos Product con variants en constants
+        variants: product.variants || []
+      } : productDefaultValues,
+  });
+
+  const { fields, replace } = useFieldArray({
+    control: form.control,
+    name: "variants",
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof insertProductSchema>> = async (
@@ -91,33 +107,52 @@ const ProductForm = ({
     }
   };
 
-  const images = form.watch('images');
+  const images = form.watch('images') || [];
   const isFeatured = form.watch('isFeatured');
   const banner = form.watch('banner');
   const name = form.watch('name');
   const price = form.watch('price');
-  const category = form.watch('category');
+  const categoryId = form.watch('categoryId');
   const brand = form.watch('brand');
   const slug = form.watch('slug');
-  const stock = form.watch('stock');
 
   // Preview Object
   const previewProduct = {
     id: productId || 'preview-id',
     name: name || 'Nombre del producto',
     slug: slug || 'slug-del-producto',
-    category: category || 'Categoría',
+    category: categories.find(c => c.id === categoryId)?.name || 'Categoría',
     images: images.length > 0 ? images : ['/assets/images/placeholder.jpg'],
     brand: brand || 'Marca',
     description: form.watch('description') || 'Descripción corta',
     price: price || '0.00',
-    stock: stock || 0,
+    stock: fields.reduce((acc, curr) => acc + Number(curr.stock || 0), 0),
     rating: '0',
     numReviews: '0',
     isFeatured: isFeatured || false,
     banner: banner || null,
     createdAt: new Date(),
   };
+
+  // Reset variants when category changes
+  useEffect(() => {
+    if (categoryId) {
+      const selectedCategory = categories.find((c) => c.id === categoryId);
+      if (selectedCategory && selectedCategory.sizes) {
+        // Only override variants on Create, or if changing to a new category entirely on Update
+        const currentCategoryId = product?.categoryId;
+        if (type === 'Create' || currentCategoryId !== categoryId) {
+          const newVariants = selectedCategory.sizes.map((size) => ({
+            sizeId: size.id,
+            stock: 0,
+          }));
+          replace(newVariants);
+        }
+      } else {
+        replace([]);
+      }
+    }
+  }, [categoryId, categories, replace, type, product]);
 
   return (
     <Form {...form}>
@@ -190,19 +225,21 @@ const ProductForm = ({
                 {/* Category */}
                 <FormField
                   control={form.control}
-                  name='category'
+                  name='categoryId'
                   render={({ field }) => (
                     <FormItem className='w-full'>
                       <FormLabel>Categoría</FormLabel>
                       <FormControl>
-                        <Input placeholder='Ingresá la categoría' list='categories' {...field} />
+                        <select 
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          {...field}
+                        >
+                          <option value="">Seleccione una categoría</option>
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          ))}
+                        </select>
                       </FormControl>
-                      <datalist id="categories">
-                        <option value="Accesorios" />
-                        <option value="Indumentaria" />
-                        <option value="Electrónica" />
-                        <option value="Hogar" />
-                      </datalist>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -226,13 +263,13 @@ const ProductForm = ({
                   )}
                 />
               </div>
-              <div className='flex flex-col md:flex-row gap-5'>
+              <div className='flex flex-col gap-5'>
                 {/* Price */}
                 <FormField
                   control={form.control}
                   name='price'
                   render={({ field }) => (
-                    <FormItem className='w-full'>
+                    <FormItem className='w-full md:w-1/2'>
                       <FormLabel>Precio</FormLabel>
                       <FormControl>
                         <Input placeholder='Ingresá el precio del producto' {...field} />
@@ -241,20 +278,40 @@ const ProductForm = ({
                     </FormItem>
                   )}
                 />
-                {/* Stock */}
-                <FormField
-                  control={form.control}
-                  name='stock'
-                  render={({ field }) => (
-                    <FormItem className='w-full'>
-                      <FormLabel>Stock</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder='Ingresá el stock' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                
+                {/* Variants (Stock per Size) */}
+                {categoryId && (
+                  <div className="border border-hairline-light rounded-md p-4 bg-zinc-50/50 mt-4">
+                    <FormLabel className="mb-4 block text-base">Inventario por Talles</FormLabel>
+                    {fields.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">La categoría seleccionada no tiene talles asignados.</p>
+                    ) : (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {fields.map((field, index) => {
+                          // Find the name of the size
+                          const selectedCat = categories.find(c => c.id === categoryId);
+                          const sizeObj = selectedCat?.sizes.find(s => s.id === field.sizeId);
+                          return (
+                            <div key={field.id} className="space-y-2">
+                              <label className="text-sm font-medium">{sizeObj?.name || 'Talle'}</label>
+                              
+                              <input 
+                                type="hidden" 
+                                {...form.register(`variants.${index}.sizeId`)} 
+                              />
+                              
+                              <Input 
+                                type="number" 
+                                placeholder="Stock"
+                                {...form.register(`variants.${index}.stock`)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div>
                 {/* Description */}
@@ -294,7 +351,7 @@ const ProductForm = ({
                       <FormLabel>Imágenes del Producto</FormLabel>
                       <div className='p-4 border border-hairline-light rounded-md mt-2 space-y-4'>
                         <div className='flex flex-wrap gap-4'>
-                          {images.map((image: string, idx) => (
+                          {images.map((image: string, idx: number) => (
                             <div key={image} className="relative w-24 h-24 group">
                               <Image
                                 src={image}
