@@ -768,6 +768,7 @@ export async function createMercadoPagoOrder(orderId: string) {
         auto_return: 'approved',
         external_reference: orderId,
         metadata: { orderId },
+        notification_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/api/webhooks/mercadopago`,
       },
     });
 
