@@ -32,6 +32,7 @@ interface ProfileFormProps {
 const profileFormSchema = z.object({
   name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
   email: z.string().email('Correo electrónico inválido'),
+  contactEmail: z.string().optional(),
   fullName: z.string().optional(),
   streetAddress: z.string().optional(),
   city: z.string().optional(),
@@ -53,6 +54,7 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
     defaultValues: {
       name: session?.user?.name ?? '',
       email: session?.user?.email ?? '',
+      contactEmail: address?.contactEmail ?? session?.user?.email ?? '',
       fullName: address?.fullName ?? '',
       streetAddress: address?.streetAddress ?? '',
       city: address?.city ?? '',
@@ -88,6 +90,7 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
 
     if (hasAnyAddressField) {
       const addressValidation = shippingAddressSchema.safeParse({
+        contactEmail: values.contactEmail || session?.user?.email || '',
         fullName: values.fullName,
         streetAddress: values.streetAddress,
         city: values.city,
@@ -131,15 +134,16 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
   };
 
   return (
-    <div className='bg-white dark:bg-canvas-night-elevated shadow-level-3 rounded-lg border border-hairline-light dark:border-hairline-dark p-6 md:p-8 w-full'>
+    <div className='bg-white dark:bg-canvas-night-elevated shadow-level-3 rounded-lg border border-hairline-light dark:border-hairline-dark p-6 md:p-8 w-full animate-fade-in'>
       <Form {...form}>
         <form
-          className='flex flex-col gap-6'
+          className='grid grid-cols-1 lg:grid-cols-12 gap-8'
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <div className='space-y-4'>
+          {/* Columna Izquierda: Datos Personales */}
+          <div className='lg:col-span-4 space-y-4 bg-zinc-50/50 dark:bg-zinc-900/20 p-5 rounded-lg border border-zinc-200/50 dark:border-zinc-800/40 self-start w-full'>
             <h3 className='font-display font-[330] text-xl text-black dark:text-white border-b border-hairline-light dark:border-hairline-dark pb-2 mb-4'>Datos Personales</h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='flex flex-col gap-4'>
               <FormField
                 control={form.control}
                 name='email'
@@ -181,7 +185,8 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
             </div>
           </div>
 
-          <div className='space-y-4 mt-4'>
+          {/* Columna Derecha: Dirección de Envío */}
+          <div className='lg:col-span-8 space-y-4'>
             <h3 className='font-display font-[330] text-xl text-black dark:text-white border-b border-hairline-light dark:border-hairline-dark pb-2 mb-2'>Dirección de Envío Predeterminada</h3>
             <p className='text-xs text-zinc-500 mb-4'>
               Completá estos datos para que se carguen automáticamente en tu próximo checkout.
@@ -197,6 +202,26 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                       <FormControl>
                         <Input
                           placeholder='Nombre y apellido de quien recibe'
+                          className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className='col-span-1 md:col-span-2'>
+                <FormField
+                  control={form.control}
+                  name='contactEmail'
+                  render={({ field }) => (
+                    <FormItem className='w-full'>
+                      <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Email de Contacto</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder='Correo electrónico para avisos de envío'
                           className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
                           {...field}
                         />
@@ -302,8 +327,8 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 control={form.control}
                 name='province'
                 render={({ field }) => (
-                  <FormItem className='flex flex-col mt-2'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300 mb-1'>Provincia</FormLabel>
+                  <FormItem className='flex flex-col'>
+                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300 h-5 mt-1'>Provincia</FormLabel>
                     <Popover open={openProvince} onOpenChange={setOpenProvince}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -398,15 +423,17 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
             </div>
           </div>
 
-          <Button
-            type='submit'
-            size='lg'
-            className='w-full mt-4'
-            variant='primaryPill'
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? 'Actualizando...' : 'Actualizar Perfil'}
-          </Button>
+          <div className='lg:col-span-12 flex justify-end mt-4 border-t border-hairline-light dark:border-hairline-dark pt-6'>
+            <Button
+              type='submit'
+              size='lg'
+              className='w-full sm:w-auto px-8 font-semibold'
+              variant='primaryPill'
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? 'Actualizando...' : 'Actualizar Perfil'}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

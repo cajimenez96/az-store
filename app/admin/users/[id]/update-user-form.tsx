@@ -28,8 +28,10 @@ import { z } from 'zod';
 
 const UpdateUserForm = ({
   user,
+  currentUserId,
 }: {
   user: z.infer<typeof updateUserSchema>;
+  currentUserId?: string;
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -137,6 +139,7 @@ const UpdateUserForm = ({
                 <Select
                   onValueChange={field.onChange}
                   value={field.value.toString()}
+                  disabled={user.id === currentUserId}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -146,11 +149,16 @@ const UpdateUserForm = ({
                   <SelectContent>
                     {USER_ROLES.map((role) => (
                       <SelectItem key={role} value={role}>
-                        {role === 'user' ? 'Usuario' : role === 'admin' ? 'Administrador' : role}
+                        {role === 'user' ? 'Usuario' : role === 'admin' ? 'Administrador' : role === 'seller' ? 'Vendedor' : role}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {user.id === currentUserId && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    No puedes cambiar tu propio rol por razones de seguridad.
+                  </p>
+                )}
                 <FormMessage />
               </FormItem>
             )}

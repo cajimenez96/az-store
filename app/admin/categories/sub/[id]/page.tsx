@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getAllCategories } from '@/lib/actions/category.actions';
 import { prisma } from '@/db/prisma';
 import SubCategoryForm from '@/components/admin/sub-category-form';
+import { requireAdmin } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Editar Sub-categoría',
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export default async function EditSubCategoryPage(props: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdmin();
   const { id } = await props.params;
 
   const subCategory = await prisma.subCategory.findUnique({ where: { id } });

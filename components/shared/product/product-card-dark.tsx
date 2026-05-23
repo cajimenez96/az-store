@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Rating from './rating';
 import ProductPrice from './product-price';
 
-const ProductCardDark = ({ product }: { product: { slug: string; images: string[]; name: string; brand: string; rating: string | number; price: string | number; variants?: { stock: number }[] } }) => {
+const ProductCardDark = ({ product }: { product: { slug: string; images: string[]; name: string; brand?: string | { name: string } | null; rating: string | number; price: string | number; variants?: { stock: number }[] } }) => {
   const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) || 0;
   return (
     <Link href={`/product/${product.slug}`} className='group block'>
@@ -26,7 +26,9 @@ const ProductCardDark = ({ product }: { product: { slug: string; images: string[
 
         {/* Card body */}
         <div className='p-4 space-y-2'>
-          <p className='eyebrow-cap text-link-cool-2'>{product.brand}</p>
+          <p className='eyebrow-cap text-link-cool-2'>
+            {product.brand ? (typeof product.brand === 'string' ? product.brand : product.brand.name) : ''}
+          </p>
           <h3 className='text-white text-sm font-medium leading-snug line-clamp-2 group-hover:text-aloe-10 transition-colors duration-200'>
             {product.name}
           </h3>

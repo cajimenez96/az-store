@@ -22,7 +22,7 @@ const OrderDetailsPage = async (props: {
   const session = await auth();
 
   // Redirect the user if they don't own the order
-  if (order.userId !== session?.user.id && session?.user.role !== 'admin') {
+  if (order.userId !== session?.user.id && session?.user.role !== 'admin' && session?.user.role !== 'seller') {
     return redirect('/unauthorized');
   }
 
@@ -33,6 +33,7 @@ const OrderDetailsPage = async (props: {
         shippingAddress: order.shippingAddress as ShippingAddress,
       }}
       isAdmin={session?.user?.role === 'admin' || false}
+      isSeller={session?.user?.role === 'seller' || false}
     />
   );
 };

@@ -15,7 +15,7 @@ type ProductWithVariants = {
   categoryId: string;
   subCategoryId?: string | null;
   images: string[];
-  brand: string;
+  brand: string | { name: string };
   description: string;
   price: string | number;
   rating: string | number;

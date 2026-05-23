@@ -12,7 +12,7 @@ export async function getLatestProducts() {
   const data = await prisma.product.findMany({
     take: LATEST_PRODUCTS_LIMIT,
     orderBy: { createdAt: 'desc' },
-    include: { category: true, subCategory: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, brand: true, variants: { include: { size: true } } },
   });
 
   return convertToPlainObject(data);
@@ -22,7 +22,7 @@ export async function getLatestProducts() {
 export async function getProductBySlug(slug: string) {
   const data = await prisma.product.findFirst({
     where: { slug: slug },
-    include: { category: true, subCategory: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, brand: true, variants: { include: { size: true } } },
   });
   return convertToPlainObject(data);
 }
@@ -31,7 +31,7 @@ export async function getProductBySlug(slug: string) {
 export async function getProductById(productId: string) {
   const data = await prisma.product.findFirst({
     where: { id: productId },
-    include: { category: true, subCategory: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, brand: true, variants: { include: { size: true } } },
   });
 
   return convertToPlainObject(data);
@@ -110,7 +110,7 @@ export async function getAllProducts({
       ...priceFilter,
       ...ratingFilter,
     },
-    include: { category: true, subCategory: true, variants: { include: { size: true } } },
+    include: { category: true, subCategory: true, brand: true, variants: { include: { size: true } } },
     orderBy:
       sort === 'lowest'
         ? { price: 'asc' }
@@ -227,7 +227,7 @@ export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
         categoryId: productExists.categoryId,
         subCategoryId: productExists.subCategoryId,
         images: productExists.images,
-        brand: productExists.brand,
+        brandId: productExists.brandId,
         price: productExists.price.toString(),
         isFeatured: productExists.isFeatured,
         banner: productExists.banner,
@@ -283,10 +283,93 @@ export async function getFeaturedProducts() {
         notIn: [''],
       },
     },
-    include: { category: true, variants: { include: { size: true } } },
+    include: { category: true, brand: true, variants: { include: { size: true } } },
     orderBy: { createdAt: 'desc' },
     take: 4,
   });
 
   return convertToPlainObject(data);
+}
+
+import { getSetting } from './setting.actions';
+
+// Get detailed inventory
+export async function getInventory({
+  limit = PAGE_SIZE,
+  page,
+  query,
+  category,
+  brand,
+  stock,
+}: {
+  limit?: number;
+  page: number;
+  query?: string;
+  category?: string;
+  brand?: string;
+  stock?: string;
+}) {
+  const queryFilter: Prisma.ProductVariantWhereInput =
+    query && query !== 'all'
+      ? {
+          product: {
+            name: {
+              contains: query,
+              mode: 'insensitive',
+            } as Prisma.StringFilter,
+          },
+        }
+      : {};
+
+  const categoryFilter: Prisma.ProductVariantWhereInput =
+    category && category !== 'all'
+      ? { product: { categoryId: category } }
+      : {};
+
+  const brandFilter: Prisma.ProductVariantWhereInput =
+    brand && brand !== 'all'
+      ? { product: { brandId: brand } }
+      : {};
+
+  let stockFilter: Prisma.ProductVariantWhereInput = {};
+  if (stock === 'critical') {
+    const criticalStockThresholdStr = await getSetting('CRITICAL_STOCK_THRESHOLD', '2');
+    const criticalStockThreshold = parseInt(criticalStockThresholdStr, 10);
+    stockFilter = { stock: { lte: criticalStockThreshold } };
+  }
+
+  const data = await prisma.productVariant.findMany({
+    where: {
+      ...queryFilter,
+      ...categoryFilter,
+      ...brandFilter,
+      ...stockFilter,
+    },
+    include: {
+      product: {
+        include: { category: true, brand: true, subCategory: true }
+      },
+      size: true,
+    },
+    orderBy: [
+      { product: { name: 'asc' } },
+      { size: { name: 'asc' } },
+    ],
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+
+  const dataCount = await prisma.productVariant.count({
+    where: {
+      ...queryFilter,
+      ...categoryFilter,
+      ...brandFilter,
+      ...stockFilter,
+    }
+  });
+
+  return {
+    data: convertToPlainObject(data),
+    totalPages: Math.ceil(dataCount / limit),
+  };
 }

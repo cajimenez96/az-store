@@ -182,10 +182,12 @@ export async function getAllUsers({
   limit = PAGE_SIZE,
   page,
   query,
+  role,
 }: {
   limit?: number;
   page: number;
   query: string;
+  role?: string;
 }) {
   await requireAdmin();
   const queryFilter: Prisma.UserWhereInput =
@@ -198,6 +200,10 @@ export async function getAllUsers({
         }
       : {};
 
+  if (role && role !== 'all') {
+    queryFilter.role = role;
+  }
+
   const data = await prisma.user.findMany({
     where: {
       ...queryFilter,
@@ -207,7 +213,9 @@ export async function getAllUsers({
     skip: (page - 1) * limit,
   });
 
-  const dataCount = await prisma.user.count();
+  const dataCount = await prisma.user.count({
+    where: queryFilter,
+  });
 
   return {
     data,

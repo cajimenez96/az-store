@@ -15,11 +15,16 @@ export type Product = z.infer<typeof insertProductSchema> & {
   rating: string;
   numReviews: number;
   createdAt: Date;
+  brand?: { name: string; id: string; createdAt: Date; slug: string } | null;
+  category?: { name: string; id: string; createdAt: Date; slug: string } | null;
+  subCategory?: { name: string; id: string; createdAt: Date; slug: string } | null;
 };
 
 export type Cart = z.infer<typeof insertCartSchema>;
 export type CartItem = z.infer<typeof cartItemSchema>;
-export type ShippingAddress = z.infer<typeof shippingAddressSchema>;
+export type ShippingAddress = z.infer<typeof shippingAddressSchema> & {
+  contactEmail?: string;
+};
 export type OrderItem = Omit<z.infer<typeof insertOrderItemSchema>, 'size'> & { size?: string | null };
 export type Order = z.infer<typeof insertOrderSchema> & {
   id: string;

@@ -14,6 +14,7 @@ async function main() {
   await prisma.size.deleteMany();
   await prisma.subCategory.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.brand.deleteMany();
 
   await prisma.account.deleteMany();
   await prisma.session.deleteMany();
@@ -44,10 +45,27 @@ async function main() {
     });
   }
 
+  // Create Brands
+  const brandNames = Array.from(
+    new Set(sampleData.products.map((p) => p.brand))
+  );
+  
+  const brands = [];
+  for (const name of brandNames) {
+    const brand = await prisma.brand.create({
+      data: {
+        name,
+        slug: slugify(name, { lower: true }),
+      },
+    });
+    brands.push(brand);
+  }
+
   // Insert Products and Variants
   for (const product of sampleData.products) {
     const cat = categories.find((c) => c.name === product.category);
-    if (!cat) continue;
+    const brand = brands.find((b) => b.name === product.brand);
+    if (!cat || !brand) continue;
 
     const size = await prisma.size.findFirst({ where: { categoryId: cat.id } });
     
@@ -59,7 +77,7 @@ async function main() {
         description: product.description,
         images: product.images,
         price: product.price,
-        brand: product.brand,
+        brandId: brand.id,
         rating: product.rating,
         numReviews: product.numReviews,
         isFeatured: product.isFeatured,

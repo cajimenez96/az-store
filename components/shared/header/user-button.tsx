@@ -64,10 +64,10 @@ const UserButton = async () => {
           </DropdownMenuItem>
           )}
 
-          {session?.user?.role === 'admin' && (
+          {(session?.user?.role === 'admin' || session?.user?.role === 'seller') && (
             <DropdownMenuItem>
               <Link href='/admin/overview' className='w-full'>
-                Administrador
+                Panel de Control
               </Link>
             </DropdownMenuItem>
           )}

@@ -25,7 +25,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 
-const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
+const ShippingAddressForm = ({
+  address,
+  defaultEmail,
+}: {
+  address: ShippingAddress;
+  defaultEmail?: string;
+}) => {
   const router = useRouter();
   const { toast } = useToast();
   const [openProvince, setOpenProvince] = useState(false);
@@ -34,6 +40,7 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
     resolver: zodResolver(shippingAddressSchema),
     defaultValues: {
       fullName: address?.fullName ?? '',
+      contactEmail: address?.contactEmail ?? defaultEmail ?? '',
       streetAddress: address?.streetAddress ?? '',
       city: address?.city ?? '',
       province: address?.province ?? '',
@@ -94,6 +101,26 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
                       <FormControl>
                         <Input
                           placeholder='Nombre completo de quien recibe'
+                          className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className='col-span-1 md:col-span-2'>
+                <FormField
+                  control={form.control}
+                  name='contactEmail'
+                  render={({ field }) => (
+                    <FormItem className='w-full'>
+                      <FormLabel className='text-sm font-medium text-black'>Email de Contacto</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder='Correo electrónico para avisos de envío'
                           className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
                           {...field}
                         />
@@ -199,8 +226,8 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
                 control={form.control}
                 name='province'
                 render={({ field }) => (
-                  <FormItem className='flex flex-col mt-2'>
-                    <FormLabel className='text-sm font-medium text-black mb-1'>Provincia</FormLabel>
+                  <FormItem className='flex flex-col'>
+                    <FormLabel className='text-sm font-medium text-black h-5 mt-1'>Provincia</FormLabel>
                     <Popover open={openProvince} onOpenChange={setOpenProvince}>
                       <PopoverTrigger asChild>
                         <FormControl>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import ProductPrice from './product-price';
 import Rating from './rating';
 
-const ProductCard = ({ product }: { product: { slug: string; images: string[]; name: string; brand: string; rating: string | number; price: string | number; variants?: { stock: number }[] } }) => {
+const ProductCard = ({ product }: { product: { slug: string; images: string[]; name: string; brand?: string | { name: string } | null; rating: string | number; price: string | number; variants?: { stock: number }[] } }) => {
   const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) || 0;
   return (
     <Card className='w-full max-w-sm'>
@@ -20,7 +20,9 @@ const ProductCard = ({ product }: { product: { slug: string; images: string[]; n
         </Link>
       </CardHeader>
       <CardContent className='p-4 grid gap-4'>
-        <div className='text-xs'>{product.brand}</div>
+        <div className='text-xs'>
+          {product.brand ? (typeof product.brand === 'string' ? product.brand : product.brand.name) : ''}
+        </div>
         <Link href={`/product/${product.slug}`}>
           <h2 className='text-sm font-medium'>{product.name}</h2>
         </Link>

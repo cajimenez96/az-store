@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import ProductForm from '@/components/admin/product-form';
 import { requireAdmin } from '@/lib/auth-guard';
 import { getAllCategories } from '@/lib/actions/category.actions';
+import { getAllBrands } from '@/lib/actions/brand.actions';
 
 export const metadata: Metadata = {
   title: 'Crear Producto',
@@ -10,12 +11,13 @@ export const metadata: Metadata = {
 const CreateProductPage = async () => {
   await requireAdmin();
   const { data: categories } = await getAllCategories();
+  const brands = await getAllBrands();
 
   return (
     <>
       <h2 className='h2-bold'>Crear Producto</h2>
       <div className='my-8'>
-        <ProductForm type='Create' categories={categories || []} />
+        <ProductForm type='Create' categories={categories || []} brands={brands || []} />
       </div>
     </>
   );

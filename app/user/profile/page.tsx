@@ -21,7 +21,7 @@ const Profile = async () => {
 
   return (
     <SessionProvider session={session}>
-      <div className='max-w-2xl mx-auto space-y-6'>
+      <div className='max-w-5xl mx-auto space-y-6'>
         <h2 className='font-display font-[330] text-3xl md:text-4xl text-black dark:text-white font-ss03'>Perfil</h2>
         <ProfileForm address={address} />
       </div>

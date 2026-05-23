@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import Image from 'next/image';
 import { Checkbox } from '../ui/checkbox';
 import ProductCard from '../shared/product/product-card';
-import { Category, Size, SubCategory } from '@prisma/client';
+import { Category, Size, SubCategory, Brand } from '@prisma/client';
 import { useEffect, useState } from 'react';
 
 type CategoryWithSizes = Category & { sizes: Size[]; subCategories: SubCategory[] };
@@ -36,12 +36,14 @@ const ProductForm = ({
   product,
   productId,
   categories = [],
+  brands = [],
   userRole,
 }: {
   type: 'Create' | 'Update';
   product?: Product;
   productId?: string;
   categories?: CategoryWithSizes[];
+  brands?: Brand[];
   userRole?: string;
 }) => {
   const router = useRouter();
@@ -113,7 +115,7 @@ const ProductForm = ({
   const name = form.watch('name');
   const price = form.watch('price');
   const categoryId = form.watch('categoryId');
-  const brand = form.watch('brand');
+  const brandId = form.watch('brandId');
   const slug = form.watch('slug');
 
   // Available sub-categories for the selected category
@@ -133,7 +135,7 @@ const ProductForm = ({
     slug: slug || 'slug-del-producto',
     category: categories.find(c => c.id === categoryId)?.name || 'Categoría',
     images: images.length > 0 ? images : ['/assets/images/placeholder.jpg'],
-    brand: brand || 'Marca',
+    brand: { name: brands?.find(b => b.id === brandId)?.name || 'Marca' },
     description: form.watch('description') || 'Descripción corta',
     price: price || '0.00',
     stock: fields.reduce((acc, curr) => acc + Number(curr.stock || 0), 0),
@@ -288,17 +290,22 @@ const ProductForm = ({
                 {/* Brand */}
                 <FormField
                   control={form.control}
-                  name='brand'
+                  name='brandId'
                   render={({ field }) => (
                     <FormItem className='w-full'>
                       <FormLabel>Marca</FormLabel>
                       <FormControl>
-                        <Input placeholder='Ingresá la marca' list='brands' {...field} disabled={userRole === 'seller'} />
+                        <select 
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          {...field}
+                          disabled={userRole === 'seller'}
+                        >
+                          <option value="">Seleccione una marca</option>
+                          {brands?.map((b) => (
+                            <option key={b.id} value={b.id}>{b.name}</option>
+                          ))}
+                        </select>
                       </FormControl>
-                      <datalist id="brands">
-                        <option value="AZ Brand" />
-                        <option value="Genérica" />
-                      </datalist>
                       <FormMessage />
                     </FormItem>
                   )}

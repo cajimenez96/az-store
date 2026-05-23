@@ -15,7 +15,7 @@ export const insertProductSchema = z.object({
   slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres'),
   categoryId: z.string().min(1, 'La categoría es requerida'),
   subCategoryId: z.string().nullable().optional(),
-  brand: z.string().min(3, 'La marca debe tener al menos 3 caracteres'),
+  brandId: z.string().min(1, 'La marca es requerida'),
   description: z.string().min(3, 'La descripción debe tener al menos 3 caracteres'),
   variants: z.array(z.object({
     sizeId: z.string(),
@@ -80,11 +80,12 @@ export const shippingAddressSchema = z.object({
   streetAddress: z.string().min(3, 'La dirección debe tener al menos 3 caracteres'),
   city: z.string().min(3, 'La ciudad debe tener al menos 3 caracteres'),
   province: z.string().min(2, 'La provincia es requerida'),
-  postalCode: z.string().min(3, 'El código postal debe tener al menos 3 caracteres'),
+  postalCode: z.string().regex(/^[a-zA-Z0-9\s]+$/, 'Solo caracteres alfanuméricos').min(3, 'El código postal debe tener al menos 3 caracteres'),
   country: z.string().min(3, 'El país debe tener al menos 3 caracteres'),
-  phone: z.string().optional(),
-  floor: z.string().optional(),
-  apartment: z.string().optional(),
+  phone: z.string().regex(/^[0-9+ -]+$/, 'Solo números y símbolos de marcación (+, -)').min(8, 'El teléfono debe tener al menos 8 caracteres'),
+  contactEmail: z.string().email('Dirección de correo electrónico inválida'),
+  floor: z.string().regex(/^[a-zA-Z0-9]*$/, 'No se permiten símbolos especiales').optional(),
+  apartment: z.string().regex(/^[a-zA-Z0-9]*$/, 'No se permiten símbolos especiales').optional(),
   lat: z.number().optional(),
   lng: z.number().optional(),
 });
@@ -170,5 +171,15 @@ export const updateCategorySchema = insertCategorySchema.extend({
 export const insertSizeSchema = z.object({
   name: z.string().min(1, 'El nombre debe tener al menos 1 caracter'),
   categoryId: z.string().min(1, 'La categoría es requerida'),
+});
+
+// Brand Schemas
+export const insertBrandSchema = z.object({
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  slug: z.string().min(2, 'El slug debe tener al menos 2 caracteres'),
+});
+
+export const updateBrandSchema = insertBrandSchema.extend({
+  id: z.string().min(1, 'El ID es requerido'),
 });
 

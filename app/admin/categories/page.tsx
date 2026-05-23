@@ -1,3 +1,4 @@
+import React from 'react';
 import { Metadata } from 'next';
 import {
   getAllCategories,
@@ -16,12 +17,14 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import DeleteDialog from '@/components/shared/delete-dialog';
+import { requireAdmin } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Admin Categorías',
 };
 
 export default async function AdminCategoriesPage() {
+  await requireAdmin();
   const { data: categories, success } = await getAllCategories();
 
   if (!success || !categories) {
@@ -51,9 +54,9 @@ export default async function AdminCategoriesPage() {
           </TableHeader>
           <TableBody>
             {categories.map((category) => (
-              <>
+              <React.Fragment key={category.id}>
                 {/* Category row */}
-                <TableRow key={category.id} className="bg-zinc-50">
+                <TableRow className="bg-zinc-50">
                   <TableCell className="font-semibold">{category.name}</TableCell>
                   <TableCell className="text-sm text-zinc-500">{category.slug}</TableCell>
                   <TableCell>
@@ -108,7 +111,7 @@ export default async function AdminCategoriesPage() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>

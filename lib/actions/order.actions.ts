@@ -347,6 +347,8 @@ type SalesDataType = {
   totalSales: number;
 }[];
 
+import { getSetting } from './setting.actions';
+
 // Get sales data and order summary
 export async function getOrderSummary() {
   // Get counts for each resource
@@ -378,6 +380,33 @@ export async function getOrderSummary() {
     take: 6,
   });
 
+  // Get sales by payment method
+  const salesByMethodRaw = await prisma.$queryRaw<
+    Array<{ paymentMethod: string; totalSales: Prisma.Decimal }>
+  >`SELECT "paymentMethod", sum("totalPrice") as "totalSales" FROM "Order" WHERE "isPaid" = true GROUP BY "paymentMethod"`;
+
+  const salesByMethod = salesByMethodRaw.map((entry) => ({
+    paymentMethod: entry.paymentMethod,
+    totalSales: Number(entry.totalSales),
+  }));
+
+  // Fetch global config for critical stock threshold
+  const criticalStockThresholdStr = await getSetting('CRITICAL_STOCK_THRESHOLD', '2');
+  const criticalStockThreshold = parseInt(criticalStockThresholdStr, 10);
+
+  // Calculate ERP metrics
+  const criticalStockCount = await prisma.productVariant.count({
+    where: { stock: { lte: criticalStockThreshold } }
+  });
+
+  const pendingPaymentsCount = await prisma.order.count({
+    where: { isPaid: false }
+  });
+
+  const pendingDeliveriesCount = await prisma.order.count({
+    where: { isPaid: true, isDelivered: false }
+  });
+
   return {
     ordersCount,
     productsCount,
@@ -385,6 +414,11 @@ export async function getOrderSummary() {
     totalSales,
     latestSales,
     salesData,
+    salesByMethod,
+    criticalStockCount,
+    criticalStockThreshold,
+    pendingPaymentsCount,
+    pendingDeliveriesCount,
   };
 }
 

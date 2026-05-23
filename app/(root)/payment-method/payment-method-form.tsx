@@ -22,8 +22,10 @@ import { updateUserPaymentMethod } from '@/lib/actions/user.actions';
 
 const PaymentMethodForm = ({
   preferredPaymentMethod,
+  userRole,
 }: {
   preferredPaymentMethod: string | null;
+  userRole?: string;
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -82,23 +84,39 @@ const PaymentMethodForm = ({
                       value={field.value}
                       className='flex flex-col gap-3'
                     >
-                      {PAYMENT_METHODS.map((paymentMethod) => (
-                        <FormItem
-                          key={paymentMethod}
-                          className='flex items-center space-x-3 space-y-0 rounded-md border border-hairline-light p-4 hover:bg-zinc-50/50 cursor-pointer transition-all duration-150'
-                        >
-                          <FormControl>
-                            <RadioGroupItem
-                              value={paymentMethod}
-                              checked={field.value === paymentMethod}
-                              className='focus:ring-black text-black border-zinc-300'
-                            />
-                          </FormControl>
-                          <FormLabel className='font-medium text-black cursor-pointer flex-1 select-none'>
-                            {paymentMethod}
-                          </FormLabel>
-                        </FormItem>
-                      ))}
+                      {PAYMENT_METHODS.filter(method => {
+                        if (method.startsWith('PuntoDeVenta')) {
+                          return userRole === 'admin' || userRole === 'seller';
+                        }
+                        return true;
+                      }).map((paymentMethod) => {
+                        const displayNames: Record<string, string> = {
+                          'MercadoPago': 'Mercado Pago (Online)',
+                          'TransferenciaBancaria': 'Transferencia Bancaria',
+                          'PuntoDeVenta_Efectivo': 'Punto de Venta - Efectivo',
+                          'PuntoDeVenta_Transferencia': 'Punto de Venta - Transferencia',
+                          'PuntoDeVenta_QR': 'Punto de Venta - QR',
+                          'PuntoDeVenta_MercadoPago': 'Punto de Venta - Mercado Pago (Terminal)'
+                        };
+                        const displayName = displayNames[paymentMethod] || paymentMethod;
+                        return (
+                          <FormItem
+                            key={paymentMethod}
+                            className='flex items-center space-x-3 space-y-0 rounded-md border border-hairline-light p-4 hover:bg-zinc-50/50 cursor-pointer transition-all duration-150'
+                          >
+                            <FormControl>
+                              <RadioGroupItem
+                                value={paymentMethod}
+                                checked={field.value === paymentMethod}
+                                className='focus:ring-black text-black border-zinc-300'
+                              />
+                            </FormControl>
+                            <FormLabel className='font-medium text-black cursor-pointer flex-1 select-none'>
+                              {displayName}
+                            </FormLabel>
+                          </FormItem>
+                        );
+                      })}
                     </RadioGroup>
                   </FormControl>
                   <FormMessage />

@@ -13,7 +13,7 @@ const AdminUserUpdatePage = async (props: {
     id: string;
   }>;
 }) => {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const { id } = await props.params;
 
@@ -24,7 +24,7 @@ const AdminUserUpdatePage = async (props: {
   return (
     <div className='space-y-8 max-w-lg mx-auto'>
       <h1 className='h2-bold'>Actualizar Usuario</h1>
-      <UpdateUserForm user={user} />
+      <UpdateUserForm user={user} currentUserId={session?.user?.id} />
     </div>
   );
 };

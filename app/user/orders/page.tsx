@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import Pagination from '@/components/shared/pagination';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Mis Pedidos',
@@ -60,7 +61,9 @@ const OrdersPage = async (props: {
                 </TableCell>
                 <TableCell>
                   <Link href={`/order/${order.id}`}>
+                  <Button variant="outline">
                     <span className='px-2'>Detalles</span>
+                  </Button>
                   </Link>
                 </TableCell>
               </TableRow>

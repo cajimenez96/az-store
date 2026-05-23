@@ -40,7 +40,7 @@ const ProductDetailsPage = async (props: {
             {/* Eyebrow */}
             <div>
               <p className='eyebrow-cap text-link-cool-1 mb-4'>
-                {product.brand} — {product.category.name}
+                {product.brand.name} — {product.category.name}
                 {product.subCategory ? ` › ${product.subCategory.name}` : ''}
               </p>
               <h1 className='display-lg text-white mb-6 leading-tight'>

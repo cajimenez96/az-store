@@ -8,9 +8,13 @@ export default function RootLayout({
 }>) {
   return (
     <div className='flex h-screen flex-col'>
-      <Header />
+      <div className='print:hidden'>
+        <Header />
+      </div>
       <main className='flex-1 wrapper'>{children}</main>
-      <Footer />
+      <div className='print:hidden'>
+        <Footer />
+      </div>
     </div>
   );
 }

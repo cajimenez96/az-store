@@ -33,6 +33,8 @@ ShippingUpdateEmail.PreviewProps = {
       province: 'NY',
       postalCode: '10001',
       country: 'US',
+      phone: '1122334455',
+      contactEmail: 'test@test.com',
     },
     createdAt: new Date(),
     totalPrice: '100',

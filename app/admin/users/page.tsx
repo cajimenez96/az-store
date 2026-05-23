@@ -15,6 +15,7 @@ import Pagination from '@/components/shared/pagination';
 import { Badge } from '@/components/ui/badge';
 import DeleteDialog from '@/components/shared/delete-dialog';
 import { requireAdmin } from '@/lib/auth-guard';
+import { Pencil } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Usuarios (Admin)',
@@ -24,28 +25,43 @@ const AdminUserPage = async (props: {
   searchParams: Promise<{
     page: string;
     query: string;
+    role: string;
   }>;
 }) => {
   await requireAdmin();
 
-  const { page = '1', query: searchText } = await props.searchParams;
+  const { page = '1', query: searchText, role = 'all' } = await props.searchParams;
 
-  const users = await getAllUsers({ page: Number(page), query: searchText });
+  const users = await getAllUsers({ page: Number(page), query: searchText, role });
 
   return (
-    <div className='space-y-2'>
+    <div className='space-y-4'>
       <div className='flex items-center gap-3'>
         <h1 className='h2-bold'>Usuarios</h1>
         {searchText && (
           <div>
             Filtrado por <i>&quot;{searchText}&quot;</i>{' '}
-            <Link href='/admin/users'>
+            <Link href={`/admin/users?role=${role}`}>
               <Button variant='outline' size='sm'>
                 Quitar Filtro
               </Button>
             </Link>
           </div>
         )}
+      </div>
+      <div className="flex gap-2">
+        <Button asChild variant={role === 'all' ? 'default' : 'outline'} size="sm">
+          <Link href={`/admin/users?role=all${searchText ? `&query=${searchText}` : ''}`}>Todos</Link>
+        </Button>
+        <Button asChild variant={role === 'admin' ? 'default' : 'outline'} size="sm">
+          <Link href={`/admin/users?role=admin${searchText ? `&query=${searchText}` : ''}`}>Admins</Link>
+        </Button>
+        <Button asChild variant={role === 'seller' ? 'default' : 'outline'} size="sm">
+          <Link href={`/admin/users?role=seller${searchText ? `&query=${searchText}` : ''}`}>Vendedores</Link>
+        </Button>
+        <Button asChild variant={role === 'user' ? 'default' : 'outline'} size="sm">
+          <Link href={`/admin/users?role=user${searchText ? `&query=${searchText}` : ''}`}>Usuarios</Link>
+        </Button>
       </div>
       <div className='overflow-x-auto'>
         <Table>
@@ -67,15 +83,22 @@ const AdminUserPage = async (props: {
                 <TableCell>
                   {user.role === 'user' ? (
                     <Badge variant='secondary'>Usuario</Badge>
+                  ) : user.role === 'seller' ? (
+                    <Badge variant='outline' className="border-emerald-500 text-emerald-700 bg-emerald-50">Vendedor</Badge>
                   ) : (
                     <Badge variant='default'>Administrador</Badge>
                   )}
                 </TableCell>
                 <TableCell>
-                  <Button asChild variant='outline' size='sm'>
-                    <Link href={`/admin/users/${user.id}`}>Editar</Link>
-                  </Button>
-                  <DeleteDialog id={user.id} action={deleteUser} />
+                  <div className="flex gap-2 items-center">
+                    <Button asChild variant='default' size='sm' className="bg-zinc-900 hover:bg-zinc-800">
+                      <Link href={`/admin/users/${user.id}`}>
+                        <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                        Editar
+                      </Link>
+                    </Button>
+                    <DeleteDialog id={user.id} action={deleteUser} />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

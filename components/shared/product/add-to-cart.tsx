@@ -29,13 +29,13 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
       // Handle success add to cart
       toast({
         description: res.message,
+        duration: 3000,
         action: (
           <ToastAction
-            className='bg-primary bg-gray-800'
             altText='Ir al Carrito'
             onClick={() => router.push('/cart')}
           >
-            Ir al Carrito
+            Ver Carrito
           </ToastAction>
         ),
       });
@@ -50,6 +50,7 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
       toast({
         variant: res.success ? 'default' : 'destructive',
         description: res.message,
+        duration: 3000,
       });
 
       return;

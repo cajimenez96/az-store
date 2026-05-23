@@ -31,9 +31,11 @@ import ShippingStatusForm from './shipping-status-form';
 const OrderDetailsTable = ({
   order,
   isAdmin,
+  isSeller,
 }: {
   order: Omit<Order, 'paymentResult'>;
   isAdmin: boolean;
+  isSeller?: boolean;
 }) => {
   const {
     id,
@@ -189,15 +191,17 @@ const OrderDetailsTable = ({
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h1 className='text-2xl font-light tracking-wide text-zinc-900'>Orden {formatId(id)}</h1>
-          <div className="flex gap-4">
-            <button
-              onClick={() => window.print()}
-              className="text-sm font-medium text-aloe-500 hover:text-aloe-600 transition-colors"
-            >
-              Imprimir Comprobante
-            </button>
-            <Link href="/user/orders" className="text-sm font-medium underline text-zinc-600 hover:text-zinc-900 transition-colors">
-              Volver a mis pedidos
+          <div className="flex gap-4 print:hidden">
+            {(isAdmin || isSeller) && (
+              <button
+                onClick={() => window.print()}
+                className="text-sm font-medium text-aloe-500 hover:text-aloe-600 transition-colors"
+              >
+                Imprimir Comprobante
+              </button>
+            )}
+            <Link href={(isAdmin || isSeller) ? "/admin/orders" : "/user/orders"} className="text-sm font-medium underline text-zinc-600 hover:text-zinc-900 transition-colors">
+              {(isAdmin || isSeller) ? "Volver a los pedidos" : "Volver a mis pedidos"}
             </Link>
           </div>
         </div>
@@ -425,15 +429,10 @@ const OrderDetailsTable = ({
                   <div className="text-zinc-950 font-semibold">{formatCurrency(totalPrice)}</div>
                 </div>
 
-                <div className="pt-2 space-y-2">
+                <div className="pt-2 space-y-2 print:hidden">
                   {/* Mercado Pago Payment Action */}
-                  {!isPaid && paymentMethod === 'MercadoPago' && (
+                  {!isPaid && paymentMethod === 'MercadoPago' && !isAdmin && (
                     <PayWithMercadoPagoButton />
-                  )}
-
-                  {/* COD Payment action (or transfer fallback without receipt for admin) */}
-                  {isAdmin && !isPaid && paymentMethod !== 'TransferenciaBancaria' && (
-                    <MarkAsPaidButton />
                   )}
 
                   {/* Standard admin buttons for bank transfer fallback when no receipt is uploaded */}

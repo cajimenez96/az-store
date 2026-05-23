@@ -1,80 +1,94 @@
-# Guía de Verificación Funcional y Control de Calidad (MVP)
+# Guía de Verificación Funcional y Control de Calidad (MVP y POS)
 
-Esta guía detalla el paso a paso para probar los flujos mínimos del e-commerce. Sirve para asegurar que los cambios de interfaz, base de datos y la pasarela de pagos cumplan con las reglas de negocio del MVP antes de pasar a producción.
-
----
-
-## 🚀 Camino Rápido: Flujo Completo de Compra (Happy Path)
-
-Seguí esta secuencia para validar la integración de punta a punta del túnel de conversión:
-
-1. **Visita Anónima:** Entrá al sitio en modo incógnito, agregá 2 productos al carrito y andá a `/cart`.
-2. **Registro:** Hacé clic en "Proceder al pago". Cuando te redirija a iniciar sesión, seleccioná **Registrate** y creá un nuevo usuario.
-3. **Fusión:** Tras registrarte, verificá que los 2 productos que habías elegido sigan estando en tu carrito (fusión anónima a usuario).
-4. **Perfil:** Completá tu dirección predeterminada de envío en `/user/profile` y guardala.
-5. **Checkout Rápido:** Volvé al carrito, avanzá a `/shipping-address` y comprobá que tus datos de envío estén precargados. Continuá.
-6. **Pago (Transferencia):** Seleccioná **Transferencia Bancaria** y realizá el pedido. Subí un comprobante en la página de detalles del pedido.
-7. **Consola del Admin:** Iniciá sesión como Administrador (`admin@example.com`), andá a la orden creada y aprobala.
-8. **Validación:** Comprobá que el stock del producto disminuyó correctamente en la base de datos y la orden quedó marcada como "Pagada".
+Esta guía detalla el paso a paso para probar los flujos del e-commerce. Sirve para asegurar que los cambios de interfaz, base de datos, módulos de administración (Marcas, Categorías), Punto de Venta (POS) y la pasarela de pagos cumplan con las reglas de negocio antes de pasar a producción.
 
 ---
 
-## 🛠️ Detalles de los Flujos de Prueba
+## 👥 Flujos por Rol (Happy Paths)
 
-A continuación, se detalla la metodología técnica para auditar cada parte del sistema:
+A continuación se detallan los caminos principales (Happy Paths) separados por los tres roles principales del sistema: **Usuario (Cliente)**, **Vendedor (Seller)** y **Administrador (Admin)**.
 
-### 1. Sesión Anónima y Carrito Temporal
+### 🛍️ 1. Rol: Usuario (Cliente) - Flujo de Compra Online
 
-| Qué probar | Cómo probar en Navegador | Qué buscar en la Base de Datos | Comportamiento Esperado |
+El objetivo de este flujo es verificar la navegación anónima, el registro y la compra online.
+
+1. **Visita Anónima:** Ingresá al sitio en modo incógnito. Navegá por las categorías y agregá 2 productos al carrito.
+2. **Registro/Login:** Desde el carrito, hacé clic en "Proceder al pago". Registrá una nueva cuenta o iniciá sesión como usuario cliente.
+3. **Fusión de Carrito:** Verificá que los 2 productos sigan estando en tu carrito tras loguearte (fusión anónima a usuario).
+4. **Checkout (Envío):** Avanzá a `/shipping-address` y completá tus datos de envío. 
+5. **Checkout (Pago):** En la selección de método de pago, verificá que **SOLO** ves opciones online (Ej: Mercado Pago, Transferencia Bancaria). Seleccioná Transferencia Bancaria.
+6. **Confirmación:** Finalizá el pedido. Subí el comprobante de transferencia en la vista de la orden.
+7. **Verificación de Restricciones:** Tratá de ingresar a `/admin/overview` ingresando la URL manualmente. El sistema debe redirigirte o mostrar error de acceso denegado.
+
+### 🏪 2. Rol: Vendedor (Seller) - Flujo de Punto de Venta (POS)
+
+El objetivo de este flujo es verificar las capacidades de venta física en el local y las restricciones sobre configuraciones globales.
+
+1. **Login como Vendedor:** Iniciá sesión con una cuenta de rol `seller`.
+2. **Flujo POS (Venta en local):** Simulá una venta a una persona en la tienda. Agregá productos al carrito y procedé al pago.
+3. **Checkout POS:** En el paso de Método de Pago, comprobá que ahora ves opciones de "Punto de Venta" (Efectivo, QR, Transferencia en local). Seleccioná *Punto de Venta - Efectivo*.
+4. **Confirmación POS:** Finalizá la orden y verificala en `/admin/orders`.
+5. **Gestión Restringida de Productos:** Andá a `/admin/products`. Comprobá que podés crear un producto, pero los campos críticos (como slug, categoría y marca) aparecen bloqueados (disabled) para evitar cambios no autorizados en la estructura.
+6. **Acceso Denegado:** Verificá que en la barra de navegación del panel de control NO ves las secciones de "Usuarios", "Categorías" ni "Marcas". Tratá de entrar a `/admin/brands` mediante la URL; debés ser bloqueado.
+
+### 👑 3. Rol: Administrador (Admin) - Gestión Total y Dashboard ERP
+
+El objetivo de este flujo es validar el control absoluto del inventario, la respuesta a alertas críticas y la creación de la taxonomía del catálogo.
+
+1. **Login como Admin:** Iniciá sesión con una cuenta de rol `admin`.
+2. **Alertas y Dashboard:** En la barra superior de navegación, buscá la **Campana Roja** de Stock Crítico. Verificá que muestre un número. Hacé clic para ir a `/admin/products`.
+3. **Dashboard ERP:** Entrá a `/admin/overview` y verificá que las nuevas tarjetas muestren los valores correctos de "Pendientes de Pago", "Pendientes de Envío" y "Stock Crítico" (por defecto, variantes con stock <= 2).
+4. **ABM Marcas:** Dirigite a `/admin/brands`. Creá una marca llamada "Marca de Prueba". Validá que no puedas crear otra con el mismo nombre exacto (por validación de Slug).
+5. **ABM Productos:** Dirigite a `/admin/products/create`. Creá un producto nuevo y comprobá que en el desplegable de Marcas aparece "Marca de Prueba" y podés seleccionarla con éxito.
+6. **Gestión de Órdenes:** Entrá a `/admin/orders`. Aprobá la transferencia que hizo el Usuario (Cliente) en el flujo 1. Marcá como "Entregado" el pedido que el Vendedor (Seller) hizo en el flujo 2.
+
+---
+
+## 🛠️ Detalles de Pruebas Específicas (Edge Cases)
+
+A continuación, se detalla la metodología técnica para auditar y romper (intentar fallar) partes clave del sistema:
+
+### 1. Panel de Control, Marcas y POS
+
+| Qué probar | Cómo probar en Navegador | Qué buscar en DB / Resultado | Comportamiento Esperado |
 |---|---|---|---|
-| **Cookie de sesión** | F12 -> Aplicación -> Cookies. Buscar `sessionCartId`. | Ejecutar en consola o Prisma Studio:<br>`prisma.cart.findMany()` | Debe existir un registro de carrito con el UUID de la cookie y `userId: null`. |
-| **Límite de stock en inputs** | Ir a la ficha del producto y tratar de subir la cantidad más allá del stock disponible. | `prisma.product.findUnique({ where: { id: ... } })` | El botón de "Agregar al carrito" se bloquea o el selector de cantidad no permite superar el límite. |
-| **Persistencia anónima** | Cerrar y volver a abrir la ventana del navegador. | Validar que el registro en `Cart` y sus items sigan existiendo. | El carrito temporal se mantiene activo ya que la cookie tiene persistencia. |
+| **Ocultamiento de POS** | Ir al checkout como `user` normal. | N/A | Las opciones "Punto de Venta" NO deben existir en el formulario. |
+| **Campana de Alertas** | Modificar un producto para que una variante quede con stock = 2. Recargar como Admin. | `prisma.productVariant` | La campanita en el Header debe aparecer o incrementar su número. Loguearse como Seller no debe mostrar la campana (vendedor mantiene carrito). |
+| **Restricciones de Vendedor** | En `/admin/products/create` como Vendedor intentar cambiar el `slug` o `marca`. | N/A | Los inputs principales estructurales deben estar `disabled`. |
+| **Duplicación de Marcas** | Crear Marca "Nike", luego intentar crear otra Marca "Nike" o "nike". | `prisma.brand.findUnique()` | Error controlado: "Una marca con este slug ya existe". |
 
 ### 2. Autenticación y Fusión de Carritos (Merge)
 
-| Qué probar | Cómo probar en Navegador | Qué buscar en la Base de Datos | Comportamiento Esperado |
+| Qué probar | Cómo probar en Navegador | Qué buscar en DB / Resultado | Comportamiento Esperado |
 |---|---|---|---|
-| **Redirección de flujo** | Entrar al carrito de forma anónima, hacer clic en checkout y validar que se guarde la `callbackUrl`. | N/A | Tras el login exitoso, debe redirigirte de vuelta a `/shipping-address`, no al Home. |
-| **Fusión de carritos** | Tener items en sesión anónima, loguearse con un usuario que ya tenía items previos en su carrito. | `prisma.cart.findUnique({ where: { userId: ... } })` | Los items se unifican. Si un item existía en ambos, se suman sus cantidades. |
-| **Límite de Stock en Merge** | Agregar 3 unidades de un producto con stock total de 4. Loguearse con un usuario que ya tenía 2 unidades de ese producto en su carrito. | `prisma.cart.findUnique()` | La cantidad final del producto en el carrito se debe topar automáticamente a 4 (el stock disponible). |
-| **Preservación en Logout** | Cerrar sesión del usuario. | `prisma.cart.findMany({ where: { sessionCartId: ... } })` | El carrito del usuario NO se destruye al desloguearse (para evitar pérdida de carritos). El nuevo carrito anónimo empieza en blanco con un nuevo UUID. |
+| **Fusión de carritos** | Tener items en sesión anónima, loguearse con un usuario que ya tenía items previos. | `prisma.cart.findUnique()` | Los items se unifican sumando cantidades sin superar el stock disponible real. |
+| **Preservación en Logout** | Cerrar sesión del usuario. | `prisma.cart` | El carrito del usuario NO se destruye. El nuevo carrito anónimo empieza en blanco con nuevo UUID. |
+| **Bloqueo de Cambio de Rol** | Como Admin en `/admin/users/[id]`, intentar cambiar tu propio rol a "user". | N/A | El Select de roles para tu propio usuario debe estar deshabilitado o arrojar error. |
 
 ### 3. Domicilios, Checkout y Stock
 
-| Qué probar | Cómo probar en Navegador | Qué buscar en la Base de Datos | Comportamiento Esperado |
+| Qué probar | Cómo probar en Navegador | Qué buscar en DB / Resultado | Comportamiento Esperado |
 |---|---|---|---|
-| **Persistencia de domicilio** | Ir a `/user/profile`, completar la sección de dirección y guardar el perfil. | `prisma.user.findUnique({ where: { email: ... } })` | El campo `address` (JSON) del usuario debe contener los datos estructurados en formato plano. |
-| **Precarga de checkout** | Avanzar en el checkout de un carrito hasta `/shipping-address`. | N/A | Los inputs deben aparecer precargados con la dirección del perfil automáticamente. |
-| **Sincronización en compra** | Modificar la dirección durante el proceso en `/shipping-address` y concretar la compra. | `prisma.order.findUnique()` y `prisma.user.findUnique()` | La orden debe crearse con la nueva dirección Y el perfil del usuario debe actualizarse con estos nuevos datos para la próxima compra. |
-| **Reserva inmediata de stock** | Crear un pedido con método **Transferencia Bancaria**. | `prisma.product.findUnique()` | El stock se reduce inmediatamente en la base de datos tras confirmar el pedido. |
-| **Expiración de orden** | Esperar 24 horas o forzar la fecha de expiración de una orden no pagada en la DB. | Cambiar en DB `expiresAt` a una fecha pasada y llamar a `/api/cron/release-expired-orders` (con cabecera de autenticación). | La orden se cancela (`isCanceled: true`) y el stock reservado vuelve a sumarse a los productos del inventario. |
+| **Precarga de checkout** | Avanzar en el checkout hasta `/shipping-address`. | N/A | Los inputs deben aparecer precargados con la dirección del perfil de usuario. |
+| **Reserva inmediata de stock** | Crear pedido con **Transferencia Bancaria**. | `prisma.productVariant` | El stock se reduce inmediatamente en la base de datos de la variante seleccionada tras confirmar pedido. |
+| **Expiración de orden** | Cambiar en DB `expiresAt` de una orden no pagada a ayer y llamar `/api/cron/release-expired-orders`. | `prisma.order` | La orden se cancela (`isCanceled: true`) y el stock reservado vuelve a sumarse a las variantes. |
 
-### 4. Pagos Híbridos y Panel de Administración
+### 4. Flujos de Pago Híbridos
 
-| Qué probar | Cómo probar en Navegador | Qué buscar en la Base de Datos | Comportamiento Esperado |
+| Qué probar | Cómo probar en Navegador | Qué buscar en DB / Resultado | Comportamiento Esperado |
 |---|---|---|---|
-| **Subida de Comprobante** | En la vista de detalles del pedido `/order/[id]`, usar el control de subida de archivos (Uploadthing) para enviar una foto/PDF del pago. | `prisma.order.findUnique()` | El campo `paymentReceiptUrl` de la orden se actualiza con la URL de Uploadthing. |
-| **Aprobación del Admin** | Loguearse como administrador, ir al panel, entrar al detalle del pedido y presionar "Confirmar pago". | `prisma.order.findUnique()` | La orden cambia a `isPaid: true`, `paidAt` se registra, y el stock del producto NO se descuenta por segunda vez. |
-| **Rechazo del Admin** | Loguearse como administrador y rechazar el pago del pedido con transferencia bancaria. | `prisma.order.findUnique()` y `prisma.product.findUnique()` | La orden cambia a `isCanceled: true` (o se anula el pago) y el stock reservado se reintegra de forma atómica a los productos. |
-| **Reserva diferida (Mercado Pago)** | Crear un pedido utilizando **Mercado Pago** y llegar a la redirección de la pasarela. | `prisma.product.findUnique()` | El stock del producto **no** debe alterarse hasta que se confirme la transacción. |
-| **Webhook IPN (Mercado Pago)** | Simular el webhook de confirmación enviando una petición POST con firma válida a `/api/webhooks/mercadopago`. | `prisma.order` y `prisma.product` | Al confirmarse el pago mediante IPN, la orden se marca como paga (`isPaid: true`) y el stock del producto recién en ese momento se reduce. |
+| **Subida de Comprobante** | En `/order/[id]`, subir foto de pago de transferencia. | `prisma.order` | El campo `receiptUrl` se actualiza. La orden ahora suma al contador "Pendientes de Pago" en el dashboard. |
+| **Aprobación del Admin** | En el detalle del pedido como Admin presionar "Confirmar pago". | `prisma.order` | La orden cambia a `isPaid: true`. El stock NO se descuenta por segunda vez. |
+| **Rechazo del Admin** | Como administrador, rechazar el pago del pedido con transferencia. | `prisma.productVariant` | La orden se anula y el stock reservado se reintegra atómicamente a las variantes. |
+| **Reserva diferida (Mercado Pago)** | Crear un pedido con Mercado Pago y llegar a la pasarela (sin pagar aún). | `prisma.productVariant` | El stock **no** debe alterarse hasta confirmación. |
+| **Webhook IPN (MP)** | Simular el webhook enviando un payload válido a `/api/webhooks/mercadopago`. | `prisma.order` y `prisma.productVariant` | La orden se marca como paga y **recién en ese momento** el stock disminuye. |
 
 ---
 
-## 📋 Checklist de Control de Calidad
+## 📋 Checklist General de Regresión
 
-Usá este checklist para marcar las validaciones realizadas antes de cada entrega:
-
-- [ ] **Estilos y Contraste:** Las páginas transaccionales (`/sign-in`, `/sign-up`, `/cart`, `/shipping-address`, `/user/profile`) tienen fondo claro `#fbfbf5` o `#ffffff` y textos legibles en negro `#000000`, sin importar el modo oscuro del sistema operativo.
-- [ ] **Acciones de Botón:** Los botones en las páginas claras son píldoras negras (`button-primary-pill`) y reaccionan correctamente en hover (`bg-shade-70`).
-- [ ] **Flujo de Sesiones:** El paso de carrito anónimo a carrito de usuario no duplica productos ni supera los stocks físicos del catálogo.
-- [ ] **Gestión de Stock:** Las compras por transferencia reservan stock al instante; las de Mercado Pago esperan la confirmación del webhook.
-- [ ] **Reintegro de Stock:** El rechazo del pago por parte de un administrador devuelve de manera atómica el stock al inventario.
-- [ ] **Pruebas Estáticas:** El comando `bun run build` compila el bundle de producción sin advertencias de tipos ni fallos.
-
----
-
-## 🚀 Próximo Paso
-
-Una vez que completes las pruebas manuales correspondientes a cada tarea en desarrollo, recordá documentar los resultados en el archivo `walkthrough.md` antes de enviar la confirmación de la entrega.
+- [ ] Las métricas del dashboard (`/admin/overview`) coinciden con las sumas reales en la DB de órdenes y variantes de productos.
+- [ ] La campana de "Stock Crítico" suma correctamente los *Talles* (ProductVariants) y no los productos globales.
+- [ ] La marca seleccionada al crear un producto persiste y se muestra correctamente en el catálogo público (`/search`).
+- [ ] El cambio de rol del usuario respeta la seguridad impidiendo que un admin se auto-remueva privilegios.
+- [ ] La consola del navegador y el proceso de build (`bun run build`) no arrojan advertencias de tipos o componentes React inválidos.

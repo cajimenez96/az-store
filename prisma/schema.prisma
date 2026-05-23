@@ -36,6 +36,14 @@ model Size {
   variants   ProductVariant[]
 }
 
+model Brand {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  products  Product[]
+}
+
 model Product {
   id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name            String
@@ -45,7 +53,8 @@ model Product {
   subCategoryId   String?          @db.Uuid
   subCategory     SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
   images          String[]
-  brand           String
+  brandId         String           @db.Uuid
+  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
   description     String
   price           Decimal          @default(0) @db.Decimal(12, 2)
   rating          Decimal          @default(0) @db.Decimal(3, 2)
@@ -196,3 +205,9 @@ model Review {
   product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Setting {
+  key   String @id
+  value String
+}
+

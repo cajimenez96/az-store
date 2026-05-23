@@ -6,7 +6,7 @@ import React from 'react';
 
 const links = [
   {
-    title: 'Resumen',
+    title: 'Dashboard',
     href: '/admin/overview',
   },
   {
@@ -16,6 +16,14 @@ const links = [
   {
     title: 'Categorías',
     href: '/admin/categories',
+  },
+  {
+    title: 'Marcas',
+    href: '/admin/brands',
+  },
+  {
+    title: 'Inventario',
+    href: '/admin/inventory',
   },
   {
     title: 'Pedidos',
@@ -36,7 +44,7 @@ const MainNav = ({
 
   const filteredLinks = links.filter((item) => {
     if (role === 'seller') {
-      if (item.title === 'Categorías' || item.title === 'Usuarios') return false;
+      if (item.title === 'Categorías' || item.title === 'Marcas' || item.title === 'Usuarios') return false;
     }
     return true;
   });
