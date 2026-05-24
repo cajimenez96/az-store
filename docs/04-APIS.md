@@ -1,199 +1,95 @@
 # 04 — Contratos de API y Server Actions
 
-## Patrón de Arquitectura
+## Patrón de Arquitectura y Server Actions
 
-Este proyecto usa **Server Actions** de Next.js 15 como capa principal de acceso a datos,
-no Route Handlers REST clásicos. Los Route Handlers se usan solo para:
-- Webhooks externos (Mercado Pago IPN).
-- Endpoints de cron (liberación de stock).
-- Uploadthing (subida de archivos).
+Este proyecto está diseñado sobre **Server Actions** de Next.js como el mecanismo principal para leer y escribir datos desde el frontend, evitando la sobrecarga de estructurar endpoints REST/GraphQL clásicos para la interfaz web.
+
+Los **Route Handlers** clásicos (rutas API HTTP) se reservan exclusivamente para integraciones y webhooks externos, llamadas asíncronas desatendidas (como tareas Cron) y la configuración de subida de archivos pesados.
 
 ---
 
-## Server Actions Existentes (ya funcionan)
+## Server Actions Implementados
 
-### `lib/actions/order.actions.ts`
+### 1. Módulo de Ordenes (`lib/actions/order.actions.ts`)
 
-| Action | Descripción | Estado |
-|---|---|---|
-| `createOrder()` | Crea orden desde el carrito del usuario. | ✅ Existe — 🔧 Modificar para stock + expiresAt |
-| `getOrderById(id)` | Obtiene una orden con sus items y usuario. | ✅ Sin cambios |
-| `getMyOrders({ page })` | Lista órdenes del usuario autenticado. | ✅ Sin cambios |
-| `getAllOrders({ page, query })` | Lista todas las órdenes (admin). | ✅ Sin cambios |
-| `updateOrderToPaid({ orderId, paymentResult })` | Marca orden como pagada y descuenta stock en `$transaction`. | ✅ Sin cambios — reutilizar en aprobación de transferencia |
-| `updateOrderToPaidCOD(orderId)` | Versión admin de marcar como pagado (COD/Transferencia). | ✅ Existe — 🔧 Adaptar para validar `receiptUrl` |
-| `deliverOrder(orderId)` | Marca orden como entregada. | ✅ Sin cambios |
-| `deleteOrder(id)` | Elimina una orden (admin). | ✅ Sin cambios |
-| `getOrderSummary()` | Métricas para el dashboard de admin. | ✅ Sin cambios |
-
-### `lib/actions/product.actions.ts`
-
-| Action | Descripción | Estado |
-|---|---|---|
-| `getLatestProducts()` | Últimos productos para la home. | ✅ Sin cambios |
-| `getProductBySlug(slug)` | Detalle de producto por slug. | ✅ Sin cambios |
-| `getAllProducts({ query, page, category... })` | Lista con filtros y paginación. | ✅ Sin cambios |
-| `createProduct(data)` | Crear producto (admin). | ✅ Sin cambios |
-| `updateProduct(data)` | Actualizar producto (admin). | ✅ Sin cambios |
-| `deleteProduct(id)` | Eliminar producto (admin). | ✅ Sin cambios |
-
-### `lib/actions/cart.actions.ts`
-
-| Action | Descripción | Estado |
-|---|---|---|
-| `addItemToCart(data)` | Agrega item al carrito. | ✅ Sin cambios |
-| `removeItemFromCart(productId)` | Quita item del carrito. | ✅ Sin cambios |
-| `getMyCart()` | Obtiene el carrito del usuario/sesión. | ✅ Sin cambios |
-
----
-
-## Server Actions a Crear 🆕
-
-### `approveBankTransfer(orderId: string)`
-
-**Archivo:** `lib/actions/order.actions.ts`
-
-**Descripción:** El administrador aprueba una transferencia bancaria.
-
-**Lógica:**
-```typescript
-export async function approveBankTransfer(orderId: string) {
-  // 1. Verificar que el usuario es admin (auth check)
-  // 2. Obtener la orden
-  // 3. Validar que paymentMethod === 'TransferenciaBancaria'
-  // 4. Validar que receiptUrl no es null
-  // 5. Llamar a updateOrderToPaid({ orderId }) — ya existe, maneja stock en $transaction
-  // 6. revalidatePath('/admin/orders')
-}
-```
-
----
-
-### `rejectBankTransfer(orderId: string)`
-
-**Archivo:** `lib/actions/order.actions.ts`
-
-**Descripción:** El administrador rechaza una transferencia bancaria y libera el stock.
-
-**Lógica:**
-```typescript
-export async function rejectBankTransfer(orderId: string) {
-  // 1. Verificar que el usuario es admin (auth check)
-  // 2. Obtener la orden con sus orderitems
-  // 3. $transaction:
-  //    a. Para cada item: product.stock += item.qty (restaurar stock)
-  //    b. order.isPaid = false, order cancellada (podemos agregar campo isCancelled o usar isPaid=false + paidAt=null)
-  // 4. revalidatePath('/admin/orders')
-}
-```
-
----
-
-### `createMercadoPagoOrder(orderId: string)`
-
-**Archivo:** `lib/actions/order.actions.ts`
-
-**Descripción:** Crea una preferencia de pago en Mercado Pago y retorna la URL de checkout.
-
-**Lógica:**
-```typescript
-import { MercadoPagoConfig, Preference } from 'mercadopago';
-
-export async function createMercadoPagoOrder(orderId: string) {
-  // 1. Obtener la orden con sus items
-  // 2. Crear la preferencia en MP con los items
-  // 3. Guardar el preference.id en order.paymentResult (campo JSON existente)
-  // 4. Retornar preference.init_point (URL de redirección al checkout)
-}
-```
-
----
-
-## Route Handlers a Crear 🆕
-
-### `POST /api/webhooks/mercadopago`
-
-**Archivo:** `app/api/webhooks/mercadopago/route.ts`
-
-**Descripción:** Recibe las notificaciones IPN de Mercado Pago.
-
-**Lógica:**
-```typescript
-export async function POST(req: Request) {
-  // 1. Parsear el body (query params: type, data.id)
-  // 2. Si type === 'payment':
-  //    a. GET https://api.mercadopago.com/v1/payments/{data.id}
-  //    b. Si payment.status === 'approved':
-  //       - Buscar orden por payment.metadata.orderId o external_reference
-  //       - updateOrderToPaid({ orderId, paymentResult: {...} })
-  // 3. Responder 200 OK siempre (MP reintenta si recibe otro status)
-}
-```
-
-**Variables necesarias:**
-```
-MERCADOPAGO_ACCESS_TOKEN   # Para verificar el pago en la API de MP
-```
-
----
-
-### `GET /api/cron/release-expired-orders`
-
-**Archivo:** `app/api/cron/release-expired-orders/route.ts`
-
-**Descripción:** Libera el stock de órdenes de transferencia no aprobadas en 24 horas.
-Llamado por un servicio externo (cron-job.org, Vercel Cron, GitHub Actions).
-
-**Lógica:**
-```typescript
-export async function GET(req: Request) {
-  // 1. Verificar header Authorization: Bearer CRON_SECRET
-  // 2. Buscar órdenes donde:
-  //    paymentMethod === 'TransferenciaBancaria'
-  //    && isPaid === false
-  //    && expiresAt < now()
-  // 3. Para cada orden expirada, en $transaction:
-  //    a. Restaurar stock de cada orderItem
-  //    b. Marcar la orden como cancelada
-  // 4. Retornar { cancelled: N } con cuántas órdenes se procesaron
-}
-```
-
-**Variables necesarias:**
-```
-CRON_SECRET   # Token secreto para autenticar el cron
-```
-
----
-
-## Endpoint Existente: Uploadthing
-
-**Archivo:** `app/api/uploadthing/core.ts`
-
-Ya funciona. Solo acepta uploads de usuarios autenticados.
-Para que los clientes puedan subir comprobantes de transferencia **sin estar logueados**,
-hay que agregar un segundo endpoint público:
-
-```typescript
-export const ourFileRouter = {
-  // Existente — solo admins
-  imageUploader: f({ image: { maxFileSize: '4MB' } })
-    .middleware(async () => {
-      const session = await auth();
-      if (!session) throw new UploadThingError('Unauthorized');
-      return { userId: session?.user?.id };
+* **`createOrder()`**
+  * **Uso:** Storefront público. Toma los productos del carrito activo del usuario en la base de datos y genera una orden de pago.
+  * **Lógica:** Si el método de pago es Transferencia Bancaria, decrementa inmediatamente el stock y setea `expiresAt` en 24 horas. Si es Mercado Pago, no toca el stock (espera al webhook).
+* **`createPosOrder(data)`** 🆕
+  * **Uso:** Panel POS. Registra una venta física presencial.
+  * **Firma:**
+    ```typescript
+    export async function createPosOrder(data: {
+      items: CartItem[];
+      paymentMethod: string;
+      customerId?: string;
+      customerName?: string;
+      customerEmail?: string;
+      customerPhone?: string;
+      customerDni?: string;
+      customerAddress?: string;
     })
-    .onUploadComplete(async ({ metadata }) => {
-      return { uploadedBy: metadata.userId };
-    }),
+    ```
+  * **Lógica:** Se ejecuta bajo transacción (`prisma.$transaction`). Resuelve el cliente (busca por ID/Email/DNI, crea un usuario nuevo en base de datos si se ingresaron datos y no existía, o asocia a "Consumidor Final"). Registra la orden directamente como Pagada (`isPaid: true`), Entregada (`isDelivered: true`) y descuenta de inmediato el stock físico de las variantes en la base de datos.
+* **`createMercadoPagoOrder(orderId)`**
+  * **Uso:** Genera la preferencia de pago en Mercado Pago para redirigir al Checkout Pro. Guarda el id de la preferencia en la orden.
+* **`approveBankTransfer(orderId)`**
+  * **Uso:** El administrador aprueba una transferencia bancaria tras revisar el comprobante visual. Pasa la orden a pagada.
+* **`rejectBankTransfer(orderId)`**
+  * **Uso:** El administrador cancela una transferencia inválida. Reintegra atómicamente el stock reservado a la variante.
 
-  // 🆕 Nuevo — para comprobantes de transferencia (usuario logueado)
-  receiptUploader: f({ image: { maxFileSize: '8MB' } })
-    .middleware(async () => {
-      const session = await auth();
-      if (!session) throw new UploadThingError('Unauthorized');
-      return { userId: session?.user?.id };
+---
+
+### 2. Módulo de Usuarios y Clientes (`lib/actions/user.actions.ts`)
+
+* **`searchPosCustomers(query)`** 🆕
+  * **Uso:** Autocomplete predictivo en la barra de búsqueda del cliente del POS.
+  * **Firma:** `export async function searchPosCustomers(query: string)`
+  * **Lógica:** Retorna un listado de hasta 10 usuarios que coincidan parcialmente en su `name`, `email`, `dni` o `phone`.
+* **`createPosCustomer(data)`** 🆕
+  * **Uso:** Registrar un nuevo cliente físico desde el POS sin salir de la pantalla.
+  * **Firma:**
+    ```typescript
+    export async function createPosCustomer(data: {
+      name: string;
+      email: string;
+      phone?: string;
+      dni?: string;
+      streetAddress?: string;
+      city?: string;
+      province?: string;
+      postalCode?: string;
     })
-    .onUploadComplete(async () => {}),
-} satisfies FileRouter;
-```
+    ```
+  * **Lógica:** Inserta el usuario con el rol `user`, guardando opcionalmente el domicilio formateado dentro del objeto de dirección JSON. Valida la no colisión de email y DNI.
+
+---
+
+## Route Handlers Activos (API Endpoints)
+
+### 1. Webhook de Mercado Pago
+* **Ruta:** `POST /api/webhooks/mercadopago`
+* **Uso:** Recibe notificaciones IPN asíncronas de Mercado Pago.
+* **Lógica:** Si el pago es `approved`, busca la orden usando la referencia externa (`external_reference`), actualiza la orden a pagada, descuenta el stock de las variantes del inventario y dispara la plantilla de correo de confirmación de compra mediante Resend.
+
+### 2. Tarea Cron de Liberación de Stock
+* **Ruta:** `GET /api/cron/release-expired-orders`
+* **Uso:** Llamado por Vercel Cron o cron-job.org de forma periódica.
+* **Seguridad:** Requiere cabecera `Authorization: Bearer <CRON_SECRET>`.
+* **Lógica:** Cancela pedidos online por transferencia no pagados que superaron las 24 horas (`expiresAt < ahora`) y reintegra el stock reservado.
+
+---
+
+## Deuda Técnica: Acoplamiento de Server Actions
+
+El uso de Server Actions de Next.js representa una **deuda técnica importante** si se contempla expandir el negocio en el mediano plazo:
+
+### El Problema
+Los Server Actions no son endpoints HTTP REST independientes. Son funciones RPC enlazadas de manera propietaria por Next.js que dependen estrechamente de su runtime de cookies, headers y middleware.
+* Un cliente externo, como una **aplicación móvil nativa en Expo (React Native)** o integraciones de software ERP de terceros, **no puede consumir** estas funciones.
+
+### Solución y Mitigación
+Al migrar el backend hacia un servicio dedicado (por ejemplo, en **NestJS**):
+1. **Desacoplar la Lógica:** Extraer los servicios de base de datos (`prisma.*`) de los archivos `.actions.ts` hacia módulos independientes.
+2. **REST APIs:** Crear controladores HTTP REST tradicionales (`POST /api/orders`, `GET /api/customers/search`) protegidos con JWT.
+3. **Migración Progresiva:** El frontend de Next.js pasará de invocar Server Actions a hacer peticiones `fetch()` estándar al nuevo backend NestJS, permitiendo que la aplicación web y la aplicación móvil Expo consuman exactamente las mismas APIs.

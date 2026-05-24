@@ -15,7 +15,7 @@ import { formatError } from '../utils';
 import { PAGE_SIZE } from '../constants';
 import { ShippingAddress } from '@/types';
 import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth-guard';
+import { requireAdmin, requireAdminOrSeller } from '@/lib/auth-guard';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 
@@ -260,6 +260,113 @@ export async function updateUser(user: z.infer<typeof updateUserSchema>) {
     return {
       success: true,
       message: 'Usuario actualizado exitosamente',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Search registered customers for POS autocomplete
+export async function searchPosCustomers(query: string) {
+  try {
+    await requireAdminOrSeller();
+
+    if (!query || query.trim() === '') {
+      return { success: true, data: [] };
+    }
+
+    const cleanQuery = query.trim();
+
+    const customers = await prisma.user.findMany({
+      where: {
+        OR: [
+          { name: { contains: cleanQuery, mode: 'insensitive' } },
+          { email: { contains: cleanQuery, mode: 'insensitive' } },
+          { dni: { contains: cleanQuery, mode: 'insensitive' } },
+          { phone: { contains: cleanQuery, mode: 'insensitive' } },
+        ],
+      },
+      take: 10,
+      orderBy: { name: 'asc' },
+    });
+
+    return { success: true, data: customers };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Create a new customer directly from the POS interface
+export async function createPosCustomer(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  dni?: string;
+  streetAddress?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+}) {
+  try {
+    await requireAdminOrSeller();
+
+    const { name, email, phone, dni, streetAddress, city, province, postalCode } = data;
+
+    if (!name || name.trim() === '') {
+      throw new Error('El nombre del cliente es obligatorio');
+    }
+    if (!email || email.trim() === '') {
+      throw new Error('El email del cliente es obligatorio');
+    }
+
+    // Check if email already exists
+    const existingEmail = await prisma.user.findUnique({
+      where: { email: email.trim() }
+    });
+    if (existingEmail) {
+      throw new Error('Ya existe un usuario registrado con este correo electrónico');
+    }
+
+    // Check if DNI already exists (if provided)
+    if (dni && dni.trim() !== '') {
+      const existingDni = await prisma.user.findUnique({
+        where: { dni: dni.trim() }
+      });
+      if (existingDni) {
+        throw new Error('Ya existe un usuario registrado con este DNI');
+      }
+    }
+
+    // Construct address JSON if provided
+    let addressObj = null;
+    if (streetAddress && streetAddress.trim() !== '') {
+      addressObj = {
+        fullName: name.trim(),
+        streetAddress: streetAddress.trim(),
+        city: city?.trim() || 'Tucumán',
+        province: province?.trim() || 'Tucumán',
+        postalCode: postalCode?.trim() || '4000',
+        country: 'Argentina',
+        phone: phone?.trim() || '00000000',
+        contactEmail: email.trim(),
+      };
+    }
+
+    const newCustomer = await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone?.trim() || null,
+        dni: dni?.trim() || null,
+        address: addressObj ? addressObj : undefined,
+        role: 'user',
+      }
+    });
+
+    return {
+      success: true,
+      message: 'Cliente creado con éxito',
+      customer: newCustomer,
     };
   } catch (error) {
     return { success: false, message: formatError(error) };

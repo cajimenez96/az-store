@@ -2,7 +2,7 @@
 
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { requireAdmin, requireAdminOrSeller } from '../auth-guard';
-import { convertToPlainObject, formatError } from '../utils';
+import { convertToPlainObject, formatError, round2 } from '../utils';
 import { auth } from '@/auth';
 import { getMyCart } from './cart.actions';
 import { getUserById } from './user.actions';
@@ -789,6 +789,181 @@ export async function createMercadoPagoOrder(orderId: string) {
       initPoint: response.init_point,
     };
   } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Create a physical POS order in a single transaction
+export async function createPosOrder(data: {
+  items: CartItem[];
+  paymentMethod: string;
+  customerId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  customerDni?: string;
+  customerAddress?: string;
+}) {
+  try {
+    const session = await requireAdminOrSeller();
+    if (!session) throw new Error('Usuario no autorizado');
+
+    const {
+      items,
+      paymentMethod,
+      customerId,
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerDni,
+      customerAddress,
+    } = data;
+
+    if (!items || items.length === 0) {
+      throw new Error('El carrito del POS está vacío');
+    }
+
+    // 1. Calculate prices
+    const itemsPriceVal = items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
+    const itemsPrice = round2(itemsPriceVal);
+    const shippingPrice = 0;
+    const taxPrice = round2(0.15 * itemsPrice);
+    const totalPrice = round2(itemsPrice + taxPrice);
+
+    // 2. Find or create POS customer user
+    let customerUser = null;
+
+    if (customerId) {
+      customerUser = await prisma.user.findUnique({ where: { id: customerId } });
+    }
+
+    if (!customerUser && customerDni && customerDni.trim() !== '') {
+      customerUser = await prisma.user.findFirst({ where: { dni: customerDni.trim() } });
+    }
+
+    if (!customerUser && customerEmail && customerEmail.trim() !== '') {
+      customerUser = await prisma.user.findFirst({ where: { email: customerEmail.trim().toLowerCase() } });
+    }
+
+    const defaultEmail = 'consumidorfinal@local.store';
+    const emailToUse = (customerEmail && customerEmail.trim() !== '') ? customerEmail.trim().toLowerCase() : defaultEmail;
+    const nameToUse = (customerName && customerName.trim() !== '') ? customerName.trim() : 'Consumidor Final';
+
+    if (!customerUser) {
+      // Look up default email user or create a new one
+      customerUser = await prisma.user.findFirst({ where: { email: emailToUse } });
+      if (!customerUser) {
+        customerUser = await prisma.user.create({
+          data: {
+            name: nameToUse,
+            email: emailToUse,
+            phone: customerPhone?.trim() || null,
+            dni: customerDni?.trim() || null,
+            role: 'user',
+          }
+        });
+      }
+    }
+
+    // Update user phone or DNI if they were not set
+    const userUpdates: { phone?: string; dni?: string } = {};
+    if (!customerUser.phone && customerPhone && customerPhone.trim() !== '') {
+      userUpdates.phone = customerPhone.trim();
+    }
+    if (!customerUser.dni && customerDni && customerDni.trim() !== '') {
+      // Ensure DNI doesn't conflict
+      const existDni = await prisma.user.findUnique({ where: { dni: customerDni.trim() } });
+      if (!existDni) {
+        userUpdates.dni = customerDni.trim();
+      }
+    }
+    if (Object.keys(userUpdates).length > 0) {
+      customerUser = await prisma.user.update({
+        where: { id: customerUser.id },
+        data: userUpdates,
+      });
+    }
+
+    const shippingAddress = {
+      fullName: customerUser.name,
+      streetAddress: (customerAddress && customerAddress.trim() !== '') ? customerAddress.trim() : 'Venta en Local',
+      city: 'Tucumán',
+      province: 'Tucumán',
+      postalCode: '4000',
+      country: 'Argentina',
+      phone: customerUser.phone || customerPhone?.trim() || '00000000',
+      contactEmail: customerUser.email
+    };
+
+    // 3. Create the transaction
+    const insertedOrderId = await prisma.$transaction(async (tx) => {
+      // Create the order
+      const insertedOrder = await tx.order.create({
+        data: {
+          userId: customerUser!.id,
+          shippingAddress,
+          paymentMethod,
+          itemsPrice: itemsPrice.toString(),
+          shippingPrice: shippingPrice.toString(),
+          taxPrice: taxPrice.toString(),
+          totalPrice: totalPrice.toString(),
+          isPaid: true,
+          paidAt: new Date(),
+          isDelivered: true,
+          deliveredAt: new Date(),
+          shippingStatus: 'Entregado',
+        }
+      });
+
+      // Create order items and decrement stocks
+      for (const item of items) {
+        await tx.orderItem.create({
+          data: {
+            orderId: insertedOrder.id,
+            productId: item.productId,
+            name: item.name,
+            slug: item.slug,
+            image: item.image,
+            qty: item.qty,
+            price: item.price,
+            size: item.size || null,
+          }
+        });
+
+        // Decrement stock
+        if (item.size) {
+          const variant = await tx.productVariant.findFirst({
+            where: {
+              productId: item.productId,
+              size: {
+                name: item.size
+              }
+            }
+          });
+
+          if (!variant || variant.stock < item.qty) {
+            throw new Error(`Stock insuficiente para el producto ${item.name} (${item.size || 'M'})`);
+          }
+
+          await tx.productVariant.update({
+            where: { id: variant.id },
+            data: { stock: { decrement: item.qty } }
+          });
+        }
+      }
+
+      return insertedOrder.id;
+    });
+
+    if (!insertedOrderId) throw new Error('No se pudo procesar la venta en local');
+
+    return {
+      success: true,
+      message: 'Venta registrada con éxito',
+      orderId: insertedOrderId,
+    };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
     return { success: false, message: formatError(error) };
   }
 }

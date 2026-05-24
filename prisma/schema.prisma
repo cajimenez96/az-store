@@ -89,6 +89,8 @@ model User {
   role          String    @default("user")
   address       Json?     @db.Json
   paymentMethod String?
+  dni           String?   @unique(map: "user_dni_idx")
+  phone         String?
   createdAt     DateTime  @default(now()) @db.Timestamp(6)
   updatedAt     DateTime  @updatedAt
   account       Account[]

@@ -1,68 +1,34 @@
-# 03 — Base de Datos: Schema de Prisma
+# 03 — Base de Datos: Schema y Normalización Relacional
 
-## Schema Actual (prostore base)
-
-> Archivo: `prisma/schema.prisma`
-
-El proyecto ya usa **PostgreSQL** de fábrica. No se requiere migración de motor.
-
-### Modelos existentes y su estado
-
-| Modelo | Estado | Observaciones |
-|---|---|---|
-| `Product` | ✅ Sin cambios | Ya tiene campo `stock: Int` |
-| `User` | ✅ Sin cambios | Roles `admin`/`user` ya configurados |
-| `Order` | 🔧 Modificar | Agregar `receiptUrl` y `expiresAt` |
-| `OrderItem` | ✅ Sin cambios | Relación con Product y Order |
-| `Cart` | ✅ Sin cambios | Items como JSON array |
-| `Review` | ✅ Sin cambios | Ratings de productos |
-| `Account` / `Session` | ✅ Sin cambios | Parte del adaptador NextAuth |
+El proyecto utiliza **PostgreSQL** (Neon en producción, Local en desarrollo) gestionado mediante **Prisma ORM**. Para soportar la complejidad de un catálogo real con talles, subcategorías y ventas presenciales, el esquema de base de datos fue normalizado a **Tercera Forma Normal (3NF)**.
 
 ---
 
-## Cambios Requeridos en `Order`
+## Normalización de la Base de Datos
 
-Agregar estos dos campos al modelo `Order`:
+### 1. Desacoplamiento de Taxonomías (Marcas y Categorías)
+* **Antes:** En el esquema original (`prostore` base), los campos `category` y `brand` en el modelo `Product` eran strings planos (`String`). Esto provocaba inconsistencia de datos, redundancia de texto y dificultades para armar filtros fiables.
+* **Ahora (Normalización):** 
+  * Se crearon los modelos `Brand`, `Category` y `SubCategory` con claves primarias independientes (`Uuid`) y slugs únicos indexados.
+  * El modelo `Product` se conecta con claves foráneas (`brandId`, `categoryId`, `subCategoryId`) que garantizan la integridad referencial.
 
-```prisma
-model Order {
-  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId          String      @db.Uuid
-  shippingAddress Json        @db.Json
-  paymentMethod   String
-  paymentResult   Json?       @db.Json
-  itemsPrice      Decimal     @db.Decimal(12, 2)
-  shippingPrice   Decimal     @db.Decimal(12, 2)
-  taxPrice        Decimal     @db.Decimal(12, 2)
-  totalPrice      Decimal     @db.Decimal(12, 2)
-  isPaid          Boolean     @default(false)
-  paidAt          DateTime?   @db.Timestamp(6)
-  isDelivered     Boolean     @default(false)
-  deliveredAt     DateTime?   @db.Timestamp(6)
-  createdAt       DateTime    @default(now()) @db.Timestamp(6)
+### 2. Normalización de Variantes y Stock (Talles)
+* **Antes:** `Product` tenía un único campo `stock` y no soportaba talles. Poner talles como strings en el carrito rompía la consistencia del inventario real.
+* **Ahora (Normalización - 3NF):**
+  * **Talles:** Se creó la tabla `Size` vinculada a una categoría (los talles de calzado son distintos a los de ropa).
+  * **Variantes de Inventario:** Se creó la tabla pivot `ProductVariant` que asocia `productId` con `sizeId` y almacena el `stock` específico de esa combinación. El stock de una variante depende directamente de la tupla (Producto, Talle), eliminando la dependencia transitiva sobre el Producto.
+  * **Unicidad:** Se configuró un índice compuesto `@unique([productId, sizeId])` para evitar registros duplicados de stock.
 
-  // 🆕 Campos nuevos para Transferencia Bancaria
-  receiptUrl      String?     // URL del comprobante subido por el cliente a Uploadthing
-  expiresAt       DateTime?   @db.Timestamp(6) // Fecha límite para aprobar (createdAt + 24hs)
+### 3. Normalización en Compras (OrderItem)
+* **Antes:** La clave primaria de `OrderItem` era un índice compuesto `@@id([orderId, productId])`.
+* **Ahora:** Al permitir que un cliente compre el mismo producto en distintos talles (por ejemplo, una Remera Polo en talle M y otra en L), la clave compuesta anterior colisionaría. Se reestructuró la tabla agregando un ID autogenerado único (`id String @id`) como surrogate primary key, y definiendo una clave compuesta de negocio `@@unique([orderId, productId, size])` para registrar ítems diferenciados sin violar restricciones.
 
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderitems      OrderItem[]
-}
-```
-
-### Comando para aplicar los cambios
-
-```bash
-# Crear y aplicar la migración
-npx prisma migrate dev --name "add-receipt-url-and-expires-at-to-order"
-
-# Verificar en Prisma Studio
-npx prisma studio
-```
+### 4. Datos del Consumidor (DNI y Teléfono)
+* Para cumplir con las normativas comerciales de facturación de Argentina y facilitar la búsqueda rápida en el POS físico, se agregaron las columnas `dni` y `phone` al modelo `User`. El DNI cuenta con un índice único `user_dni_idx` para evitar duplicaciones de clientes en la base de datos.
 
 ---
 
-## Schema Completo Resultante
+## Schema de Prisma Completo (`prisma/schema.prisma`)
 
 ```prisma
 generator client {
@@ -75,23 +41,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  slug           String        @unique
+  createdAt      DateTime      @default(now()) @db.Timestamp(6)
+  subCategories  SubCategory[]
+  sizes          Size[]
+  products       Product[]
+}
+
+model SubCategory {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  slug       String    @unique
+  categoryId String    @db.Uuid
+  createdAt  DateTime  @default(now()) @db.Timestamp(6)
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products   Product[]
+}
+
+model Size {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  categoryId String           @db.Uuid
+  category   Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  variants   ProductVariant[]
+}
+
+model Brand {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  products  Product[]
+}
+
 model Product {
-  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String
-  slug        String      @unique(map: "product_slug_idx")
-  category    String
-  images      String[]
-  brand       String
-  description String
-  stock       Int
-  price       Decimal     @default(0) @db.Decimal(12, 2)
-  rating      Decimal     @default(0) @db.Decimal(3, 2)
-  numReviews  Int         @default(0)
-  isFeatured  Boolean     @default(false)
-  banner      String?
-  createdAt   DateTime    @default(now()) @db.Timestamp(6)
-  OrderItem   OrderItem[]
-  Review      Review[]
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  slug            String           @unique(map: "product_slug_idx")
+  categoryId      String           @db.Uuid
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategoryId   String?          @db.Uuid
+  subCategory     SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
+  images          String[]
+  brandId         String           @db.Uuid
+  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  description     String
+  price           Decimal          @default(0) @db.Decimal(12, 2)
+  rating          Decimal          @default(0) @db.Decimal(3, 2)
+  numReviews      Int              @default(0)
+  isFeatured      Boolean          @default(false)
+  banner          String?
+  createdAt       DateTime         @default(now()) @db.Timestamp(6)
+  OrderItem       OrderItem[]
+  Review          Review[]
+  variants        ProductVariant[]
+}
+
+model ProductVariant {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productId String @db.Uuid
+  sizeId    String @db.Uuid
+  stock     Int    @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size    Size    @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, sizeId], map: "product_size_unique_idx")
 }
 
 model User {
@@ -104,6 +122,8 @@ model User {
   role          String    @default("user")
   address       Json?     @db.Json
   paymentMethod String?
+  dni           String?   @unique(map: "user_dni_idx")
+  phone         String?
   createdAt     DateTime  @default(now()) @db.Timestamp(6)
   updatedAt     DateTime  @updatedAt
   account       Account[]
@@ -113,39 +133,43 @@ model User {
   Review        Review[]
 }
 
-model Order {
-  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId          String      @db.Uuid
-  shippingAddress Json        @db.Json
-  paymentMethod   String
-  paymentResult   Json?       @db.Json
-  itemsPrice      Decimal     @db.Decimal(12, 2)
-  shippingPrice   Decimal     @db.Decimal(12, 2)
-  taxPrice        Decimal     @db.Decimal(12, 2)
-  totalPrice      Decimal     @db.Decimal(12, 2)
-  isPaid          Boolean     @default(false)
-  paidAt          DateTime?   @db.Timestamp(6)
-  isDelivered     Boolean     @default(false)
-  deliveredAt     DateTime?   @db.Timestamp(6)
-  createdAt       DateTime    @default(now()) @db.Timestamp(6)
-  receiptUrl      String?
-  expiresAt       DateTime?   @db.Timestamp(6)
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderitems      OrderItem[]
+model Account {
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
 }
 
-model OrderItem {
-  orderId   String  @db.Uuid
-  productId String  @db.Uuid
-  qty       Int
-  price     Decimal @db.Decimal(12, 2)
-  name      String
-  slug      String
-  image     String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+model Session {
+  sessionToken String   @id
+  userId       String   @db.Uuid
+  expires      DateTime @db.Timestamp(6)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([orderId, productId], map: "orderitems_orderId_productId_pk")
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }
 
 model Cart {
@@ -161,6 +185,45 @@ model Cart {
   user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Order {
+  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String      @db.Uuid
+  shippingAddress Json        @db.Json
+  paymentMethod   String
+  paymentResult   Json?       @db.Json
+  itemsPrice      Decimal     @db.Decimal(12, 2)
+  shippingPrice   Decimal     @db.Decimal(12, 2)
+  taxPrice        Decimal     @db.Decimal(12, 2)
+  totalPrice      Decimal     @db.Decimal(12, 2)
+  isPaid          Boolean     @default(false)
+  paidAt          DateTime?   @db.Timestamp(6)
+  isDelivered     Boolean     @default(false)
+  deliveredAt     DateTime?   @db.Timestamp(6)
+  shippingStatus  String?     @default("Pendiente")
+  shippingNotes   String?
+  createdAt       DateTime    @default(now()) @db.Timestamp(6)
+  receiptUrl      String?
+  expiresAt       DateTime?   @db.Timestamp(6)
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderitems      OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId   String  @db.Uuid
+  productId String  @db.Uuid
+  size      String?
+  qty       Int
+  price     Decimal @db.Decimal(12, 2)
+  name      String
+  slug      String
+  image     String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, productId, size], map: "orderitems_order_product_size_idx")
+}
+
 model Review {
   id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId             String   @db.Uuid
@@ -173,62 +236,18 @@ model Review {
   product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-model Account {
-  userId            String  @db.Uuid
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  createdAt         DateTime @default(now()) @db.Timestamp(6)
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @id
-  userId       String   @db.Uuid
-  expires      DateTime @db.Timestamp(6)
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime @updatedAt
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
-}
 ```
 
 ---
 
-## Relaciones Clave
+## Relaciones del Esquema
 
 ```
-User ──┬── Order ── OrderItem ── Product
-       ├── Cart
-       ├── Review ─────────────── Product
-       └── Account / Session  (NextAuth)
+     Category ── SubCategory 
+        │
+      Size ── ProductVariant ── Product ── Brand
+                 │
+              OrderItem ── Order ── User ── Account / Session
+                                     │
+                                    Cart
 ```
-
----
-
-## Seed de Datos de Prueba
-
-```bash
-npx tsx ./db/seed
-```
-
-El archivo `db/sample-data.ts` contiene productos de ejemplo. Modificarlo con
-productos reales antes del lanzamiento.

@@ -10,6 +10,10 @@ const links = [
     href: '/admin/overview',
   },
   {
+    title: 'POS (Venta)',
+    href: '/admin/pos',
+  },
+  {
     title: 'Productos',
     href: '/admin/products',
   },
