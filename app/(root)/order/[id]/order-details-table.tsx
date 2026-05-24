@@ -221,7 +221,7 @@ const OrderDetailsTable = ({
                       : paymentMethod}
                   </span>
                   {isPaid ? (
-                    <Badge variant='secondary' className="bg-zinc-100 text-zinc-800 border-transparent">
+                    <Badge variant='secondary' className="bg-aloe-10 text-zinc-900 border-transparent">
                       Pagado el {formatDateTime(paidAt!).dateTime}
                     </Badge>
                   ) : (
