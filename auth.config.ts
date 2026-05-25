@@ -9,8 +9,11 @@ export const authConfig = {
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   callbacks: {
+    session({ session, token }) {
+      session.user.role = token.role;
+      return session;
+    },
     authorized({ request, auth }) {
-      // Array of regex patterns of paths we want to protect
       const protectedPaths = [
         /\/shipping-address/,
         /\/payment-method/,
@@ -21,26 +24,22 @@ export const authConfig = {
         /\/admin/,
       ];
 
-      // Get pathname from the req URL object
       const { pathname } = request.nextUrl;
-      // Check if user is not authenticated and accessing a protected path
+
       if (!auth && protectedPaths.some((p) => p.test(pathname))) return false;
 
-      // Check for session cart cookie
-      if (!request.cookies.get('sessionCartId')) {
-        // Generate new session cart id cookie
-        const sessionCartId = crypto.randomUUID();
+      if (auth && /\/admin/.test(pathname) && auth.user?.role !== 'admin') {
+        return NextResponse.redirect(new URL('/unauthorized', request.url));
+      }
 
-        // Create new response and add the new headers
+      if (!request.cookies.get('sessionCartId')) {
+        const sessionCartId = crypto.randomUUID();
         const response = NextResponse.next({
           request: {
             headers: new Headers(request.headers),
           },
         });
-
-        // Set newly generated sessionCartId in the response cookies
         response.cookies.set('sessionCartId', sessionCartId);
-
         return response;
       }
 

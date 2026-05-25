@@ -4,6 +4,7 @@ import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/auth-guard';
+import { DEFAULT_CATEGORY_ID } from '../constants';
 
 // ─── CATEGORIES ─────────────────────────────────────────────────────────────
 
@@ -11,7 +12,11 @@ export async function getAllCategories() {
   try {
     const categories = await prisma.category.findMany({
       orderBy: { name: 'asc' },
-      include: { sizes: true, subCategories: { orderBy: { name: 'asc' } } },
+      include: {
+        sizes: true,
+        subCategories: { orderBy: { name: 'asc' } },
+        _count: { select: { products: true } },
+      },
     });
     return { success: true, data: categories };
   } catch (error) {
@@ -56,7 +61,26 @@ export async function updateCategory(id: string, data: { name: string; slug: str
 export async function deleteCategory(id: string) {
   try {
     await requireAdmin();
-    await prisma.category.delete({ where: { id } });
+
+    if (id === DEFAULT_CATEGORY_ID) {
+      return { success: false, message: 'No se puede eliminar la categoría predeterminada del sistema' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.category.upsert({
+        where: { id: DEFAULT_CATEGORY_ID },
+        create: { id: DEFAULT_CATEGORY_ID, name: 'Sin categoría', slug: 'sin-categoria' },
+        update: {},
+      });
+
+      await tx.product.updateMany({
+        where: { categoryId: id },
+        data: { categoryId: DEFAULT_CATEGORY_ID },
+      });
+
+      await tx.category.delete({ where: { id } });
+    });
+
     revalidatePath('/admin/categories');
     return { success: true, message: 'Categoría eliminada exitosamente' };
   } catch (error) {

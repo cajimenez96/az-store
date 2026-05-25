@@ -49,12 +49,12 @@ model Product {
   name            String
   slug            String           @unique(map: "product_slug_idx")
   categoryId      String           @db.Uuid
-  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   subCategoryId   String?          @db.Uuid
   subCategory     SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
   images          String[]
   brandId         String           @db.Uuid
-  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Restrict)
   description     String
   price           Decimal          @default(0) @db.Decimal(12, 2)
   rating          Decimal          @default(0) @db.Decimal(3, 2)
@@ -170,6 +170,7 @@ model Order {
   shippingNotes   String?
   createdAt       DateTime    @default(now()) @db.Timestamp(6)
   receiptUrl      String?
+  mpPaymentId     String?     @unique
   expiresAt       DateTime?   @db.Timestamp(6)
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderitems      OrderItem[]

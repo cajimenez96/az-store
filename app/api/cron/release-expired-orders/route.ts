@@ -1,27 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/db/prisma';
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
+    const expectedSecret = process.env.CRON_SECRET;
+
+    if (!expectedSecret) {
+      return NextResponse.json(
+        { success: false, message: 'CRON_SECRET no está configurado en el entorno' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const secretParam = searchParams.get('secret');
-    
     const authHeader = request.headers.get('Authorization');
     const secretHeader = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-    
-    const expectedSecret = process.env.CRON_SECRET;
-    
-    // Auth guard using CRON_SECRET if it is configured
-    if (expectedSecret && secretParam !== expectedSecret && secretHeader !== expectedSecret) {
+
+    if (secretParam !== expectedSecret && secretHeader !== expectedSecret) {
       return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 });
     }
 
     const now = new Date();
 
-    // Find unpaid bank transfer orders that have passed their expiration date
+    // Find all unpaid orders that have passed their expiration date
     const expiredOrdersRaw = await prisma.order.findMany({
       where: {
-        paymentMethod: 'TransferenciaBancaria',
         isPaid: false,
         expiresAt: {
           lt: now,
@@ -44,31 +48,37 @@ export async function GET(request: NextRequest) {
 
     let processedCount = 0;
 
-    // Process each expired order and restore stock in a transaction
+    // Process each expired order
     for (const order of expiredOrders) {
       await prisma.$transaction(async (tx) => {
-        // Restore product stock
-        for (const item of order.orderitems) {
-          if (item.size) {
-            const variant = await tx.productVariant.findFirst({
-              where: { productId: item.productId, size: { name: item.size } }
-            });
-            if (variant) {
-              await tx.productVariant.update({
-                where: { id: variant.id },
-                data: { stock: { increment: item.qty } },
+        // Only bank transfer orders reserved stock — restore it on expiry
+        if (order.paymentMethod === 'TransferenciaBancaria') {
+          for (const item of order.orderitems) {
+            if (item.size) {
+              const variant = await tx.productVariant.findFirst({
+                where: { productId: item.productId, size: { name: item.size } },
               });
+              if (variant) {
+                await tx.productVariant.update({
+                  where: { id: variant.id },
+                  data: { stock: { increment: item.qty } },
+                });
+              }
             }
           }
         }
 
-        // Cancel order in database (marking status in paymentResult)
+        const reason =
+          order.paymentMethod === 'TransferenciaBancaria'
+            ? 'Expiración automática por falta de comprobante de transferencia (24hs)'
+            : 'Expiración automática por pago no completado';
+
         await tx.order.update({
           where: { id: order.id },
           data: {
             paymentResult: {
               status: 'CANCELLED',
-              reason: 'Expiración automática por falta de comprobante de transferencia (24hs)',
+              reason,
               cancelledAt: new Date().toISOString(),
             },
           },

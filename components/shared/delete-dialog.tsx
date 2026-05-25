@@ -17,9 +17,11 @@ import {
 const DeleteDialog = ({
   id,
   action,
+  warningMessage,
 }: {
   id: string;
   action: (id: string) => Promise<{ success: boolean; message: string }>;
+  warningMessage?: string;
 }) => {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -53,8 +55,15 @@ const DeleteDialog = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta acción no se puede deshacer.
+          <AlertDialogDescription asChild>
+            <div>
+              <span>Esta acción no se puede deshacer.</span>
+              {warningMessage && (
+                <span className='mt-2 block font-medium text-amber-600 dark:text-amber-400'>
+                  {warningMessage}
+                </span>
+              )}
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

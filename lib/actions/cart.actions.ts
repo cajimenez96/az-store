@@ -11,11 +11,15 @@ import { Prisma } from '@prisma/client';
 
 // Calculate cart prices
 const calcPrice = (items: CartItem[]) => {
+  const freeShippingThreshold = parseFloat(process.env.FREE_SHIPPING_THRESHOLD ?? '100');
+  const shippingFee = parseFloat(process.env.SHIPPING_PRICE ?? '10');
+  const taxRate = parseFloat(process.env.TAX_RATE ?? '0.15');
+
   const itemsPrice = round2(
       items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0)
     ),
-    shippingPrice = round2(itemsPrice > 100 ? 0 : 10),
-    taxPrice = round2(0.15 * itemsPrice),
+    shippingPrice = round2(itemsPrice > freeShippingThreshold ? 0 : shippingFee),
+    taxPrice = round2(taxRate * itemsPrice),
     totalPrice = round2(itemsPrice + taxPrice + shippingPrice);
 
   return {

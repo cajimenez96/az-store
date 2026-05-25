@@ -69,3 +69,6 @@ export const reviewFormDefaultValues = {
 };
 
 export const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
+
+export const DEFAULT_BRAND_ID = '00000000-0000-0000-0000-000000000001';
+export const DEFAULT_CATEGORY_ID = '00000000-0000-0000-0000-000000000002';

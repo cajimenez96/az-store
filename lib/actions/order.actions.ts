@@ -67,10 +67,16 @@ export async function createOrder() {
     const expirationHours = process.env.ORDER_EXPIRATION_HOURS
       ? Number(process.env.ORDER_EXPIRATION_HOURS)
       : 24;
-    const expiresAt =
-      user.paymentMethod === 'TransferenciaBancaria'
-        ? new Date(Date.now() + expirationHours * 60 * 60 * 1000)
-        : null;
+    const mpExpirationMinutes = process.env.MP_EXPIRATION_MINUTES
+      ? Number(process.env.MP_EXPIRATION_MINUTES)
+      : 30;
+
+    let expiresAt: Date | null = null;
+    if (user.paymentMethod === 'TransferenciaBancaria') {
+      expiresAt = new Date(Date.now() + expirationHours * 60 * 60 * 1000);
+    } else if (user.paymentMethod === 'MercadoPago') {
+      expiresAt = new Date(Date.now() + mpExpirationMinutes * 60 * 1000);
+    }
 
     // Create a transaction to create order and order items in database
     const insertedOrderId = await prisma.$transaction(async (tx) => {
@@ -241,10 +247,18 @@ export async function approvePayPalOrder(
 export async function updateOrderToPaid({
   orderId,
   paymentResult,
+  mpPaymentId,
 }: {
   orderId: string;
   paymentResult?: PaymentResult;
+  mpPaymentId?: string;
 }) {
+  // Idempotency: reject duplicate MP payment IDs before any DB write
+  if (mpPaymentId) {
+    const existing = await prisma.order.findFirst({ where: { mpPaymentId } });
+    if (existing) throw new Error('La orden ya está pagada');
+  }
+
   // Get order from database
   const order = await prisma.order.findFirst({
     where: {
@@ -266,13 +280,27 @@ export async function updateOrderToPaid({
       for (const item of order.orderitems) {
         if (item.size) {
           const variant = await tx.productVariant.findFirst({
-            where: { productId: item.productId, size: { name: item.size } }
+            where: { productId: item.productId, size: { name: item.size } },
           });
-          if (variant) {
-            await tx.productVariant.update({
-              where: { id: variant.id },
-              data: { stock: { decrement: item.qty } },
-            });
+
+          if (!variant) {
+            throw new Error(
+              `Variante no encontrada: producto ${item.productId}, talle ${item.size}`
+            );
+          }
+
+          // Guard atómico: decrementa solo si hay stock suficiente.
+          // Previene stock negativo en compras simultáneas (race condition).
+          const affected = await tx.$executeRaw`
+            UPDATE "ProductVariant"
+            SET stock = stock - ${item.qty}
+            WHERE id = ${variant.id} AND stock >= ${item.qty}
+          `;
+
+          if (affected === 0) {
+            throw new Error(
+              `Stock insuficiente para el talle ${item.size}. No se puede confirmar el pago.`
+            );
           }
         }
       }
@@ -285,6 +313,7 @@ export async function updateOrderToPaid({
         isPaid: true,
         paidAt: new Date(),
         paymentResult,
+        ...(mpPaymentId ? { mpPaymentId } : {}),
       },
     });
   });
@@ -626,10 +655,7 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
 // Approve bank transfer (admin)
 export async function approveBankTransfer(orderId: string) {
   try {
-    const session = await auth();
-    if (session?.user?.role !== 'admin' && session?.user?.role !== 'seller') {
-      throw new Error('No autorizado');
-    }
+    await requireAdminOrSeller();
 
     const order = await prisma.order.findFirst({
       where: { id: orderId },
@@ -662,10 +688,7 @@ export async function approveBankTransfer(orderId: string) {
 // Reject bank transfer (admin)
 export async function rejectBankTransfer(orderId: string) {
   try {
-    const session = await auth();
-    if (session?.user?.role !== 'admin' && session?.user?.role !== 'seller') {
-      throw new Error('No autorizado');
-    }
+    await requireAdminOrSeller();
 
     const order = await prisma.order.findFirst({
       where: { id: orderId },

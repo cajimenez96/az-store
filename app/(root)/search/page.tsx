@@ -27,9 +27,7 @@ const prices = [
   },
 ];
 
-const ratings = [4, 3, 2, 1];
-
-const sortOrders = ['newest', 'lowest', 'highest', 'rating'];
+const sortOrders = ['newest', 'lowest', 'highest'];
 
 export async function generateMetadata(props: {
   searchParams: Promise<{
@@ -37,7 +35,6 @@ export async function generateMetadata(props: {
     category: string;
     subCategory: string;
     price: string;
-    rating: string;
   }>;
 }) {
   const {
@@ -45,7 +42,6 @@ export async function generateMetadata(props: {
     category = 'all',
     subCategory = 'all',
     price = 'all',
-    rating = 'all',
   } = await props.searchParams;
 
   const isQuerySet = q && q !== 'all' && q.trim() !== '';
@@ -54,16 +50,14 @@ export async function generateMetadata(props: {
   const isSubCategorySet =
     subCategory && subCategory !== 'all' && subCategory.trim() !== '';
   const isPriceSet = price && price !== 'all' && price.trim() !== '';
-  const isRatingSet = rating && rating !== 'all' && rating.trim() !== '';
 
-  if (isQuerySet || isCategorySet || isSubCategorySet || isPriceSet || isRatingSet) {
+  if (isQuerySet || isCategorySet || isSubCategorySet || isPriceSet) {
     return {
       title: `
-      Search ${isQuerySet ? q : ''} 
+      Search ${isQuerySet ? q : ''}
       ${isCategorySet ? `: Category ${category}` : ''}
       ${isSubCategorySet ? `: Sub-category ${subCategory}` : ''}
-      ${isPriceSet ? `: Price ${price}` : ''}
-      ${isRatingSet ? `: Rating ${rating}` : ''}`,
+      ${isPriceSet ? `: Price ${price}` : ''}`,
     };
   } else {
     return {
@@ -78,7 +72,6 @@ const SearchPage = async (props: {
     category?: string;
     subCategory?: string;
     price?: string;
-    rating?: string;
     sort?: string;
     page?: string;
   }>;
@@ -88,7 +81,6 @@ const SearchPage = async (props: {
     category = 'all',
     subCategory = 'all',
     price = 'all',
-    rating = 'all',
     sort = 'newest',
     page = '1',
   } = await props.searchParams;
@@ -99,26 +91,22 @@ const SearchPage = async (props: {
     sc,
     p,
     s,
-    r,
     pg,
   }: {
     c?: string;
     sc?: string;
     p?: string;
     s?: string;
-    r?: string;
     pg?: string;
   }) => {
-    const params = { q, category, subCategory, price, rating, sort, page };
+    const params = { q, category, subCategory, price, sort, page };
 
     if (c) params.category = c;
-    // If category is cleared or changed without explicitly providing a subcategory, reset subcategory
     if (c && c !== category && !sc) params.subCategory = 'all';
     else if (sc) params.subCategory = sc;
-    
+
     if (p) params.price = p;
     if (s) params.sort = s;
-    if (r) params.rating = r;
     if (pg) params.page = pg;
 
     return `/search?${new URLSearchParams(params).toString()}`;
@@ -129,7 +117,6 @@ const SearchPage = async (props: {
     category,
     subCategory,
     price,
-    rating,
     sort,
     page: Number(page),
   });
@@ -189,30 +176,6 @@ const SearchPage = async (props: {
             ))}
           </ul>
         </div>
-        {/* Rating Links */}
-        <div className='text-xl mb-2 mt-8'>Customer Ratings</div>
-        <div>
-          <ul className='space-y-1'>
-            <li>
-              <Link
-                className={`${rating === 'all' && 'font-bold'}`}
-                href={getFilterUrl({ r: 'all' })}
-              >
-                Any
-              </Link>
-            </li>
-            {ratings.map((r) => (
-              <li key={r}>
-                <Link
-                  className={`${rating === r.toString() && 'font-bold'}`}
-                  href={getFilterUrl({ r: `${r}` })}
-                >
-                  {`${r} stars & up`}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
       <div className='md:col-span-4 space-y-4'>
         <div className='flex-between flex-col md:flex-row my-4'>
@@ -221,12 +184,10 @@ const SearchPage = async (props: {
             {category !== 'all' && category !== '' && <span>Category: {category}</span>}
             {subCategory !== 'all' && subCategory !== '' && <span>Sub-category: {subCategory}</span>}
             {price !== 'all' && <span>Price: {price}</span>}
-            {rating !== 'all' && <span>Rating: {rating} stars & up</span>}
-            
+
             {(q !== 'all' && q !== '') ||
             (category !== 'all' && category !== '') ||
             (subCategory !== 'all' && subCategory !== '') ||
-            rating !== 'all' ||
             price !== 'all' ? (
               <Button variant={'link'} asChild>
                 <Link href='/search'>Clear</Link>

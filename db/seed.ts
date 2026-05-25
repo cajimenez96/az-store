@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import sampleData from './sample-data';
 import { hash } from '@/lib/encrypt';
 import slugify from 'slugify';
+import { DEFAULT_BRAND_ID, DEFAULT_CATEGORY_ID } from '../lib/constants';
 
 async function main() {
   const prisma = new PrismaClient();
@@ -20,6 +21,14 @@ async function main() {
   await prisma.session.deleteMany();
   await prisma.verificationToken.deleteMany();
   await prisma.user.deleteMany();
+
+  // Create sentinel default records (must exist before any product references them)
+  await prisma.brand.create({
+    data: { id: DEFAULT_BRAND_ID, name: 'Sin marca', slug: 'sin-marca' },
+  });
+  await prisma.category.create({
+    data: { id: DEFAULT_CATEGORY_ID, name: 'Sin categoría', slug: 'sin-categoria' },
+  });
 
   // Create Categories and a default Size
   const categoryNames = Array.from(
