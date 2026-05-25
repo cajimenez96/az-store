@@ -323,12 +323,12 @@ export async function getInventory({
 
   const categoryFilter: Prisma.ProductVariantWhereInput =
     category && category !== 'all'
-      ? { product: { categoryId: category } }
+      ? { product: { category: { slug: category } } }
       : {};
 
   const brandFilter: Prisma.ProductVariantWhereInput =
     brand && brand !== 'all'
-      ? { product: { brandId: brand } }
+      ? { product: { brand: { slug: brand } } }
       : {};
 
   let stockFilter: Prisma.ProductVariantWhereInput = {};

@@ -80,7 +80,7 @@ export default function InventoryFilters({
           >
             <option value="all">Todas las Marcas</option>
             {brands.map(b => (
-              <option key={b.id} value={b.id}>{b.name}</option>
+              <option key={b.id} value={b.slug}>{b.name}</option>
             ))}
           </select>
         </div>
@@ -93,7 +93,7 @@ export default function InventoryFilters({
           >
             <option value="all">Todas las Categorías</option>
             {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.slug}>{c.name}</option>
             ))}
           </select>
         </div>

@@ -31,15 +31,15 @@ const AdminInventoryPage = async (props: {
 
   const page = Number(searchParams.page) || 1;
   const searchText = searchParams.query || '';
-  const categoryId = searchParams.category || 'all';
-  const brandId = searchParams.brand || 'all';
+  const categorySlug = searchParams.category || 'all';
+  const brandSlug = searchParams.brand || 'all';
   const stockFilter = searchParams.stock || 'all';
 
   const inventory = await getInventory({
     query: searchText,
     page,
-    category: categoryId,
-    brand: brandId,
+    category: categorySlug,
+    brand: brandSlug,
     stock: stockFilter,
   });
 
@@ -55,8 +55,8 @@ const AdminInventoryPage = async (props: {
       <InventoryFilters 
         categories={categoriesResult.data || []} 
         brands={brands} 
-        currentCategory={categoryId}
-        currentBrand={brandId}
+        currentCategory={categorySlug}
+        currentBrand={brandSlug}
         currentStock={stockFilter}
         currentQuery={searchText}
       />
