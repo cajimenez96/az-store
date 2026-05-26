@@ -10,6 +10,7 @@ export default {
   theme: {
   	extend: {
   		colors: {
+  			// ── shadcn/ui CSS-variable tokens (do not remove — power UI components) ──
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -50,55 +51,123 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			// DESIGN.md — Cinematic Track
+
+  			// ── DESIGN.md — Brand & Accent ──────────────────────────────────────────
+  			'az-primary':       '#0064e0',
+  			'az-primary-deep':  '#0457cb',
+  			'az-primary-soft':  '#0091ff',
+  			'az-on-primary':    '#ffffff',
+  			'az-ink-button':    '#000000',
+  			'az-on-ink':        '#ffffff',
+  			'az-fb-blue':       '#1876f2',
+  			'az-meta-link':     '#385898',
+
+  			// ── DESIGN.md — Semantic ────────────────────────────────────────────────
+  			'az-success':       '#31a24c',
+  			'az-success-bg':    '#24e400',
+  			'az-attention':     '#f2a918',
+  			'az-warning':       '#f7b928',
+  			'az-warning-bg':    '#ffe200',
+  			'az-critical':      '#e41e3f',
+  			'az-critical-strong': '#f0284a',
+
+  			// ── DESIGN.md — Surface ─────────────────────────────────────────────────
+  			'az-canvas':        '#ffffff',
+  			'az-surface-soft':  '#f1f4f7',
+
+  			// ── DESIGN.md — Text ────────────────────────────────────────────────────
+  			'az-ink-deep':      '#0a1317',
+  			'az-ink':           '#1c1e21',
+  			'az-charcoal':      '#444950',
+  			'az-slate':         '#4b4c4f',
+  			'az-steel':         '#5d6c7b',
+  			'az-stone':         '#8595a4',
+
+  			// ── DESIGN.md — Hairlines ───────────────────────────────────────────────
+  			'az-hairline':      '#ced0d4',
+  			'az-hairline-soft': '#dee3e9',
+  			'az-disabled-text': '#bcc0c4',
+
+  			// ── Legacy tokens (used by existing components — remove as redesign progresses) ──
   			'canvas-night': '#000000',
   			'canvas-night-elevated': '#0a0a0a',
   			'surface-elevated-dark': '#1e2c31',
-  			// DESIGN.md — Transactional Track
   			'canvas-cream': '#fbfbf5',
   			'canvas-light': '#ffffff',
-  			// DESIGN.md — Brand Accents (light track only)
   			'aloe-10': '#c1fbd4',
   			'pistachio-10': '#d4f9e0',
-  			// DESIGN.md — Shade Ladder
   			'shade-30': '#d4d4d8',
   			'shade-40': '#a1a1aa',
   			'shade-50': '#71717a',
   			'shade-60': '#52525b',
   			'shade-70': '#3f3f46',
-  			// DESIGN.md — Hairlines
   			'hairline-light': '#e4e4e7',
   			'hairline-dark': '#1e2c31',
-  			// DESIGN.md — Link tones (dark track)
   			'link-cool-1': '#9dabad',
   			'link-cool-2': '#9797a2',
   			'link-cool-3': '#bdbdca',
   			'link-mint': '#99b3ad',
-  			// Base
   			'ink': '#000000',
   		},
   		fontFamily: {
-  			display: [
-  				'var(--font-inter-display)',
+  			sans: [
+  				'var(--font-geist)',
+  				'Geist',
   				'Helvetica Neue',
   				'Helvetica',
   				'Arial',
   				'sans-serif',
   			],
-  			sans: [
-  				'var(--font-inter)',
-  				'Inter',
+  			// legacy aliases — replaced by sans
+  			display: [
+  				'var(--font-geist)',
+  				'Geist',
+  				'Helvetica Neue',
   				'Helvetica',
   				'Arial',
   				'sans-serif',
   			],
   		},
   		borderRadius: {
+  			// shadcn/ui tokens
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)',
+  			// DESIGN.md full scale
+  			'az-xs':      '2px',
+  			'az-sm':      '4px',
+  			'az-md':      '6px',
+  			'az-lg':      '8px',
+  			'az-xl':      '16px',
+  			'az-xxl':     '24px',
+  			'az-xxxl':    '32px',
+  			'az-feature': '40px',
+  			'az-full':    '100px',
+  			'az-circle':  '9999px',
+  			// legacy
   			pill: '9999px',
-  		}
+  		},
+  		spacing: {
+  			// DESIGN.md spacing scale
+  			'az-xxs':        '4px',
+  			'az-xs':         '8px',
+  			'az-sm':         '10px',
+  			'az-md':         '12px',
+  			'az-base':       '16px',
+  			'az-lg':         '20px',
+  			'az-xl':         '24px',
+  			'az-xxl':        '32px',
+  			'az-xxxl':       '40px',
+  			'az-section-sm': '48px',
+  			'az-section':    '64px',
+  			'az-section-lg': '80px',
+  			'az-hero':       '120px',
+  		},
+  		boxShadow: {
+  			// DESIGN.md elevation
+  			'az-sticky': 'rgba(20, 22, 26, 0.3) 0px 1px 4px 0px',
+  			'az-tab':    'rgba(0, 0, 0, 0.2) 1px 1px 0px 0px',
+  		},
   	}
   },
   plugins: [require("tailwindcss-animate")],

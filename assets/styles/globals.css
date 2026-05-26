@@ -90,7 +90,7 @@
 @layer base {
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "ss03" 1;
+    font-feature-settings: "ss01" 1, "ss02" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -105,112 +105,119 @@
   }
 }
 
-/* Custom Design System Classes (DESIGN.md) */
+/* ── DESIGN.md Typography System ──────────────────────────────────────────── */
 @layer utilities {
-  .font-ss03 {
-    font-feature-settings: "ss03" 1;
+  /* Headings — ss01 + ss02 always together per DESIGN.md */
+  .az-hero-display {
+    font-size: 64px;
+    font-weight: 500;
+    line-height: 1.16;
+    font-feature-settings: "ss01" 1, "ss02" 1;
   }
-
-  /* Font Families & Weights */
-  .font-display {
-    font-family: var(--font-inter-display), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  .az-display-lg {
+    font-size: clamp(36px, 5vw, 48px);
+    font-weight: 500;
+    line-height: 1.17;
+    font-feature-settings: "ss01" 1, "ss02" 1;
   }
-
-  .font-weight-330 {
+  .az-heading-lg {
+    font-size: clamp(28px, 4vw, 36px);
+    font-weight: 500;
+    line-height: 1.28;
+    font-feature-settings: "ss01" 1, "ss02" 1;
+  }
+  .az-heading-md {
+    font-size: clamp(22px, 3vw, 28px);
     font-weight: 300;
+    line-height: 1.21;
+    font-feature-settings: "ss01" 1, "ss02" 1;
+  }
+  .az-heading-sm {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.25;
+    font-feature-settings: "ss01" 1, "ss02" 1;
   }
 
-  /* Display Tiers — Cinematic Track */
+  /* Body & UI */
+  .az-subtitle-lg   { font-size: 18px; font-weight: 700; line-height: 1.44; }
+  .az-subtitle-md   { font-size: 18px; font-weight: 400; line-height: 1.44; }
+  .az-body-md-bold  { font-size: 16px; font-weight: 700; line-height: 1.50; letter-spacing: -0.16px; }
+  .az-body-md       { font-size: 16px; font-weight: 400; line-height: 1.50; letter-spacing: -0.16px; }
+  .az-body-sm-bold  { font-size: 14px; font-weight: 700; line-height: 1.43; letter-spacing: -0.14px; }
+  .az-body-sm       { font-size: 14px; font-weight: 400; line-height: 1.43; letter-spacing: -0.14px; }
+  .az-caption-bold  { font-size: 12px; font-weight: 700; line-height: 1.33; }
+  .az-caption       { font-size: 12px; font-weight: 400; line-height: 1.33; }
+  .az-button-md     { font-size: 14px; font-weight: 700; line-height: 1.43; letter-spacing: -0.14px; }
+  .az-link-md       { font-size: 16px; font-weight: 700; line-height: 1.50; letter-spacing: -0.16px; }
+
+  /* Layout helpers */
+  .az-wrapper {
+    @apply max-w-[1280px] mx-auto px-8 w-full;
+  }
+  .az-section       { @apply py-[64px]; }
+  .az-section-lg    { @apply py-[80px]; }
+  .az-section-sm    { @apply py-[48px]; }
+
+  /* Elevation */
+  .az-shadow-sticky {
+    box-shadow: rgba(20, 22, 26, 0.3) 0px 1px 4px 0px;
+  }
+
+  /* Legacy utilities (used by existing components — remove as redesign progresses) */
+  .font-ss03       { font-feature-settings: "ss03" 1; }
+  .font-display    { font-family: var(--font-geist), Geist, sans-serif; }
+  .font-weight-330 { font-weight: 300; }
+
   .display-xxl {
-    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
     font-size: clamp(48px, 8vw, 96px);
     font-weight: 300;
     line-height: 1.0;
     letter-spacing: 2.4px;
-    font-feature-settings: "ss03" 1;
   }
-
   .display-xl {
-    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
     font-size: clamp(36px, 6vw, 70px);
     font-weight: 300;
     line-height: 1.0;
-    letter-spacing: 0;
-    font-feature-settings: "ss03" 1;
   }
-
   .display-lg {
-    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
     font-size: clamp(32px, 5vw, 55px);
     font-weight: 300;
     line-height: 1.16;
-    letter-spacing: 0;
-    font-feature-settings: "ss03" 1;
   }
-
   .display-md {
-    font-family: var(--font-inter-display), Helvetica, Arial, sans-serif;
     font-size: clamp(28px, 4vw, 48px);
     font-weight: 300;
     line-height: 1.14;
-    letter-spacing: 0;
-    font-feature-settings: "ss03" 1;
   }
 
-  /* Elevation — Light Track */
   .shadow-level-3 {
-    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1), 
-                0 4px 4px rgba(0, 0, 0, 0.1), 
-                0 2px 2px rgba(0, 0, 0, 0.1), 
-                0 0 0 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 8px rgba(0,0,0,.1), 0 4px 4px rgba(0,0,0,.1),
+                0 2px 2px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.1);
   }
-
-  /* Elevation — Dark Track (Level 1: subtle inset top highlight) */
   .shadow-level-1-dark {
-    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04);
   }
-
-  /* Elevation — Dark Track (Level 2: card with hairline + drop) */
   .shadow-level-2-dark {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
-                0 1px 3px rgba(0, 0, 0, 0.3),
-                0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 1px 3px rgba(0,0,0,.3),
+                0 5px 10px rgba(0,0,0,.2);
   }
 
-  /* Section padding — Cinematic Track (generous negative space) */
-  .section-cinematic {
-    @apply py-24 md:py-32 lg:py-40;
-  }
+  .section-cinematic    { @apply py-24 md:py-32 lg:py-40; }
+  .section-transactional { @apply py-10 md:py-12; }
+  .hairline-light-border { border: 1px solid #e4e4e7; }
+  .hairline-dark-border  { border: 1px solid #1e2c31; }
 
-  /* Section padding — Transactional Track (dense, action-focused) */
-  .section-transactional {
-    @apply py-10 md:py-12;
-  }
-
-  /* Hairlines */
-  .hairline-light-border {
-    border: 1px solid #e4e4e7;
-  }
-
-  .hairline-dark-border {
-    border: 1px solid #1e2c31;
-  }
-
-  /* Full-bleed helper for cinematic sections */
   .full-bleed {
     width: 100vw;
     margin-left: calc(-50vw + 50%);
   }
-
-  /* Eyebrow cap label */
   .eyebrow-cap {
     font-size: 12px;
     font-weight: 400;
     line-height: 1.2;
     letter-spacing: 0.72px;
     text-transform: uppercase;
-    font-feature-settings: "ss03" 1;
   }
 }
 

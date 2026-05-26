@@ -1,21 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter, Inter_Tight } from 'next/font/google';
+import { Geist } from 'next/font/google';
 import '@/assets/styles/globals.css';
 import { APP_DESCRIPTION, APP_NAME, SERVER_URL } from '@/lib/constants';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/toaster';
 
-const inter = Inter({
+const geist = Geist({
   subsets: ['latin'],
-  variable: '--font-inter',
-});
-
-// Inter Tight at weight 300 is the closest open-source substitute for
-// Neue Haas Grotesk Display thin — used exclusively for display/headline roles.
-const interDisplay = Inter_Tight({
-  subsets: ['latin'],
-  weight: ['300', '400'],
-  variable: '--font-inter-display',
+  variable: '--font-geist',
 });
 
 export const metadata: Metadata = {
@@ -34,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
-      <body className={`${inter.variable} ${interDisplay.variable} ${inter.className} antialiased`}>
+      <body className={`${geist.variable} ${geist.className} antialiased`}>
         <ThemeProvider
           attribute='class'
           defaultTheme='light'
