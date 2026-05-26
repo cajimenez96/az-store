@@ -3,44 +3,45 @@ import Image from 'next/image';
 import ProductPrice from './product-price';
 
 const ProductCardDark = ({ product }: { product: { slug: string; images: string[]; name: string; brand?: string | { name: string } | null; price: string | number; variants?: { stock: number }[] } }) => {
-  const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) || 0;
+  const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) ?? 0;
+  const brandName = product.brand
+    ? (typeof product.brand === 'string' ? product.brand : product.brand.name)
+    : '';
+
   return (
     <Link href={`/product/${product.slug}`} className='group block'>
-      <div className='bg-canvas-night-elevated rounded-xl overflow-hidden shadow-level-2-dark border border-hairline-dark hover:border-white/20 transition-all duration-300 hover:-translate-y-1'>
-        {/* Image container */}
-        <div className='relative aspect-square overflow-hidden bg-canvas-night'>
+      <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft overflow-hidden hover:shadow-az-sticky hover:-translate-y-1 transition-all duration-200'>
+        {/* Image area */}
+        <div className='relative aspect-square bg-az-surface-soft p-4'>
           <Image
             src={product.images[0]}
             alt={product.name}
             fill
-            className='object-cover object-center group-hover:scale-105 transition-transform duration-500'
+            className='object-contain group-hover:scale-[1.03] transition-transform duration-300 p-4'
             sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
           />
           {stock === 0 && (
-            <div className='absolute inset-0 bg-black/60 flex items-center justify-center'>
-              <span className='text-white/70 text-sm font-medium tracking-widest uppercase'>Sin stock</span>
+            <div className='absolute top-3 left-3'>
+              <span className='az-caption-bold bg-az-critical text-white px-3 py-1 rounded-az-full'>
+                Sin stock
+              </span>
             </div>
           )}
         </div>
 
-        {/* Card body */}
-        <div className='p-4 space-y-2'>
-          <p className='eyebrow-cap text-link-cool-2'>
-            {product.brand ? (typeof product.brand === 'string' ? product.brand : product.brand.name) : ''}
-          </p>
-          <h3 className='text-white text-sm font-medium leading-snug line-clamp-2 group-hover:text-aloe-10 transition-colors duration-200'>
+        {/* Info */}
+        <div className='px-6 py-5'>
+          {brandName && (
+            <p className='az-caption text-az-steel mb-1'>{brandName}</p>
+          )}
+          <h3 className='az-body-sm-bold text-az-ink mb-3 line-clamp-2 group-hover:text-az-ink-deep transition-colors duration-150'>
             {product.name}
           </h3>
-          <div className='flex items-center justify-between pt-1'>
-            {stock > 0 ? (
-              <ProductPrice
-                value={Number(product.price)}
-                className='text-white font-semibold text-sm'
-              />
-            ) : (
-              <span className='text-shade-50 text-xs'>Sin stock</span>
-            )}
-          </div>
+          {stock > 0 ? (
+            <ProductPrice value={Number(product.price)} className='az-body-md-bold text-az-ink-deep' />
+          ) : (
+            <span className='az-caption text-az-stone'>Sin stock</span>
+          )}
         </div>
       </div>
     </Link>
