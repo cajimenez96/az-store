@@ -19,6 +19,16 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { updateUserPaymentMethod } from '@/lib/actions/user.actions';
+import { cn } from '@/lib/utils';
+
+const DISPLAY_NAMES: Record<string, string> = {
+  MercadoPago: 'Mercado Pago (Online)',
+  TransferenciaBancaria: 'Transferencia Bancaria',
+  PuntoDeVenta_Efectivo: 'Punto de Venta — Efectivo',
+  PuntoDeVenta_Transferencia: 'Punto de Venta — Transferencia',
+  PuntoDeVenta_QR: 'Punto de Venta — QR',
+  PuntoDeVenta_MercadoPago: 'Punto de Venta — Mercado Pago (Terminal)',
+};
 
 const PaymentMethodForm = ({
   preferredPaymentMethod,
@@ -44,10 +54,7 @@ const PaymentMethodForm = ({
       const res = await updateUserPaymentMethod(values);
 
       if (!res.success) {
-        toast({
-          variant: 'destructive',
-          description: res.message,
-        });
+        toast({ variant: 'destructive', description: res.message });
         return;
       }
 
@@ -55,24 +62,26 @@ const PaymentMethodForm = ({
     });
   };
 
+  const visibleMethods = PAYMENT_METHODS.filter((method) => {
+    if (method.startsWith('PuntoDeVenta')) {
+      return userRole === 'admin' || userRole === 'seller';
+    }
+    return true;
+  });
+
   return (
-    <div className='max-w-xl mx-auto px-4'>
-      <div className='bg-white shadow-level-3 rounded-lg border-0 p-6 md:p-8 space-y-6'>
-        <div className='space-y-2 border-b border-hairline-light pb-4'>
-          <h1 className='font-display font-[330] text-2xl md:text-3xl text-black font-ss03'>
-            Método de Pago
-          </h1>
-          <p className='text-xs text-zinc-500'>
-            Por favor, seleccioná la opción que prefieras para realizar el pago de tu pedido.
+    <div className='max-w-xl mx-auto'>
+      <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft p-6 md:p-8 space-y-6'>
+        {/* Header */}
+        <div className='space-y-1 border-b border-az-hairline-soft pb-5'>
+          <h1 className='az-heading-sm text-az-ink-deep'>Método de Pago</h1>
+          <p className='az-body-sm text-az-steel'>
+            Seleccioná la opción que prefieras para realizar el pago de tu pedido.
           </p>
         </div>
 
         <Form {...form}>
-          <form
-            method='post'
-            className='space-y-6'
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
+          <form method='post' className='space-y-6' onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name='type'
@@ -84,35 +93,42 @@ const PaymentMethodForm = ({
                       value={field.value}
                       className='flex flex-col gap-3'
                     >
-                      {PAYMENT_METHODS.filter(method => {
-                        if (method.startsWith('PuntoDeVenta')) {
-                          return userRole === 'admin' || userRole === 'seller';
-                        }
-                        return true;
-                      }).map((paymentMethod) => {
-                        const displayNames: Record<string, string> = {
-                          'MercadoPago': 'Mercado Pago (Online)',
-                          'TransferenciaBancaria': 'Transferencia Bancaria',
-                          'PuntoDeVenta_Efectivo': 'Punto de Venta - Efectivo',
-                          'PuntoDeVenta_Transferencia': 'Punto de Venta - Transferencia',
-                          'PuntoDeVenta_QR': 'Punto de Venta - QR',
-                          'PuntoDeVenta_MercadoPago': 'Punto de Venta - Mercado Pago (Terminal)'
-                        };
-                        const displayName = displayNames[paymentMethod] || paymentMethod;
+                      {visibleMethods.map((method) => {
+                        const isSelected = field.value === method;
                         return (
-                          <FormItem
-                            key={paymentMethod}
-                            className='flex items-center space-x-3 space-y-0 rounded-md border border-hairline-light p-4 hover:bg-zinc-50/50 cursor-pointer transition-all duration-150'
-                          >
-                            <FormControl>
-                              <RadioGroupItem
-                                value={paymentMethod}
-                                checked={field.value === paymentMethod}
-                                className='focus:ring-black text-black border-zinc-300'
-                              />
-                            </FormControl>
-                            <FormLabel className='font-medium text-black cursor-pointer flex-1 select-none'>
-                              {displayName}
+                          <FormItem key={method} className='space-y-0'>
+                            <FormLabel
+                              className={cn(
+                                'flex items-center gap-4 rounded-az-xl border p-4 cursor-pointer transition-all duration-150',
+                                isSelected
+                                  ? 'border-az-primary bg-az-canvas shadow-sm'
+                                  : 'border-az-hairline-soft bg-az-canvas hover:bg-az-surface-soft'
+                              )}
+                            >
+                              <FormControl>
+                                <RadioGroupItem
+                                  id={`payment-${method}`}
+                                  value={method}
+                                  checked={isSelected}
+                                  className={cn(
+                                    'border-az-hairline',
+                                    isSelected && 'border-az-primary text-az-primary'
+                                  )}
+                                />
+                              </FormControl>
+                              <span
+                                className={cn(
+                                  'az-body-sm-bold flex-1 select-none',
+                                  isSelected ? 'text-az-ink-deep' : 'text-az-ink'
+                                )}
+                              >
+                                {DISPLAY_NAMES[method] ?? method}
+                              </span>
+                              {isSelected && (
+                                <span className='az-caption text-az-primary font-semibold'>
+                                  Seleccionado
+                                </span>
+                              )}
                             </FormLabel>
                           </FormItem>
                         );
@@ -125,10 +141,11 @@ const PaymentMethodForm = ({
             />
 
             <Button
+              id='payment-submit'
               type='submit'
-              variant='primaryPill'
+              variant='buyCta'
               size='lg'
-              className='w-full mt-4'
+              className='w-full'
               disabled={isPending}
             >
               {isPending ? (
@@ -136,7 +153,7 @@ const PaymentMethodForm = ({
               ) : (
                 <>
                   Continuar
-                  <ArrowRight className='w-4 h-4 ml-2' />
+                  <ArrowRight className='w-4 h-4' />
                 </>
               )}
             </Button>

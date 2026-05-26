@@ -360,16 +360,16 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
       {/* Product Catalog Column */}
       <div className='lg:col-span-7 space-y-6'>
         {/* Search Header and Category Filter */}
-        <div className='bg-white shadow-level-1 border border-zinc-100 rounded-2xl p-5 space-y-4'>
+        <div className='bg-az-canvas border border-az-hairline-soft rounded-az-xl p-5 space-y-4'>
           <div className='flex gap-3 items-center'>
             <div className='relative flex-1'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4' />
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-az-stone h-4 w-4' />
               <Input
                 type='text'
                 placeholder='Buscar producto por nombre, marca o slug...'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className='pl-10 h-11 border-zinc-200 focus-visible:ring-black'
+                className='pl-10 h-11 border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                 autoFocus
               />
             </div>
@@ -377,7 +377,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <Button
                 variant='ghost'
                 onClick={() => setSearchQuery('')}
-                className='text-xs h-11 px-4 hover:bg-zinc-100 rounded-xl'
+                className='text-xs h-11 px-4 hover:bg-az-surface-soft rounded-az-lg az-caption-bold text-az-steel'
               >
                 Limpiar
               </Button>
@@ -385,16 +385,16 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
           </div>
 
           {/* Categories Quick Filter */}
-          <div className='flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide'>
-            <span className='text-[10px] uppercase font-bold text-zinc-400 flex items-center gap-1 mr-1 flex-shrink-0'>
+          <div className='flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none'>
+            <span className='az-caption-bold text-az-stone flex items-center gap-1 mr-1 flex-shrink-0 uppercase tracking-wider'>
               <Filter className='h-3 w-3' /> Categoría:
             </span>
             <button
               onClick={() => setSelectedCategoryId('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-az-full az-caption-bold transition-all ${
                 selectedCategoryId === 'all'
-                  ? 'bg-black text-white'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                  ? 'bg-az-ink-deep text-white'
+                  : 'bg-az-surface-soft hover:bg-az-hairline-soft text-az-charcoal'
               }`}
             >
               Todos
@@ -403,10 +403,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategoryId(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex-shrink-0 ${
+                className={`px-3 py-1.5 rounded-az-full az-caption-bold transition-all flex-shrink-0 ${
                   selectedCategoryId === cat.id
-                    ? 'bg-black text-white'
-                    : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                    ? 'bg-az-ink-deep text-white'
+                    : 'bg-az-surface-soft hover:bg-az-hairline-soft text-az-charcoal'
                 }`}
               >
                 {cat.name}
@@ -416,9 +416,9 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
         </div>
 
         {/* Product Catalog Grid */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[62vh] overflow-y-auto pr-2 custom-scrollbar'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[62vh] overflow-y-auto pr-2'>
           {filteredProducts.length === 0 ? (
-            <div className='col-span-2 py-12 text-center text-zinc-400 bg-white border border-dashed rounded-2xl'>
+            <div className='col-span-2 py-12 text-center az-body-sm text-az-stone bg-az-surface-soft border border-dashed border-az-hairline rounded-az-xl'>
               No se encontraron productos con los filtros seleccionados.
             </div>
           ) : (
@@ -427,38 +427,38 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               return (
                 <div
                   key={product.id}
-                  className='bg-white border border-zinc-100 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md transition-all duration-200 group'
+                  className='bg-az-canvas border border-az-hairline-soft rounded-az-xl p-4 flex flex-col justify-between hover:shadow-sm transition-all duration-200 group'
                 >
                   <div className='flex gap-4'>
-                    <div className='relative h-20 w-20 rounded-xl overflow-hidden bg-zinc-50 border border-zinc-100 flex-shrink-0'>
+                    <div className='relative h-20 w-20 rounded-az-xl overflow-hidden bg-az-surface-soft border border-az-hairline-soft flex-shrink-0'>
                       <Image
                         src={product.images[0] || '/placeholder.png'}
                         alt={product.name}
                         fill
-                        className='object-cover group-hover:scale-105 transition-transform duration-300'
+                        className='object-contain group-hover:scale-105 transition-transform duration-300'
                         sizes='80px'
                       />
                     </div>
                     <div className='space-y-1 min-w-0'>
-                      <span className='text-[10px] uppercase font-bold tracking-wider text-zinc-400'>
+                      <span className='az-caption-bold text-az-stone uppercase tracking-wider block'>
                         {product.brand?.name || 'Genérica'}
                       </span>
-                      <h3 className='font-display font-medium text-sm text-zinc-800 truncate' title={product.name}>
+                      <h3 className='az-body-sm-bold text-az-ink-deep truncate' title={product.name}>
                         {product.name}
                       </h3>
-                      <p className='font-semibold text-base text-black'>
+                      <p className='az-body-md-bold text-az-ink-deep tabular-nums'>
                         {formatCurrency(product.price)}
                       </p>
-                      <p className='text-[11px] text-zinc-500'>
-                        Stock Total: <span className={totalStock > 2 ? 'text-zinc-600 font-semibold' : 'text-amber-600 font-semibold'}>{totalStock} u.</span>
+                      <p className='az-caption text-az-steel'>
+                        Stock: <span className={totalStock > 2 ? 'text-az-success font-semibold' : 'text-az-attention font-semibold'}>{totalStock} u.</span>
                       </p>
                     </div>
                   </div>
 
                   {/* Size Selector */}
-                  <div className='mt-4 pt-3 border-t border-zinc-50 space-y-1.5'>
-                    <span className='text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block'>
-                      Seleccionar Talle (Agregar):
+                  <div className='mt-4 pt-3 border-t border-az-hairline-soft space-y-1.5'>
+                    <span className='az-caption-bold text-az-stone uppercase tracking-wider block'>
+                      Talle → Agregar:
                     </span>
                     <div className='flex flex-wrap gap-1.5'>
                       {product.variants.map((v) => {
@@ -472,16 +472,14 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                             type='button'
                             disabled={isOutOfStock}
                             onClick={() => handleAddToCart(product, v)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all duration-150 ${
+                            className={`px-3 py-1.5 rounded-az-full az-caption-bold flex items-center gap-1 transition-all duration-150 ${
                               isOutOfStock
-                                ? 'bg-zinc-50 text-zinc-300 border border-zinc-100 line-through cursor-not-allowed'
-                                : 'bg-zinc-100 hover:bg-black hover:text-white text-zinc-800 border border-transparent'
+                                ? 'bg-az-surface-soft text-az-stone border border-az-hairline-soft line-through cursor-not-allowed'
+                                : 'bg-az-surface-soft hover:bg-az-ink-deep hover:text-white text-az-ink border border-az-hairline-soft'
                             }`}
                           >
                             <span>{v.size.name}</span>
-                            <span className={`text-[10px] opacity-75 font-normal`}>
-                              ({remainingStock})
-                            </span>
+                            <span className='opacity-60 font-normal'>({remainingStock})</span>
                           </button>
                         );
                       })}
@@ -496,21 +494,21 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
       {/* POS Cart Summary Column */}
       <div className='lg:col-span-5 space-y-6'>
-        <div className='bg-white shadow-level-2 border border-zinc-100 rounded-2xl p-6 space-y-6'>
+        <div className='bg-az-canvas border border-az-hairline-soft rounded-az-xl shadow-[rgba(20,22,26,0.3)_0px_1px_4px_0px] p-6 space-y-6'>
           {/* Header */}
-          <div className='flex-between border-b border-zinc-100 pb-4'>
+          <div className='flex items-center justify-between border-b border-az-hairline-soft pb-4'>
             <div className='flex items-center gap-2'>
-              <Store className='h-5 w-5 text-zinc-700' />
+              <Store className='h-5 w-5 text-az-steel' />
               <div>
-                <h2 className='font-display font-medium text-lg text-zinc-900'>Venta Actual</h2>
-                <p className='text-[10px] text-zinc-500'>Vendedor: {sellerName}</p>
+                <h2 className='az-body-md-bold text-az-ink-deep'>Venta Actual</h2>
+                <p className='az-caption text-az-steel'>Vendedor: {sellerName}</p>
               </div>
             </div>
             {cart.length > 0 && (
               <Button
                 variant='ghost'
                 onClick={() => setCart([])}
-                className='text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 h-8 rounded-lg'
+                className='az-caption-bold text-az-critical hover:text-az-critical hover:bg-red-50 px-2.5 h-8 rounded-az-full'
               >
                 Vaciar
               </Button>
@@ -518,39 +516,39 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
           </div>
 
           {/* Cart List */}
-          <div className='max-h-[22vh] overflow-y-auto space-y-3 custom-scrollbar pr-1'>
+          <div className='max-h-[22vh] overflow-y-auto space-y-3 pr-1'>
             {cart.length === 0 ? (
-              <div className='py-6 text-center text-zinc-400 text-sm'>
+              <div className='py-6 text-center az-body-sm text-az-stone'>
                 El carrito está vacío. Agregá talles de productos a la izquierda.
               </div>
             ) : (
               cart.map((item) => (
                 <div
                   key={`${item.productId}-${item.size}`}
-                  className='flex items-center justify-between gap-3 p-3 bg-zinc-50/50 border border-zinc-100 rounded-xl hover:bg-zinc-50 transition-all duration-150'
+                  className='flex items-center justify-between gap-3 p-3 bg-az-surface-soft/50 border border-az-hairline-soft rounded-az-xl hover:bg-az-surface-soft transition-all duration-150'
                 >
                   <div className='min-w-0 flex-1 space-y-0.5'>
-                    <h4 className='font-medium text-xs text-zinc-800 truncate'>{item.name}</h4>
-                    <p className='text-[10px] text-zinc-500'>
-                      Talle: <span className='font-semibold'>{item.size}</span> | {formatCurrency(item.price)} c/u
+                    <h4 className='az-body-sm-bold text-az-ink-deep truncate'>{item.name}</h4>
+                    <p className='az-caption text-az-steel'>
+                      Talle: <span className='font-semibold text-az-charcoal'>{item.size}</span> · {formatCurrency(item.price)} c/u
                     </p>
                   </div>
                   <div className='flex items-center gap-2.5'>
-                    <div className='flex items-center border border-zinc-200 rounded-lg bg-white overflow-hidden h-7'>
+                    <div className='flex items-center border border-az-hairline-soft rounded-az-full bg-az-canvas overflow-hidden h-7'>
                       <button
                         type='button'
                         onClick={() => handleUpdateQty(item.productId, item.size, -1)}
-                        className='px-2 hover:bg-zinc-50 text-zinc-600 h-full flex items-center justify-center border-r border-zinc-100'
+                        className='px-2 hover:bg-az-surface-soft text-az-charcoal h-full flex items-center justify-center border-r border-az-hairline-soft'
                       >
                         <Minus className='h-3 w-3' />
                       </button>
-                      <span className='px-3 text-xs font-semibold text-zinc-800 min-w-[24px] text-center'>
+                      <span className='px-3 az-caption-bold text-az-ink-deep min-w-[24px] text-center tabular-nums'>
                         {item.qty}
                       </span>
                       <button
                         type='button'
                         onClick={() => handleUpdateQty(item.productId, item.size, 1)}
-                        className='px-2 hover:bg-zinc-50 text-zinc-600 h-full flex items-center justify-center border-l border-zinc-100'
+                        className='px-2 hover:bg-az-surface-soft text-az-charcoal h-full flex items-center justify-center border-l border-az-hairline-soft'
                       >
                         <Plus className='h-3 w-3' />
                       </button>
@@ -558,7 +556,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     <button
                       type='button'
                       onClick={() => handleRemoveItem(item.productId, item.size)}
-                      className='text-zinc-400 hover:text-rose-600 p-1 transition-colors'
+                      className='text-az-stone hover:text-az-critical p-1 transition-colors'
                       title='Eliminar item'
                     >
                       <Trash2 className='h-4 w-4' />
@@ -570,16 +568,16 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
           </div>
 
           {/* Customer Selection & Search */}
-          <div className='pt-4 border-t border-zinc-100 space-y-3.5'>
+          <div className='pt-4 border-t border-az-hairline-soft space-y-3.5'>
             <div className='flex justify-between items-center'>
-              <h3 className='text-xs font-bold text-zinc-400 uppercase tracking-wider'>
+              <h3 className='az-caption-bold text-az-stone uppercase tracking-wider'>
                 Cliente de la Venta
               </h3>
               <Button
                 type='button'
                 variant='ghost'
                 onClick={() => setIsCreateModalOpen(true)}
-                className='text-xs text-black font-semibold hover:bg-zinc-50 h-7 px-2 rounded-lg flex items-center gap-1.5'
+                className='az-caption-bold text-az-ink-deep hover:bg-az-surface-soft h-7 px-3 rounded-az-full flex items-center gap-1.5'
               >
                 <UserPlus className='h-3.5 w-3.5' />
                 Nuevo Cliente
@@ -590,7 +588,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
             {!selectedCustomer ? (
               <div className='relative'>
                 <div className='relative'>
-                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 h-3.5 w-3.5' />
+                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-az-stone h-3.5 w-3.5' />
                   <Input
                     type='text'
                     placeholder='Buscar por Nombre, DNI, Email o Teléfono...'
@@ -600,20 +598,20 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                       setShowSearchResults(true);
                     }}
                     onFocus={() => setShowSearchResults(true)}
-                    className='pl-9 h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='pl-9 h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
 
                 {/* Dropdown search results */}
                 {showSearchResults && customerSearchQuery.trim() !== '' && (
-                  <div className='absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-xl shadow-lg max-h-56 overflow-y-auto p-1.5 space-y-1'>
+                  <div className='absolute z-20 top-full left-0 right-0 mt-1 bg-az-canvas border border-az-hairline-soft rounded-az-xl shadow-lg max-h-56 overflow-y-auto p-1.5 space-y-1'>
                     {isSearchingCustomers ? (
-                      <div className='py-4 text-center text-xs text-zinc-400 flex items-center justify-center gap-2'>
-                        <Loader2 className='h-3.5 w-3.5 animate-spin text-zinc-500' />
+                      <div className='py-4 text-center az-caption text-az-stone flex items-center justify-center gap-2'>
+                        <Loader2 className='h-3.5 w-3.5 animate-spin text-az-steel' />
                         Buscando en la base de datos...
                       </div>
                     ) : searchResults.length === 0 ? (
-                      <div className='py-4 text-center text-xs text-zinc-400'>
+                      <div className='py-4 text-center az-caption text-az-stone'>
                         No se encontraron clientes. ¿Deseas registrar uno nuevo?
                       </div>
                     ) : (
@@ -626,10 +624,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                             setShowSearchResults(false);
                             setCustomerSearchQuery('');
                           }}
-                          className='w-full text-left p-2.5 hover:bg-zinc-50 rounded-lg flex flex-col gap-0.5 transition-colors border border-transparent hover:border-zinc-100'
+                          className='w-full text-left p-2.5 hover:bg-az-surface-soft rounded-az-lg flex flex-col gap-0.5 transition-colors border border-transparent hover:border-az-hairline-soft'
                         >
-                          <span className='font-semibold text-xs text-zinc-800'>{cust.name}</span>
-                          <span className='text-[10px] text-zinc-500'>
+                          <span className='az-body-sm-bold text-az-ink-deep'>{cust.name}</span>
+                          <span className='az-caption text-az-steel'>
                             {cust.dni ? `DNI: ${cust.dni}` : 'Sin DNI'} | {cust.email} {cust.phone ? `| Tel: ${cust.phone}` : ''}
                           </span>
                         </button>
@@ -639,14 +637,14 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 )}
               </div>
             ) : (
-              <div className='bg-zinc-50 border border-zinc-100 rounded-xl p-3.5 flex items-center justify-between gap-3 animate-in fade-in duration-200'>
+              <div className='bg-az-surface-soft border border-az-hairline-soft rounded-az-xl p-3.5 flex items-center justify-between gap-3 animate-in fade-in duration-200'>
                 <div className='flex items-center gap-2 min-w-0'>
-                  <div className='bg-white h-7 w-7 rounded-full flex items-center justify-center border border-zinc-200 text-black flex-shrink-0'>
+                  <div className='bg-az-canvas h-7 w-7 rounded-az-full flex items-center justify-center border border-az-hairline-soft text-az-primary flex-shrink-0'>
                     <UserCheck className='h-4 w-4' />
                   </div>
                   <div className='min-w-0'>
-                    <p className='text-xs font-bold text-zinc-800 truncate'>{selectedCustomer.name}</p>
-                    <p className='text-[10px] text-zinc-500 truncate'>
+                    <p className='az-body-sm-bold text-az-ink-deep truncate'>{selectedCustomer.name}</p>
+                    <p className='az-caption text-az-steel truncate'>
                       {selectedCustomer.dni ? `DNI: ${selectedCustomer.dni}` : 'Sin DNI'} | {selectedCustomer.email}
                     </p>
                   </div>
@@ -654,7 +652,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <button
                   type='button'
                   onClick={() => setSelectedCustomer(null)}
-                  className='text-zinc-400 hover:text-rose-600 p-1 transition-colors'
+                  className='text-az-stone hover:text-az-critical p-1 transition-colors'
                   title='Remover cliente'
                 >
                   <X className='h-4 w-4' />
@@ -662,21 +660,21 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               </div>
             )}
 
-            {/* Editable Fields (Only if no customer selected, or allows updating) */}
+            {/* Editable Fields */}
             <div className='grid grid-cols-2 gap-3 pt-1'>
               <div className='space-y-1'>
-                <Label htmlFor='posCustName' className='text-[10px] font-bold text-zinc-400 uppercase tracking-wider'>Nombre Completo</Label>
+                <Label htmlFor='posCustName' className='az-caption-bold text-az-stone uppercase tracking-wider'>Nombre Completo</Label>
                 <Input
                   id='posCustName'
                   placeholder='Consumidor Final'
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   disabled={!!selectedCustomer}
-                  className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                 />
               </div>
               <div className='space-y-1'>
-                <Label htmlFor='posCustEmail' className='text-[10px] font-bold text-zinc-400 uppercase tracking-wider'>Correo Electrónico</Label>
+                <Label htmlFor='posCustEmail' className='az-caption-bold text-az-stone uppercase tracking-wider'>Correo Electrónico</Label>
                 <Input
                   id='posCustEmail'
                   type='email'
@@ -684,48 +682,48 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   disabled={!!selectedCustomer}
-                  className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                 />
               </div>
               <div className='space-y-1'>
-                <Label htmlFor='posCustDni' className='text-[10px] font-bold text-zinc-400 uppercase tracking-wider'>Documento (DNI)</Label>
+                <Label htmlFor='posCustDni' className='az-caption-bold text-az-stone uppercase tracking-wider'>Documento (DNI)</Label>
                 <Input
                   id='posCustDni'
                   placeholder='DNI del cliente'
                   value={customerDni}
                   onChange={(e) => setCustomerDni(e.target.value)}
                   disabled={!!selectedCustomer && !!selectedCustomer.dni}
-                  className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                 />
               </div>
               <div className='space-y-1'>
-                <Label htmlFor='posCustPhone' className='text-[10px] font-bold text-zinc-400 uppercase tracking-wider'>Teléfono de Contacto</Label>
+                <Label htmlFor='posCustPhone' className='az-caption-bold text-az-stone uppercase tracking-wider'>Teléfono de Contacto</Label>
                 <Input
                   id='posCustPhone'
                   placeholder='Teléfono'
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   disabled={!!selectedCustomer && !!selectedCustomer.phone}
-                  className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                 />
               </div>
               <div className='col-span-2 space-y-1'>
-                <Label htmlFor='posCustAddress' className='text-[10px] font-bold text-zinc-400 uppercase tracking-wider'>Domicilio (Dirección)</Label>
+                <Label htmlFor='posCustAddress' className='az-caption-bold text-az-stone uppercase tracking-wider'>Domicilio (Dirección)</Label>
                 <Input
                   id='posCustAddress'
                   placeholder='Calle y número (ej. Comb. de las Piedras 1026)'
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
                   disabled={!!selectedCustomer && (selectedCustomer.address && selectedCustomer.address.streetAddress)}
-                  className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                 />
               </div>
             </div>
           </div>
 
           {/* Local Payment Methods */}
-          <div className='pt-4 border-t border-zinc-100 space-y-3'>
-            <h3 className='text-xs font-bold text-zinc-400 uppercase tracking-wider'>
+          <div className='pt-4 border-t border-az-hairline-soft space-y-3'>
+            <h3 className='az-caption-bold text-az-stone uppercase tracking-wider'>
               Método de Pago Local
             </h3>
             <RadioGroup
@@ -744,15 +742,15 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 return (
                   <Label
                     key={method.id}
-                    className={`flex items-center gap-2 border rounded-xl p-3 cursor-pointer transition-all duration-150 ${
+                    className={`flex items-center gap-2 border rounded-az-xl p-3 cursor-pointer transition-all duration-150 ${
                       active
-                        ? 'border-black bg-zinc-50/50 shadow-sm text-black font-semibold'
-                        : 'border-zinc-200 text-zinc-600 hover:bg-zinc-50/20'
+                        ? 'border-az-primary bg-az-canvas shadow-sm text-az-primary font-semibold'
+                        : 'border-az-hairline-soft text-az-charcoal hover:bg-az-surface-soft'
                     }`}
                   >
                     <RadioGroupItem value={method.id} className='sr-only' />
-                    <Icon className={`h-4 w-4 ${active ? 'text-black' : 'text-zinc-400'}`} />
-                    <span className='text-xs'>{method.label}</span>
+                    <Icon className={`h-4 w-4 ${active ? 'text-az-primary' : 'text-az-stone'}`} />
+                    <span className='az-caption-bold'>{method.label}</span>
                   </Label>
                 );
               })}
@@ -760,27 +758,29 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
           </div>
 
           {/* Price Totals & Submit */}
-          <div className='pt-4 border-t border-zinc-100 space-y-4'>
-            <div className='space-y-2 text-sm text-zinc-600'>
-              <div className='flex justify-between'>
+          <div className='pt-4 border-t border-az-hairline-soft space-y-4'>
+            <div className='space-y-2'>
+              <div className='flex justify-between az-body-sm text-az-charcoal'>
                 <span>Subtotal</span>
-                <span>{formatCurrency(totals.subtotal)}</span>
+                <span className='tabular-nums'>{formatCurrency(totals.subtotal)}</span>
               </div>
-              <div className='flex justify-between text-xs text-zinc-500'>
+              <div className='flex justify-between az-caption text-az-stone'>
                 <span>Impuesto IVA (15%)</span>
-                <span>{formatCurrency(totals.tax)}</span>
+                <span className='tabular-nums'>{formatCurrency(totals.tax)}</span>
               </div>
-              <div className='flex justify-between text-base font-bold text-black border-t border-zinc-50 pt-2'>
-                <span>Total a Cobrar</span>
-                <span>{formatCurrency(totals.total)}</span>
+              <div className='flex justify-between border-t border-az-hairline-soft pt-3'>
+                <span className='az-body-md-bold text-az-ink-deep'>Total a Cobrar</span>
+                <span className='az-heading-sm text-az-ink-deep tabular-nums'>{formatCurrency(totals.total)}</span>
               </div>
             </div>
 
             <Button
+              id='pos-register-sale'
               type='button'
+              variant='buyCta'
               disabled={isPending || cart.length === 0}
               onClick={handleRegisterSale}
-              className='w-full h-12 bg-black hover:bg-zinc-800 text-white rounded-xl font-medium transition-all duration-150 flex items-center justify-center gap-2 text-sm'
+              className='w-full h-12'
             >
               {isPending ? (
                 <>
@@ -788,9 +788,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   Registrando Venta...
                 </>
               ) : (
-                <>
-                  Registrar Venta ({formatCurrency(totals.total)})
-                </>
+                <>Registrar Venta ({formatCurrency(totals.total)})</>
               )}
             </Button>
           </div>
@@ -799,49 +797,50 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
       {/* SUCCESS MODAL */}
       {successOrder && (
-        <div className='fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
-          <div className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-zinc-100 space-y-6 text-center animate-in scale-in duration-200'>
-            <div className='mx-auto h-16 w-16 bg-zinc-100 rounded-full flex items-center justify-center text-black'>
+        <div className='fixed inset-0 z-50 bg-az-ink-deep/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
+          <div className='bg-az-canvas rounded-az-xxxl p-8 max-w-md w-full shadow-2xl border border-az-hairline-soft space-y-6 text-center animate-in zoom-in-95 duration-200'>
+            <div className='mx-auto h-16 w-16 bg-az-surface-soft rounded-az-full flex items-center justify-center text-az-success'>
               <CheckCircle className='h-9 w-9' />
             </div>
             <div className='space-y-2'>
-              <h3 className='text-2xl font-display font-medium text-zinc-900'>¡Venta Registrada!</h3>
-              <p className='text-xs text-zinc-500'>La transacción fue guardada y el stock fue actualizado.</p>
+              <h3 className='az-heading-sm text-az-ink-deep'>¡Venta Registrada!</h3>
+              <p className='az-body-sm text-az-steel'>La transacción fue guardada y el stock fue actualizado.</p>
             </div>
-            <div className='p-4 bg-zinc-50 rounded-2xl text-left space-y-2.5 text-xs text-zinc-600 border border-zinc-100/50'>
-              <div className='flex justify-between'>
-                <span className='font-medium'>ID de la Venta:</span>
-                <span className='font-mono font-semibold text-black'>{successOrder.orderId.substring(0, 8)}...</span>
+            <div className='p-4 bg-az-surface-soft rounded-az-xxl text-left space-y-2.5 border border-az-hairline-soft'>
+              <div className='flex justify-between az-body-sm'>
+                <span className='text-az-charcoal'>ID de la Venta:</span>
+                <span className='font-mono az-body-sm-bold text-az-ink-deep'>{successOrder.orderId.substring(0, 8)}...</span>
               </div>
-              <div className='flex justify-between'>
-                <span className='font-medium'>Cliente:</span>
-                <span className='font-semibold text-black truncate max-w-[200px] block text-right'>{customerName || 'Consumidor Final'}</span>
+              <div className='flex justify-between az-body-sm'>
+                <span className='text-az-charcoal'>Cliente:</span>
+                <span className='az-body-sm-bold text-az-ink-deep truncate max-w-[200px] block text-right'>{customerName || 'Consumidor Final'}</span>
               </div>
-              <div className='flex justify-between'>
-                <span className='font-medium'>Total Cobrado:</span>
-                <span className='font-bold text-black'>{formatCurrency(successOrder.total)}</span>
+              <div className='flex justify-between az-body-sm'>
+                <span className='text-az-charcoal'>Total Cobrado:</span>
+                <span className='az-body-sm-bold text-az-ink-deep tabular-nums'>{formatCurrency(successOrder.total)}</span>
               </div>
-              <div className='flex justify-between'>
-                <span className='font-medium'>Método de Pago:</span>
-                <span className='font-semibold text-zinc-800'>
+              <div className='flex justify-between az-body-sm'>
+                <span className='text-az-charcoal'>Método de Pago:</span>
+                <span className='az-body-sm-bold text-az-ink-deep'>
                   {paymentMethod.replace('PuntoDeVenta_', 'POS ')}
                 </span>
               </div>
             </div>
             <div className='flex gap-3'>
               <Button
-                variant='outline'
+                variant='outlineLight'
                 onClick={() => {
                   window.open(`/order/${successOrder.orderId}`, '_blank');
                 }}
-                className='flex-1 border-zinc-200 rounded-xl h-11 text-xs font-semibold gap-1.5'
+                className='flex-1 h-11'
               >
                 <Receipt className='h-4 w-4' />
                 Ver Comprobante
               </Button>
               <Button
+                variant='buyCta'
                 onClick={handleResetSale}
-                className='flex-1 bg-black hover:bg-zinc-800 text-white rounded-xl h-11 text-xs font-semibold'
+                className='flex-1 h-11'
               >
                 Nueva Venta
               </Button>
@@ -852,34 +851,34 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
       {/* CREATE CUSTOMER MODAL */}
       {isCreateModalOpen && (
-        <div className='fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
-          <div className='bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-zinc-100 space-y-5 animate-in scale-in duration-200'>
-            <div className='flex justify-between items-center border-b border-zinc-100 pb-3'>
-              <h3 className='text-lg font-display font-medium text-zinc-900'>Registrar Nuevo Cliente</h3>
+        <div className='fixed inset-0 z-50 bg-az-ink-deep/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
+          <div className='bg-az-canvas rounded-az-xxxl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-az-hairline-soft space-y-5 animate-in zoom-in-95 duration-200'>
+            <div className='flex justify-between items-center border-b border-az-hairline-soft pb-3'>
+              <h3 className='az-heading-sm text-az-ink-deep'>Registrar Nuevo Cliente</h3>
               <button
                 type='button'
                 onClick={() => setIsCreateModalOpen(false)}
-                className='text-zinc-400 hover:text-zinc-600 p-1 transition-colors'
+                className='text-az-stone hover:text-az-ink p-1 transition-colors'
               >
                 <X className='h-5 w-5' />
               </button>
             </div>
 
-            <form onSubmit={handleCreateCustomer} className='space-y-4 text-xs'>
+            <form onSubmit={handleCreateCustomer} className='space-y-4'>
               <div className='grid grid-cols-2 gap-3.5'>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalName' className='text-[10px] font-bold text-zinc-500 uppercase tracking-wider'>Nombre Completo *</Label>
+                  <Label htmlFor='modalName' className='az-caption-bold text-az-stone uppercase tracking-wider'>Nombre Completo *</Label>
                   <Input
                     id='modalName'
                     required
                     placeholder='Ej: Carlos Jimenez'
                     value={newCustomerForm.name}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
-                    className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalEmail' className='text-[10px] font-bold text-zinc-500 uppercase tracking-wider'>Email *</Label>
+                  <Label htmlFor='modalEmail' className='az-caption-bold text-az-stone uppercase tracking-wider'>Email *</Label>
                   <Input
                     id='modalEmail'
                     type='email'
@@ -887,74 +886,75 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='ejemplo@correo.com'
                     value={newCustomerForm.email}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
-                    className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalDni' className='text-[10px] font-bold text-zinc-500 uppercase tracking-wider'>Documento (DNI)</Label>
+                  <Label htmlFor='modalDni' className='az-caption-bold text-az-stone uppercase tracking-wider'>Documento (DNI)</Label>
                   <Input
                     id='modalDni'
                     placeholder='Ej: 38444555'
                     value={newCustomerForm.dni}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, dni: e.target.value })}
-                    className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalPhone' className='text-[10px] font-bold text-zinc-500 uppercase tracking-wider'>Teléfono de Contacto</Label>
+                  <Label htmlFor='modalPhone' className='az-caption-bold text-az-stone uppercase tracking-wider'>Teléfono de Contacto</Label>
                   <Input
                     id='modalPhone'
                     placeholder='Ej: 3814445555'
                     value={newCustomerForm.phone}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
-                    className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
                 <div className='col-span-2 space-y-1.5'>
-                  <Label htmlFor='modalStreet' className='text-[10px] font-bold text-zinc-500 uppercase tracking-wider'>Domicilio (Calle y Altura)</Label>
+                  <Label htmlFor='modalStreet' className='az-caption-bold text-az-stone uppercase tracking-wider'>Domicilio (Calle y Altura)</Label>
                   <Input
                     id='modalStreet'
                     placeholder='Ej: Comb. de las Piedras 1026'
                     value={newCustomerForm.streetAddress}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, streetAddress: e.target.value })}
-                    className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalCity' className='text-[10px] font-bold text-zinc-500 uppercase tracking-wider'>Ciudad</Label>
+                  <Label htmlFor='modalCity' className='az-caption-bold text-az-stone uppercase tracking-wider'>Ciudad</Label>
                   <Input
                     id='modalCity'
                     placeholder='Tucumán'
                     value={newCustomerForm.city}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, city: e.target.value })}
-                    className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalProvince' className='text-[10px] font-bold text-zinc-500 uppercase tracking-wider'>Provincia</Label>
+                  <Label htmlFor='modalProvince' className='az-caption-bold text-az-stone uppercase tracking-wider'>Provincia</Label>
                   <Input
                     id='modalProvince'
                     placeholder='Tucumán'
                     value={newCustomerForm.province}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, province: e.target.value })}
-                    className='h-9 text-xs border-zinc-200 focus-visible:ring-black'
+                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
                   />
                 </div>
               </div>
 
-              <div className='flex justify-end gap-3 pt-4 border-t border-zinc-100'>
+              <div className='flex justify-end gap-3 pt-4 border-t border-az-hairline-soft'>
                 <Button
                   type='button'
-                  variant='ghost'
+                  variant='outlineLight'
                   onClick={() => setIsCreateModalOpen(false)}
-                  className='border border-zinc-200 h-10 px-4 text-xs font-semibold rounded-xl'
+                  className='h-10 px-5'
                 >
                   Cancelar
                 </Button>
                 <Button
                   type='submit'
+                  variant='buyCta'
                   disabled={isCreatingCustomer}
-                  className='bg-black hover:bg-zinc-800 text-white h-10 px-4 text-xs font-semibold rounded-xl flex items-center gap-1.5'
+                  className='h-10 px-5 flex items-center gap-1.5'
                 >
                   {isCreatingCustomer ? (
                     <>

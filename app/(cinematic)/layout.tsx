@@ -1,4 +1,4 @@
-import HeaderStorefront from '@/components/shared/header/header-dark';
+import Header from '@/components/shared/header';
 import FooterDark from '@/components/footer-dark';
 
 export default function CinematicLayout({
@@ -8,7 +8,7 @@ export default function CinematicLayout({
 }>) {
   return (
     <div className='flex min-h-screen flex-col bg-az-canvas text-az-ink'>
-      <HeaderStorefront />
+      <Header />
       <main className='flex-1'>{children}</main>
       <FooterDark />
     </div>

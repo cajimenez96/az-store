@@ -7,11 +7,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className='flex h-screen flex-col'>
+    <div className='flex min-h-screen flex-col bg-az-canvas'>
       <div className='print:hidden'>
         <Header />
       </div>
-      <main className='flex-1 wrapper'>{children}</main>
+      <main className='flex-1 az-wrapper py-8'>{children}</main>
       <div className='print:hidden'>
         <Footer />
       </div>

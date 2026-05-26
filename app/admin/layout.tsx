@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Menu from '@/components/shared/header/menu';
 import MainNav from './main-nav';
 import AdminSearch from '@/components/admin/admin-search';
-
 import { auth } from '@/auth';
 
 export default async function AdminLayout({
@@ -13,32 +12,42 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  
+
   return (
-    <>
-      <div className='flex flex-col'>
-        <div className='border-b container mx-auto'>
-          <div className='flex items-center h-16 px-4'>
-            <Link href='/' className='w-22'>
+    <div className='flex flex-col min-h-screen bg-az-surface-soft'>
+      {/* Admin top bar */}
+      <header className='sticky top-0 z-50 bg-az-ink-deep border-b border-white/10'>
+        <div className='container mx-auto'>
+          <div className='flex items-center h-14 px-4 gap-4'>
+            <Link href='/' className='flex items-center gap-2 shrink-0'>
               <Image
                 src='/images/logo.svg'
-                height={48}
-                width={48}
+                height={32}
+                width={32}
                 alt={APP_NAME}
+                className='brightness-0 invert'
               />
+              <span className='hidden lg:block az-caption-bold text-white/70 uppercase tracking-widest'>
+                Admin
+              </span>
             </Link>
-            <MainNav className='mx-6' role={session?.user?.role} />
-            <div className='ml-auto items-center flex space-x-4'>
+
+            <div className='w-px h-5 bg-white/20 hidden md:block' />
+
+            <MainNav className='mx-2 flex-1' role={session?.user?.role} />
+
+            <div className='ml-auto flex items-center gap-3'>
               <AdminSearch />
               <Menu />
             </div>
           </div>
         </div>
+      </header>
 
-        <div className='flex-1 space-y-4 p-8 pt-6 container mx-auto'>
-          {children}
-        </div>
-      </div>
-    </>
+      {/* Page content */}
+      <main className='flex-1 container mx-auto px-4 py-6'>
+        {children}
+      </main>
+    </div>
   );
 }

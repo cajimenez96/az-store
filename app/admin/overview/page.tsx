@@ -6,10 +6,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getOrderSummary } from '@/lib/actions/order.actions';
-import { formatCurrency, formatDateTime, formatNumber } from '@/lib/utils';
-import { BadgeDollarSign, Barcode, CreditCard, Users } from 'lucide-react';
+import { formatCurrency, formatDateTime, formatNumber, cn } from '@/lib/utils';
+import {
+  BadgeDollarSign,
+  Barcode,
+  CreditCard,
+  Users,
+  AlertTriangle,
+  Truck,
+  Clock,
+} from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Charts from './charts';
@@ -17,9 +24,60 @@ import { requireAdminOrSeller } from '@/lib/auth-guard';
 import SettingForm from './setting-form';
 import { Button } from '@/components/ui/button';
 
+
+
 export const metadata: Metadata = {
   title: 'Panel de Control',
 };
+
+function MetricCard({
+  label,
+  value,
+  icon: Icon,
+  accent,
+  sublabel,
+}: {
+  label: string;
+  value: string;
+  icon: React.ElementType;
+  accent?: 'warning' | 'primary' | 'critical' | 'default';
+  sublabel?: string;
+}) {
+  const accentMap = {
+    default: {
+      icon: 'text-az-steel',
+      value: 'text-az-ink-deep',
+    },
+    primary: {
+      icon: 'text-az-primary',
+      value: 'text-az-primary',
+    },
+    warning: {
+      icon: 'text-az-attention',
+      value: 'text-az-attention',
+    },
+    critical: {
+      icon: 'text-az-critical',
+      value: 'text-az-critical',
+    },
+  };
+
+  const colors = accentMap[accent ?? 'default'];
+
+  return (
+    <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 flex flex-col gap-3'>
+      <div className='flex items-center justify-between'>
+        <p className='az-caption-bold text-az-steel uppercase tracking-wider'>{label}</p>
+        <div className={cn('w-8 h-8 rounded-az-lg bg-az-surface-soft flex items-center justify-center', colors.icon)}>
+          <Icon className='w-4 h-4' />
+        </div>
+      </div>
+      <div className={cn('az-heading-sm tabular-nums', colors.value)}>{value}</div>
+      {sublabel && <p className='az-caption text-az-stone'>{sublabel}</p>}
+    </div>
+  );
+}
+
 
 const AdminOverviewPage = async () => {
   await requireAdminOrSeller();
@@ -27,199 +85,159 @@ const AdminOverviewPage = async () => {
   const summary = await getOrderSummary();
 
   return (
-    <div className='space-y-2'>
-      <h1 className='h2-bold'>Panel de Control</h1>
+    <div className='space-y-6'>
+      <h1 className='az-heading-lg text-az-ink-deep'>Panel de Control</h1>
+
+      {/* KPI row */}
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Ingresos Totales</CardTitle>
-            <BadgeDollarSign />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatCurrency(
-                summary.totalSales._sum.totalPrice?.toString() || 0
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Ventas</CardTitle>
-            <CreditCard />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatNumber(summary.ordersCount)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Clientes</CardTitle>
-            <Users />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatNumber(summary.usersCount)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Productos</CardTitle>
-            <Barcode />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatNumber(summary.productsCount)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-        <Card className="bg-amber-50 border-amber-200">
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium text-amber-900'>Pendientes de Pago</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-amber-700'>
-              {formatNumber(summary.pendingPaymentsCount)}
-            </div>
-            <p className="text-xs text-amber-600 mt-1">Órdenes a la espera de comprobantes</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-blue-50 border-blue-200">
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium text-blue-900'>Pendientes de Envío</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-blue-700'>
-              {formatNumber(summary.pendingDeliveriesCount)}
-            </div>
-            <p className="text-xs text-blue-600 mt-1">Órdenes pagadas listas para enviar</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-red-50 border-red-200">
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium text-red-900'>Stock Crítico</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold text-red-700'>
-              {formatNumber(summary.criticalStockCount)}
-            </div>
-            <p className="text-xs text-red-600 mt-1">Talles con 2 o menos unidades</p>
-          </CardContent>
-        </Card>
-      </div>
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7'>
-        <Card className='col-span-4'>
-          <CardHeader>
-            <CardTitle>Resumen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Charts
-              data={{
-                salesData: summary.salesData,
-              }}
-            />
-          </CardContent>
-        </Card>
-        <Card className='col-span-3'>
-          <CardHeader>
-            <CardTitle>Ventas Recientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>COMPRADOR</TableHead>
-                  <TableHead>FECHA</TableHead>
-                  <TableHead>TOTAL</TableHead>
-                  <TableHead>ACCIONES</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {summary.latestSales.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      {order?.user?.name ? order.user.name : 'Usuario Eliminado'}
-                    </TableCell>
-                    <TableCell>
-                      {formatDateTime(order.createdAt).dateOnly}
-                    </TableCell>
-                    <TableCell>{formatCurrency(order.totalPrice)}</TableCell>
-                    <TableCell>
-                      <Link href={`/order/${order.id}`}>
-                        <Button variant="outline">
-                          <span className='px-2'>Detalles</span>
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <MetricCard
+          label='Ingresos Totales'
+          value={formatCurrency(summary.totalSales._sum.totalPrice?.toString() || 0)}
+          icon={BadgeDollarSign}
+        />
+        <MetricCard
+          label='Ventas'
+          value={formatNumber(summary.ordersCount)}
+          icon={CreditCard}
+        />
+        <MetricCard
+          label='Clientes'
+          value={formatNumber(summary.usersCount)}
+          icon={Users}
+        />
+        <MetricCard
+          label='Productos'
+          value={formatNumber(summary.productsCount)}
+          icon={Barcode}
+        />
       </div>
 
-      {/* Tercera fila: Configuraciones y Desglose de Ingresos */}
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4'>
+      {/* Alert cards */}
+      <div className='grid gap-4 md:grid-cols-3'>
+        <MetricCard
+          label='Pendientes de Pago'
+          value={formatNumber(summary.pendingPaymentsCount)}
+          icon={Clock}
+          accent='warning'
+          sublabel='Órdenes a la espera de comprobantes'
+        />
+        <MetricCard
+          label='Pendientes de Envío'
+          value={formatNumber(summary.pendingDeliveriesCount)}
+          icon={Truck}
+          accent='primary'
+          sublabel='Órdenes pagadas listas para enviar'
+        />
+        <MetricCard
+          label='Stock Crítico'
+          value={formatNumber(summary.criticalStockCount)}
+          icon={AlertTriangle}
+          accent='critical'
+          sublabel='Talles con 2 o menos unidades'
+        />
+      </div>
+
+      {/* Charts + recent sales */}
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7'>
+        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-4'>
+          <p className='az-body-md-bold text-az-ink-deep mb-4'>Resumen</p>
+          <Charts data={{ salesData: summary.salesData }} />
+        </div>
+
+        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-3'>
+          <p className='az-body-md-bold text-az-ink-deep mb-4'>Ventas Recientes</p>
+          <Table>
+            <TableHeader>
+              <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Comprador</TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Fecha</TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Total</TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {summary.latestSales.map((order) => (
+                <TableRow
+                  key={order.id}
+                  className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
+                >
+                  <TableCell className='az-body-sm text-az-ink py-3'>
+                    {order?.user?.name ?? 'Usuario Eliminado'}
+                  </TableCell>
+                  <TableCell className='az-body-sm text-az-charcoal py-3 tabular-nums'>
+                    {formatDateTime(order.createdAt).dateOnly}
+                  </TableCell>
+                  <TableCell className='az-body-sm-bold text-az-ink-deep py-3 tabular-nums'>
+                    {formatCurrency(order.totalPrice)}
+                  </TableCell>
+                  <TableCell className='py-3'>
+                    <Link href={`/order/${order.id}`}>
+                      <Button variant='outline' size='sm' className='h-7 az-caption-bold rounded-az-full border-az-hairline-soft text-az-ink hover:bg-az-ink-deep hover:text-white hover:border-az-ink-deep transition-colors'>
+                        Ver
+                      </Button>
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* Config + revenue by method */}
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7'>
         <div className='col-span-3'>
-          <SettingForm 
-            settingKey="CRITICAL_STOCK_THRESHOLD"
+          <SettingForm
+            settingKey='CRITICAL_STOCK_THRESHOLD'
             initialValue={summary.criticalStockThreshold.toString()}
-            label="Límite de Stock Crítico"
-            description="Las alertas se activarán cuando un talle llegue a esta cantidad o menos."
+            label='Límite de Stock Crítico'
+            description='Las alertas se activarán cuando un talle llegue a esta cantidad o menos.'
           />
         </div>
-        
-        <Card className='col-span-4'>
-          <CardHeader>
-            <CardTitle>Ingresos por Método de Pago</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
+
+        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-4'>
+          <p className='az-body-md-bold text-az-ink-deep mb-4'>Ingresos por Método de Pago</p>
+          <Table>
+            <TableHeader>
+              <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Método de Pago</TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Ingresos</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {summary.salesByMethod.length === 0 ? (
                 <TableRow>
-                  <TableHead>MÉTODO DE PAGO</TableHead>
-                  <TableHead className='text-right'>INGRESOS</TableHead>
+                  <TableCell colSpan={2} className='text-center az-body-sm text-az-stone py-8'>
+                    No hay datos de ingresos
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {summary.salesByMethod.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center text-muted-foreground">
-                      No hay datos de ingresos
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  summary.salesByMethod.map((item) => {
-                    const displayName =
-                      item.paymentMethod === 'TransferenciaBancaria'
-                        ? 'Transferencia Bancaria'
-                        : item.paymentMethod === 'MercadoPago'
-                        ? 'Mercado Pago'
-                        : item.paymentMethod;
-                    
-                    return (
-                      <TableRow key={item.paymentMethod}>
-                        <TableCell className="font-medium">
-                          {displayName}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(item.totalSales)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              ) : (
+                summary.salesByMethod.map((item) => {
+                  const displayName =
+                    item.paymentMethod === 'TransferenciaBancaria'
+                      ? 'Transferencia Bancaria'
+                      : item.paymentMethod === 'MercadoPago'
+                      ? 'Mercado Pago'
+                      : item.paymentMethod;
+
+                  return (
+                    <TableRow
+                      key={item.paymentMethod}
+                      className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
+                    >
+                      <TableCell className='az-body-sm-bold text-az-ink py-3'>
+                        {displayName}
+                      </TableCell>
+                      <TableCell className='az-body-sm-bold text-az-ink-deep py-3 text-right tabular-nums'>
+                        {formatCurrency(item.totalSales)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

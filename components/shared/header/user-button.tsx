@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UserIcon } from 'lucide-react';
@@ -16,9 +17,15 @@ const UserButton = async () => {
 
   if (!session) {
     return (
-      <Button asChild>
+      <Button
+        asChild
+        variant='outlineLight'
+        size='sm'
+        className='h-9 px-4 rounded-az-full'
+      >
         <Link href='/sign-in'>
-          <UserIcon /> Iniciar Sesión
+          <UserIcon className='h-3.5 w-3.5' />
+          Iniciar Sesión
         </Link>
       </Button>
     );
@@ -30,52 +37,59 @@ const UserButton = async () => {
     <div className='flex gap-2 items-center'>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <div className='flex items-center'>
-            <Button
-              variant='ghost'
-              className='relativee w-8 h-8 rounded-full ml-2 flex items-center justify-center bg-gray-200'
-            >
-              {firstInitial}
-            </Button>
-          </div>
+          <Button
+            variant='ghost'
+            className='w-9 h-9 rounded-az-full text-az-ink-deep bg-az-surface-soft hover:bg-az-hairline-soft border border-az-hairline-soft az-body-sm-bold transition-colors'
+          >
+            {firstInitial}
+          </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className='w-56' align='end' forceMount>
-          <DropdownMenuLabel className='font-normal'>
-            <div className='flex flex-col space-y-1'>
-              <div className='text-sm font-medium leading-none'>
+        <DropdownMenuContent
+          className='w-56 bg-az-canvas border-az-hairline-soft shadow-az-sticky rounded-az-xl'
+          align='end'
+          forceMount
+        >
+          <DropdownMenuLabel className='font-normal px-3 py-2'>
+            <div className='flex flex-col gap-0.5'>
+              <span className='az-body-sm-bold text-az-ink-deep'>
                 {session.user?.name}
-              </div>
-              <div className='text-sm text-muted-foreground leading-none'>
+              </span>
+              <span className='az-caption text-az-stone truncate'>
                 {session.user?.email}
-              </div>
+              </span>
             </div>
           </DropdownMenuLabel>
 
-          <DropdownMenuItem>
+          <DropdownMenuSeparator className='bg-az-hairline-soft' />
+
+          <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
             <Link href='/user/profile' className='w-full'>
               Mi Perfil
             </Link>
           </DropdownMenuItem>
-          {session?.user?.role !== 'admin' && (
-          <DropdownMenuItem>
-            <Link href='/user/orders' className='w-full'>
-              Historial de Pedidos
-            </Link>
-          </DropdownMenuItem>
-          )}
 
-          {(session?.user?.role === 'admin' || session?.user?.role === 'seller') && (
-            <DropdownMenuItem>
-              <Link href='/admin/overview' className='w-full'>
-                Panel de Control
+          {session?.user?.role !== 'admin' && (
+            <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
+              <Link href='/user/orders' className='w-full'>
+                Historial de Pedidos
               </Link>
             </DropdownMenuItem>
           )}
 
-          <DropdownMenuItem className='p-0 mb-1'>
+          {session?.user?.role === 'admin' && (
+            <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
+              <Link href='/admin/overview' className='w-full'>
+                Administrador
+              </Link>
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator className='bg-az-hairline-soft' />
+
+          <DropdownMenuItem className='p-0 mb-1 rounded-az-lg mx-1 focus:bg-transparent'>
             <form action={signOutUser} className='w-full'>
               <Button
-                className='w-full py-4 px-2 h-4 justify-start'
+                className='w-full h-9 justify-start az-body-sm text-az-critical hover:text-az-critical hover:bg-red-50 rounded-az-lg px-2'
                 variant='ghost'
               >
                 Cerrar Sesión

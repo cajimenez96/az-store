@@ -68,11 +68,9 @@ export default async function PosPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col gap-1 border-b border-zinc-100 pb-4'>
-        <h1 className='font-display font-[330] text-3xl text-black font-ss03 tracking-tight'>
-          Punto de Venta (POS)
-        </h1>
-        <p className='text-xs text-zinc-500'>
+      <div className='flex flex-col gap-1 pb-4 border-b border-az-hairline-soft'>
+        <h1 className='az-heading-lg text-az-ink-deep'>Punto de Venta (POS)</h1>
+        <p className='az-body-sm text-az-steel'>
           Registrá ventas en efectivo, transferencias y pagos locales de forma rápida.
         </p>
       </div>

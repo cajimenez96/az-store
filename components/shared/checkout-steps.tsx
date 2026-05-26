@@ -2,30 +2,42 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 const CheckoutSteps = ({ current = 0 }) => {
+  const steps = ['Iniciar Sesión', 'Dirección de Envío', 'Método de Pago', 'Confirmar Pedido'];
+
   return (
-    <div className='flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 mb-10 w-full max-w-4xl mx-auto px-4'>
-      {['Iniciar Sesión', 'Dirección de Envío', 'Método de Pago', 'Confirmar Pedido'].map(
-        (step, index) => (
-          <React.Fragment key={step}>
-            <div
+    <div className='flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 mb-10 w-full max-w-4xl mx-auto px-4'>
+      {steps.map((step, index) => (
+        <React.Fragment key={step}>
+          <div
+            className={cn(
+              'py-2 px-5 rounded-az-full text-center transition-all duration-200 border w-full md:w-auto',
+              index === current
+                ? 'bg-az-canvas border-az-primary text-az-primary az-body-sm-bold shadow-sm'
+                : index < current
+                ? 'bg-az-canvas border-az-hairline-soft text-az-ink az-body-sm'
+                : 'bg-az-surface-soft border-az-hairline-soft text-az-stone az-caption'
+            )}
+          >
+            <span
               className={cn(
-                'py-2.5 px-6 rounded-full text-center text-sm transition-all duration-200 border w-full md:w-auto min-w-[160px]',
-                index === current
-                  ? 'bg-aloe-10 border-transparent text-black font-semibold shadow-sm'
-                  : index < current
-                  ? 'bg-white border-hairline-light text-zinc-800 font-medium'
-                  : 'bg-zinc-50 border-hairline-light text-zinc-400'
+                'mr-1.5 font-mono text-xs',
+                index === current ? 'opacity-100' : 'opacity-50'
               )}
             >
-              <span className='mr-1.5 text-xs opacity-70 font-mono'>{index + 1}.</span>
-              {step}
-            </div>
-            {step !== 'Confirmar Pedido' && (
-              <div className='hidden md:block h-px w-10 bg-zinc-300' />
-            )}
-          </React.Fragment>
-        )
-      )}
+              {index + 1}.
+            </span>
+            {step}
+          </div>
+          {index < steps.length - 1 && (
+            <div
+              className={cn(
+                'hidden md:block h-px w-8 flex-shrink-0',
+                index < current ? 'bg-az-primary/40' : 'bg-az-hairline-soft'
+              )}
+            />
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 };

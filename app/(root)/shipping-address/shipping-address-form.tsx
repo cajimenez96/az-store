@@ -22,8 +22,19 @@ import { ArrowRight, Loader, Check, ChevronsUpDown } from 'lucide-react';
 import { updateUserAddress } from '@/lib/actions/user.actions';
 import provincias from '@/lib/data/argentina.json';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { cn } from '@/lib/utils';
+
+const inputClass =
+  'bg-az-canvas border-az-hairline-soft rounded-az-lg text-az-ink placeholder:text-az-stone focus-visible:ring-az-primary focus-visible:ring-offset-0 h-11';
+const labelClass = 'az-body-sm-bold text-az-ink-deep';
 
 const ShippingAddressForm = ({
   address,
@@ -54,17 +65,12 @@ const ShippingAddressForm = ({
 
   const [isPending, startTransition] = useTransition();
 
-  const onSubmit: SubmitHandler<z.infer<typeof shippingAddressSchema>> = async (
-    values
-  ) => {
+  const onSubmit: SubmitHandler<z.infer<typeof shippingAddressSchema>> = async (values) => {
     startTransition(async () => {
       const res = await updateUserAddress(values);
 
       if (!res.success) {
-        toast({
-          variant: 'destructive',
-          description: res.message,
-        });
+        toast({ variant: 'destructive', description: res.message });
         return;
       }
 
@@ -73,35 +79,32 @@ const ShippingAddressForm = ({
   };
 
   return (
-    <div className='max-w-xl mx-auto px-4'>
-      <div className='bg-white shadow-level-3 rounded-lg border-0 p-6 md:p-8 space-y-6'>
-        <div className='space-y-2 border-b border-hairline-light pb-4'>
-          <h1 className='font-display font-[330] text-2xl md:text-3xl text-black font-ss03'>
-            Dirección de Envío
-          </h1>
-          <p className='text-xs text-zinc-500'>
-            Por favor, ingresá los datos del destinatario y la dirección de entrega.
+    <div className='max-w-xl mx-auto'>
+      <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft p-6 md:p-8 space-y-6'>
+        {/* Header */}
+        <div className='space-y-1 border-b border-az-hairline-soft pb-5'>
+          <h1 className='az-heading-sm text-az-ink-deep'>Dirección de Envío</h1>
+          <p className='az-body-sm text-az-steel'>
+            Ingresá los datos del destinatario y la dirección de entrega.
           </p>
         </div>
 
         <Form {...form}>
-          <form
-            method='post'
-            className='space-y-5'
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
+          <form method='post' className='space-y-5' onSubmit={form.handleSubmit(onSubmit)}>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              {/* Full name — full width */}
               <div className='col-span-1 md:col-span-2'>
                 <FormField
                   control={form.control}
                   name='fullName'
                   render={({ field }) => (
-                    <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black'>Nombre del Destinatario</FormLabel>
+                    <FormItem>
+                      <FormLabel className={labelClass}>Nombre del Destinatario</FormLabel>
                       <FormControl>
                         <Input
+                          id='shipping-full-name'
                           placeholder='Nombre completo de quien recibe'
-                          className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                          className={inputClass}
                           {...field}
                         />
                       </FormControl>
@@ -111,17 +114,19 @@ const ShippingAddressForm = ({
                 />
               </div>
 
+              {/* Contact email — full width */}
               <div className='col-span-1 md:col-span-2'>
                 <FormField
                   control={form.control}
                   name='contactEmail'
                   render={({ field }) => (
-                    <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black'>Email de Contacto</FormLabel>
+                    <FormItem>
+                      <FormLabel className={labelClass}>Email de Contacto</FormLabel>
                       <FormControl>
                         <Input
+                          id='shipping-email'
                           placeholder='Correo electrónico para avisos de envío'
-                          className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                          className={inputClass}
                           {...field}
                         />
                       </FormControl>
@@ -131,17 +136,19 @@ const ShippingAddressForm = ({
                 />
               </div>
 
+              {/* Street address — full width */}
               <div className='col-span-1 md:col-span-2'>
                 <FormField
                   control={form.control}
                   name='streetAddress'
                   render={({ field }) => (
-                    <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black'>Calle y Altura</FormLabel>
+                    <FormItem>
+                      <FormLabel className={labelClass}>Calle y Altura</FormLabel>
                       <FormControl>
                         <Input
+                          id='shipping-street'
                           placeholder='Dirección de entrega'
-                          className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                          className={inputClass}
                           {...field}
                         />
                       </FormControl>
@@ -151,16 +158,18 @@ const ShippingAddressForm = ({
                 />
               </div>
 
+              {/* Floor */}
               <FormField
                 control={form.control}
                 name='floor'
                 render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black'>Piso (Opcional)</FormLabel>
+                  <FormItem>
+                    <FormLabel className={labelClass}>Piso (Opcional)</FormLabel>
                     <FormControl>
                       <Input
+                        id='shipping-floor'
                         placeholder='Ej: 2'
-                        className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -168,16 +177,19 @@ const ShippingAddressForm = ({
                   </FormItem>
                 )}
               />
+
+              {/* Apartment */}
               <FormField
                 control={form.control}
                 name='apartment'
                 render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black'>Depto (Opcional)</FormLabel>
+                  <FormItem>
+                    <FormLabel className={labelClass}>Depto (Opcional)</FormLabel>
                     <FormControl>
                       <Input
+                        id='shipping-apartment'
                         placeholder='Ej: B'
-                        className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -186,16 +198,18 @@ const ShippingAddressForm = ({
                 )}
               />
 
+              {/* Phone */}
               <FormField
                 control={form.control}
                 name='phone'
                 render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black'>Teléfono</FormLabel>
+                  <FormItem>
+                    <FormLabel className={labelClass}>Teléfono</FormLabel>
                     <FormControl>
                       <Input
+                        id='shipping-phone'
                         placeholder='Ej: +54 9 11 1234-5678'
-                        className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -204,16 +218,18 @@ const ShippingAddressForm = ({
                 )}
               />
 
+              {/* Postal code */}
               <FormField
                 control={form.control}
                 name='postalCode'
                 render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black'>Código Postal</FormLabel>
+                  <FormItem>
+                    <FormLabel className={labelClass}>Código Postal</FormLabel>
                     <FormControl>
                       <Input
+                        id='shipping-postal-code'
                         placeholder='Código postal'
-                        className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -222,33 +238,41 @@ const ShippingAddressForm = ({
                 )}
               />
 
+              {/* Province combobox */}
               <FormField
                 control={form.control}
                 name='province'
                 render={({ field }) => (
                   <FormItem className='flex flex-col'>
-                    <FormLabel className='text-sm font-medium text-black h-5 mt-1'>Provincia</FormLabel>
+                    <FormLabel className={cn(labelClass, 'h-5 mt-1')}>Provincia</FormLabel>
                     <Popover open={openProvince} onOpenChange={setOpenProvince}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
+                            id='shipping-province'
                             variant='outline'
                             role='combobox'
                             className={cn(
-                              'w-full justify-between bg-white border-hairline-light text-black hover:bg-zinc-50',
-                              !field.value && 'text-muted-foreground'
+                              'w-full justify-between bg-az-canvas border-az-hairline-soft text-az-ink rounded-az-lg h-11 hover:bg-az-surface-soft',
+                              !field.value && 'text-az-stone'
                             )}
                           >
                             {field.value
-                              ? provincias.provinces.find((prov) => prov === field.value)
+                              ? provincias.provinces.find((p) => p === field.value)
                               : 'Seleccionar provincia...'}
                             <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-white border-hairline-light' align="start">
+                      <PopoverContent
+                        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft rounded-az-xl'
+                        align='start'
+                      >
                         <Command className='bg-transparent'>
-                          <CommandInput placeholder='Buscar provincia...' className='border-none outline-none ring-0' />
+                          <CommandInput
+                            placeholder='Buscar provincia...'
+                            className='border-none outline-none ring-0'
+                          />
                           <CommandList>
                             <CommandEmpty>No se encontró la provincia.</CommandEmpty>
                             <CommandGroup>
@@ -260,11 +284,11 @@ const ShippingAddressForm = ({
                                     form.setValue('province', prov);
                                     setOpenProvince(false);
                                   }}
-                                  className='cursor-pointer text-black hover:bg-zinc-100'
+                                  className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
                                 >
                                   <Check
                                     className={cn(
-                                      'mr-2 h-4 w-4 text-aloe-10',
+                                      'mr-2 h-4 w-4 text-az-primary',
                                       prov === field.value ? 'opacity-100' : 'opacity-0'
                                     )}
                                   />
@@ -281,16 +305,18 @@ const ShippingAddressForm = ({
                 )}
               />
 
+              {/* City */}
               <FormField
                 control={form.control}
                 name='city'
                 render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black'>Ciudad / Localidad</FormLabel>
+                  <FormItem>
+                    <FormLabel className={labelClass}>Ciudad / Localidad</FormLabel>
                     <FormControl>
                       <Input
+                        id='shipping-city'
                         placeholder='Ciudad / Localidad'
-                        className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -299,18 +325,19 @@ const ShippingAddressForm = ({
                 )}
               />
 
+              {/* Country — disabled */}
               <div className='col-span-1 md:col-span-2'>
                 <FormField
                   control={form.control}
                   name='country'
                   render={({ field }) => (
-                    <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black'>País</FormLabel>
+                    <FormItem>
+                      <FormLabel className={cn(labelClass, 'text-az-stone')}>País</FormLabel>
                       <FormControl>
                         <Input
                           disabled
                           placeholder='País'
-                          className='bg-canvas-cream border-hairline-light rounded-md text-zinc-500 cursor-not-allowed'
+                          className='bg-az-surface-soft border-az-hairline-soft rounded-az-lg text-az-stone cursor-not-allowed h-11'
                           {...field}
                         />
                       </FormControl>
@@ -322,10 +349,11 @@ const ShippingAddressForm = ({
             </div>
 
             <Button
+              id='shipping-submit'
               type='submit'
-              variant='primaryPill'
+              variant='buyCta'
               size='lg'
-              className='w-full mt-4'
+              className='w-full mt-2'
               disabled={isPending}
             >
               {isPending ? (
@@ -333,7 +361,7 @@ const ShippingAddressForm = ({
               ) : (
                 <>
                   Continuar al pago
-                  <ArrowRight className='w-4 h-4 ml-2' />
+                  <ArrowRight className='w-4 h-4' />
                 </>
               )}
             </Button>

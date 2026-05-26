@@ -63,17 +63,17 @@ export default async function AdminCategoriesPage() {
 
               return (
                 <React.Fragment key={category.id}>
-                  <TableRow className="bg-zinc-50">
-                    <TableCell className="font-semibold">{category.name}</TableCell>
-                    <TableCell className="text-sm text-zinc-500">{category.slug}</TableCell>
-                    <TableCell className="text-sm text-zinc-500">{productCount}</TableCell>
+                  <TableRow className="bg-az-surface-soft border-b border-az-hairline-soft">
+                    <TableCell className="font-medium text-az-ink-deep">{category.name}</TableCell>
+                    <TableCell className="text-sm text-az-steel">{category.slug}</TableCell>
+                    <TableCell className="text-sm text-az-steel">{productCount}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {category.subCategories.length === 0 ? (
-                          <span className="text-xs text-zinc-400">Sin sub-categorías</span>
+                          <span className="text-xs text-az-stone">Sin sub-categorías</span>
                         ) : (
                           category.subCategories.map((sub) => (
-                            <Badge key={sub.id} variant="secondary" className="text-xs">
+                            <Badge key={sub.id} variant="outline" className="border-az-hairline-soft text-az-charcoal">
                               {sub.name}
                             </Badge>
                           ))
@@ -102,10 +102,10 @@ export default async function AdminCategoriesPage() {
 
                   {category.subCategories.map((sub) => (
                     <TableRow key={sub.id} className="border-t-0">
-                      <TableCell className="pl-10 text-sm text-zinc-500">
+                      <TableCell className="pl-10 az-body-sm text-az-stone">
                         └ {sub.name}
                       </TableCell>
-                      <TableCell className="text-xs text-zinc-400">{sub.slug}</TableCell>
+                      <TableCell className="az-caption text-az-stone">{sub.slug}</TableCell>
                       <TableCell />
                       <TableCell />
                       <TableCell>
@@ -121,7 +121,7 @@ export default async function AdminCategoriesPage() {
 
                   <TableRow key={`${category.id}-add`} className="border-t-0">
                     <TableCell colSpan={5} className="py-1 pl-10">
-                      <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs text-zinc-400 hover:text-black">
+                      <Button asChild variant="link" size="sm" className="h-auto p-0 az-caption text-az-stone hover:text-az-ink-deep">
                         <Link href={`/admin/categories/sub/create?categoryId=${category.id}`}>
                           + Agregar sub-categoría a &quot;{category.name}&quot;
                         </Link>

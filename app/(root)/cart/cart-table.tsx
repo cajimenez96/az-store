@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useTransition } from 'react';
 import { addItemToCart, removeItemFromCart } from '@/lib/actions/cart.actions';
-import { ArrowRight, Loader, Minus, Plus } from 'lucide-react';
+import { ArrowRight, Loader, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { Cart, CartItem } from '@/types';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -16,68 +16,45 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 
-function AddButton({ item }: { item: CartItem }) {
+function QtyButton({
+  item,
+  action,
+}: {
+  item: CartItem;
+  action: 'add' | 'remove';
+}) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
-  return (
-    <Button
-      disabled={isPending}
-      variant='outline'
-      type='button'
-      className='rounded-full h-8 w-8 p-0 flex items-center justify-center border-hairline-light hover:bg-black hover:text-white hover:border-transparent transition-all duration-200'
-      onClick={() =>
-        startTransition(async () => {
-          const res = await addItemToCart(item);
 
-          if (!res.success) {
-            toast({
-              variant: 'destructive',
-              description: res.message,
-            });
-          }
-        })
+  const handleClick = () =>
+    startTransition(async () => {
+      const res =
+        action === 'add'
+          ? await addItemToCart(item)
+          : await removeItemFromCart(item.productId, item.size);
+
+      if (!res.success) {
+        toast({ variant: 'destructive', description: res.message });
       }
+    });
+
+  return (
+    <button
+      disabled={isPending}
+      onClick={handleClick}
+      className='h-8 w-8 rounded-az-full border border-az-hairline-soft flex items-center justify-center text-az-ink hover:bg-az-ink-deep hover:text-white hover:border-az-ink-deep transition-colors duration-150 disabled:opacity-40'
+      aria-label={action === 'add' ? 'Agregar uno' : 'Quitar uno'}
     >
       {isPending ? (
-        <Loader className='w-4 h-4 animate-spin' />
+        <Loader className='w-3.5 h-3.5 animate-spin' />
+      ) : action === 'add' ? (
+        <Plus className='w-3.5 h-3.5' />
       ) : (
-        <Plus className='w-3 h-3' />
+        <Minus className='w-3.5 h-3.5' />
       )}
-    </Button>
-  );
-}
-
-function RemoveButton({ item }: { item: CartItem }) {
-  const { toast } = useToast();
-  const [isPending, startTransition] = useTransition();
-  return (
-    <Button
-      disabled={isPending}
-      variant='outline'
-      type='button'
-      className='rounded-full h-8 w-8 p-0 flex items-center justify-center border-hairline-light hover:bg-black hover:text-white hover:border-transparent transition-all duration-200'
-      onClick={() =>
-        startTransition(async () => {
-          const res = await removeItemFromCart(item.productId, item.size);
-
-          if (!res.success) {
-            toast({
-              variant: 'destructive',
-              description: res.message,
-            });
-          }
-        })
-      }
-    >
-      {isPending ? (
-        <Loader className='w-4 h-4 animate-spin' />
-      ) : (
-        <Minus className='w-3 h-3' />
-      )}
-    </Button>
+    </button>
   );
 }
 
@@ -85,109 +62,134 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  return (
-    <div className='w-full max-w-7xl mx-auto px-4 py-8 bg-canvas-cream rounded-xl min-h-[60vh]'>
-      <h1 className='font-display font-[330] text-3xl md:text-4xl text-black font-ss03 mb-8 px-2'>
-        Carrito de Compras
-      </h1>
-      {!cart || cart.items.length === 0 ? (
-        <div className='text-center py-12 bg-white rounded-lg shadow-level-3 border-0 p-8'>
-          <p className='text-zinc-500 mb-6 font-medium'>Tu carrito de compras está vacío.</p>
-          <Link href='/' className='inline-flex'>
-            <Button variant='primaryPill' size='lg'>
-              Ir a comprar
-            </Button>
-          </Link>
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className='flex flex-col items-center justify-center py-24 text-center'>
+        <div className='w-20 h-20 rounded-az-xxxl bg-az-surface-soft flex items-center justify-center mb-6'>
+          <ShoppingBag className='w-9 h-9 text-az-stone' />
         </div>
-      ) : (
-        <div className='grid grid-cols-1 lg:grid-cols-4 gap-8'>
-          <div className='overflow-x-auto lg:col-span-3 bg-white rounded-lg shadow-level-3 border-0 p-4 md:p-6'>
-            <Table>
-              <TableHeader>
-                <TableRow className='border-b border-hairline-light hover:bg-transparent'>
-                  <TableHead className='text-black font-semibold h-12'>Producto</TableHead>
-                  <TableHead className='text-center text-black font-semibold h-12'>Cantidad</TableHead>
-                  <TableHead className='text-right text-black font-semibold h-12'>Precio</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {cart.items.map((item) => (
-                  <TableRow key={`${item.slug}-${item.size || ''}`} className='border-b border-hairline-light last:border-0 hover:bg-zinc-50/50 transition-colors duration-150'>
-                    <TableCell className='py-4'>
-                      <Link
-                        href={`/product/${item.slug}`}
-                        className='flex items-center gap-4 group'
-                      >
-                        <div className='overflow-hidden rounded-md border border-hairline-light bg-zinc-50 p-1 flex-shrink-0'>
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={60}
-                            height={60}
-                            className='object-contain rounded'
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className='font-medium text-black group-hover:underline transition duration-150'>
-                            {item.name}
-                          </span>
-                          {item.size && (
-                            <span className="text-sm text-zinc-500">Talle: {item.size}</span>
-                          )}
-                        </div>
-                      </Link>
-                    </TableCell>
-                    <TableCell className='py-4 text-center'>
-                      <div className='flex items-center justify-center gap-3'>
-                        <RemoveButton item={item} />
-                        <span className='w-6 text-center font-semibold text-black'>{item.qty}</span>
-                        <AddButton item={item} />
-                      </div>
-                    </TableCell>
-                    <TableCell className='py-4 text-right font-semibold text-black'>
-                      {formatCurrency(item.price)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+        <h1 className='az-heading-md text-az-ink-deep mb-2'>Tu carrito está vacío</h1>
+        <p className='az-body-md text-az-steel mb-8'>
+          Explorá nuestro catálogo y encontrá lo que buscás.
+        </p>
+        <Link href='/'>
+          <Button variant='buyCta' size='lg' id='cart-empty-cta'>
+            Ir a comprar
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
-          <div className='lg:col-span-1'>
-            <Card className='shadow-level-3 border-0 bg-white rounded-lg overflow-hidden'>
-              <CardContent className='p-6 flex flex-col gap-6'>
-                <div className='space-y-2 border-b border-hairline-light pb-4'>
-                  <p className='text-xs eyebrow-cap text-zinc-500 uppercase tracking-wider'>Resumen de compra</p>
-                  <div className='text-lg font-medium text-black flex justify-between items-baseline'>
-                    <span>Subtotal ({cart.items.reduce((a, c) => a + c.qty, 0)} items)</span>
-                  </div>
-                  <div className='text-2xl font-bold text-black pt-1'>
-                    {formatCurrency(cart.itemsPrice)}
-                  </div>
-                </div>
-                <Button
-                  className='w-full'
-                  variant='primaryPill'
-                  size='lg'
-                  disabled={isPending}
-                  onClick={() =>
-                    startTransition(() => router.push('/shipping-address'))
-                  }
+  return (
+    <div className='w-full'>
+      <h1 className='az-heading-lg text-az-ink-deep mb-8'>Carrito de Compras</h1>
+
+      <div className='grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8'>
+        {/* Items table */}
+        <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft overflow-hidden'>
+          <Table>
+            <TableHeader>
+              <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
+                <TableHead className='az-body-sm-bold text-az-ink h-12 pl-6'>Producto</TableHead>
+                <TableHead className='az-body-sm-bold text-az-ink text-center h-12'>Cantidad</TableHead>
+                <TableHead className='az-body-sm-bold text-az-ink text-right h-12 pr-6'>Precio</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {cart.items.map((item) => (
+                <TableRow
+                  key={`${item.slug}-${item.size || ''}`}
+                  className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors duration-150'
                 >
-                  {isPending ? (
-                    <Loader className='w-4 h-4 animate-spin' />
-                  ) : (
-                    <>
-                      Continuar Compra
-                      <ArrowRight className='w-4 h-4 ml-2' />
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
+                  <TableCell className='py-5 pl-6'>
+                    <Link
+                      href={`/product/${item.slug}`}
+                      className='flex items-center gap-4 group'
+                    >
+                      <div className='rounded-az-xl border border-az-hairline-soft bg-az-surface-soft p-1.5 flex-shrink-0'>
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={56}
+                          height={56}
+                          className='object-contain rounded-az-lg'
+                        />
+                      </div>
+                      <div className='flex flex-col gap-0.5'>
+                        <span className='az-body-md-bold text-az-ink-deep group-hover:underline transition duration-150'>
+                          {item.name}
+                        </span>
+                        {item.size && (
+                          <span className='az-caption text-az-steel'>Talle: {item.size}</span>
+                        )}
+                      </div>
+                    </Link>
+                  </TableCell>
+                  <TableCell className='py-5 text-center'>
+                    <div className='flex items-center justify-center gap-3'>
+                      <QtyButton item={item} action='remove' />
+                      <span className='w-6 text-center az-body-md-bold text-az-ink-deep tabular-nums'>
+                        {item.qty}
+                      </span>
+                      <QtyButton item={item} action='add' />
+                    </div>
+                  </TableCell>
+                  <TableCell className='py-5 text-right az-body-md-bold text-az-ink-deep pr-6 tabular-nums'>
+                    {formatCurrency(item.price)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Order summary rail */}
+        <div className='lg:sticky lg:top-24 h-fit'>
+          <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft shadow-[rgba(20,22,26,0.3)_0px_1px_4px_0px] p-6 flex flex-col gap-5'>
+            <p className='az-caption-bold text-az-steel uppercase tracking-wider'>
+              Resumen de compra
+            </p>
+
+            <div className='space-y-3'>
+              <div className='flex justify-between az-body-sm text-az-charcoal'>
+                <span>Subtotal ({cart.items.reduce((a, c) => a + c.qty, 0)} items)</span>
+                <span className='az-body-sm-bold text-az-ink-deep tabular-nums'>
+                  {formatCurrency(cart.itemsPrice)}
+                </span>
+              </div>
+              <div className='border-t border-az-hairline-soft pt-3 flex justify-between'>
+                <span className='az-body-md-bold text-az-ink-deep'>Total</span>
+                <span className='az-heading-sm text-az-ink-deep tabular-nums'>
+                  {formatCurrency(cart.itemsPrice)}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              id='cart-checkout-cta'
+              className='w-full'
+              variant='buyCta'
+              size='lg'
+              disabled={isPending}
+              onClick={() => startTransition(() => router.push('/shipping-address'))}
+            >
+              {isPending ? (
+                <Loader className='w-4 h-4 animate-spin' />
+              ) : (
+                <>
+                  Continuar Compra
+                  <ArrowRight className='w-4 h-4' />
+                </>
+              )}
+            </Button>
+
+            <Link href='/' className='text-center az-body-sm text-az-steel hover:text-az-ink transition-colors'>
+              ← Seguir comprando
+            </Link>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -1,45 +1,17 @@
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { getAllCategories } from '@/lib/actions/category.actions';
 import { SearchIcon } from 'lucide-react';
 
 const Search = async () => {
-  const { data: categories = [] } = await getAllCategories();
-
   return (
-    <form action='/search' method='GET'>
-      <div className='flex w-full max-w-sm items-center space-x-2'>
-        <Select name='category'>
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder='Todas' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem key='All' value='all'>
-              Todas
-            </SelectItem>
-            {categories.map((x) => (
-              <SelectItem key={x.id} value={x.slug}>
-                {x.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <form action='/search' method='GET' className='relative w-full max-w-lg'>
+      <div className='relative flex items-center'>
+        <SearchIcon className='absolute left-3 w-4 h-4 text-az-stone pointer-events-none' />
         <Input
           name='q'
-          type='text'
-          placeholder='Buscar...'
-          className='md:w-[100px] lg:w-[300px]'
+          type='search'
+          placeholder='Buscar productos...'
+          className='w-full pl-9 pr-4 h-10 rounded-az-full bg-az-surface-soft border border-az-hairline-soft focus:ring-1 focus:ring-az-primary focus:border-az-primary text-sm transition-all'
         />
-        <Button>
-          <SearchIcon />
-        </Button>
       </div>
     </form>
   );

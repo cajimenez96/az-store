@@ -60,11 +60,11 @@ export default async function AdminBrandsPage() {
                   : undefined;
 
               return (
-                <TableRow key={brand.id} className="bg-zinc-50">
-                  <TableCell className="font-semibold">{brand.name}</TableCell>
-                  <TableCell className="text-sm text-zinc-500">{brand.slug}</TableCell>
-                  <TableCell className="text-sm text-zinc-500">{productCount}</TableCell>
-                  <TableCell>
+                <TableRow key={brand.id} className="bg-az-surface-soft border-b border-az-hairline-soft">
+                  <TableCell className="font-medium text-az-ink-deep">{brand.name}</TableCell>
+                  <TableCell className="text-sm text-az-steel">{brand.slug}</TableCell>
+                  <TableCell className="text-sm text-az-steel">{productCount}</TableCell>
+                  <TableCell className="text-right">
                     <div className="flex items-center gap-2">
                       {isDefault ? (
                         <Badge variant="secondary">Predeterminada</Badge>
@@ -87,7 +87,7 @@ export default async function AdminBrandsPage() {
             })}
             {brands.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-4 text-zinc-500">
+                <TableCell colSpan={4} className="text-center py-4 text-az-stone">
                   No hay marcas registradas.
                 </TableCell>
               </TableRow>

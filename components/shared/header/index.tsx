@@ -2,32 +2,38 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { APP_NAME } from '@/lib/constants';
 import Menu from './menu';
-import CategoryDrawer from './category-drawer';
 import Search from './search';
 
 const Header = () => {
   return (
-    <header className='w-full border-b border-hairline-light dark:border-hairline-dark bg-white dark:bg-canvas-night-elevated text-black dark:text-white'>
-      <div className='wrapper flex-between'>
-        <div className='flex-start'>
-          <CategoryDrawer />
-          <Link href='/' className='flex-start ml-4'>
-            <Image
-              src='/images/logo.svg'
-              alt={`${APP_NAME} logo`}
-              height={48}
-              width={48}
-              priority={true}
-            />
-            <span className='hidden lg:block font-bold text-2xl ml-3'>
-              {APP_NAME}
-            </span>
-          </Link>
-        </div>
-        <div className='hidden md:block'>
+    <header className='sticky top-0 z-50 bg-az-canvas border-b border-az-hairline-soft'>
+      <div className='az-wrapper flex items-center justify-between h-16 gap-4 lg:gap-8'>
+        {/* Logo */}
+        <Link href='/' className='flex items-center gap-3 shrink-0'>
+          <Image
+            src='/images/logo.svg'
+            alt={`${APP_NAME} logo`}
+            height={36}
+            width={36}
+            priority
+          />
+          <span className='hidden lg:block az-body-md-bold text-az-ink-deep tracking-tight'>
+            {APP_NAME}
+          </span>
+        </Link>
+
+        {/* Global Search */}
+        <div className='hidden md:block flex-1 max-w-2xl mx-auto'>
           <Search />
         </div>
+
+        {/* Right: menu/user actions */}
         <Menu />
+      </div>
+      
+      {/* Mobile Search (visible only on mobile, below the main header bar) */}
+      <div className='md:hidden px-4 pb-3'>
+         <Search />
       </div>
     </header>
   );

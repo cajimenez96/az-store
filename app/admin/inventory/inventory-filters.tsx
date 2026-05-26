@@ -60,10 +60,10 @@ export default function InventoryFilters({
   };
 
   return (
-    <div className="bg-zinc-50 border border-hairline-light rounded-md p-4 mb-4 space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="bg-az-surface-soft border border-az-hairline-soft rounded-az-xl p-4 mb-4 space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label className="text-xs font-semibold uppercase text-zinc-500 mb-1 block">Búsqueda</label>
+          <label className="az-caption-bold uppercase text-az-stone mb-1 block">Búsqueda</label>
           <Input 
             placeholder="Buscar por nombre..." 
             value={query}
@@ -72,7 +72,7 @@ export default function InventoryFilters({
           />
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase text-zinc-500 mb-1 block">Marca</label>
+          <label className="az-caption-bold uppercase text-az-stone mb-1 block">Marca</label>
           <select 
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none"
             value={brand}
@@ -85,7 +85,7 @@ export default function InventoryFilters({
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase text-zinc-500 mb-1 block">Categoría</label>
+          <label className="az-caption-bold uppercase text-az-stone mb-1 block">Categoría</label>
           <select 
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none"
             value={category}
@@ -98,7 +98,7 @@ export default function InventoryFilters({
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase text-zinc-500 mb-1 block">Estado de Stock</label>
+          <label className="az-caption-bold uppercase text-az-stone mb-1 block">Estado de Stock</label>
           <select 
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none"
             value={stock}

@@ -91,7 +91,7 @@ const AdminUserPage = async (props: {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2 items-center">
-                    <Button asChild variant='default' size='sm' className="bg-zinc-900 hover:bg-zinc-800">
+                    <Button asChild variant='default' size='sm' className="bg-az-ink-deep hover:bg-az-ink rounded-az-lg">
                       <Link href={`/admin/users/${user.id}`}>
                         <Pencil className="w-3.5 h-3.5 mr-1.5" />
                         Editar
