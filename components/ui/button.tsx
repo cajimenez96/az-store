@@ -22,6 +22,8 @@ const buttonVariants = cva(
         outlineOnDark: "bg-transparent border-2 border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-200",
         outlineOnLight: "bg-white border border-black text-black rounded-full hover:bg-black hover:text-white transition-all duration-200",
         aloePill: "bg-aloe-10 text-black rounded-full hover:bg-aloe-10/90 transition-all duration-200 border border-transparent",
+        buyCta: "bg-az-primary text-white rounded-az-full hover:bg-az-primary-deep transition-colors duration-150",
+        outlineLight: "border-2 border-az-ink-deep text-az-ink-deep bg-transparent rounded-az-full hover:bg-az-ink-deep hover:text-white transition-colors duration-150",
       },
       size: {
         default: "h-10 px-4 py-2",

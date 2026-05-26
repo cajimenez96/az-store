@@ -2,12 +2,9 @@
 
 import { useState } from 'react';
 import AddToCart from './add-to-cart';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Cart } from '@/types';
+import { cn } from '@/lib/utils';
 
-// Type that matches the plain object returned by convertToPlainObject(getProductBySlug(...))
-// Decimal fields become strings after serialization
 type ProductWithVariants = {
   id: string;
   name: string;
@@ -41,64 +38,82 @@ export default function ProductAction({
 }) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
-  // Filter variants with stock
   const availableVariants = product.variants?.filter((v) => v.stock > 0) || [];
+  const allVariants = product.variants || [];
   const hasStock = availableVariants.length > 0;
-
-  // Selected variant
   const currentVariant = selectedSize
-    ? availableVariants.find((v) => v.size.name === selectedSize)
+    ? allVariants.find((v) => v.size.name === selectedSize)
     : null;
 
+  const formattedPrice = new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+  }).format(Number(product.price));
+
   return (
-    <div className='flex flex-col gap-6 w-full'>
-      {/* Talles */}
-      {availableVariants.length > 0 && (
-        <div className='space-y-3'>
-          <p className='eyebrow-cap text-shade-50'>Talles disponibles</p>
-          <div className='flex flex-wrap gap-2'>
-            {availableVariants.map((v) => (
-              <Button
-                key={v.id}
-                type='button'
-                variant={selectedSize === v.size.name ? 'primaryPill' : 'outlineOnDark'}
-                className={`rounded-pill min-w-[3rem] ${
-                  selectedSize === v.size.name ? 'border-primary' : ''
-                }`}
-                onClick={() => setSelectedSize(v.size.name)}
-              >
-                {v.size.name}
-              </Button>
-            ))}
+    <>
+      <div className='flex flex-col gap-6 w-full'>
+        {/* Size selector */}
+        {allVariants.length > 0 && (
+          <div className='space-y-3'>
+            <p className='az-caption-bold text-az-steel uppercase tracking-widest'>Talles</p>
+            <div className='flex flex-wrap gap-2'>
+              {allVariants.map((v) => {
+                const inStock = v.stock > 0;
+                const isSelected = selectedSize === v.size.name;
+                return (
+                  <button
+                    key={v.id}
+                    type='button'
+                    disabled={!inStock}
+                    onClick={() => inStock && setSelectedSize(v.size.name)}
+                    className={cn(
+                      'min-w-[3rem] px-4 py-2 rounded-az-full border-2 az-button-md transition-colors duration-150',
+                      isSelected
+                        ? 'bg-az-ink-deep text-white border-az-ink-deep'
+                        : inStock
+                        ? 'bg-az-canvas text-az-ink-deep border-az-hairline hover:border-az-ink-deep'
+                        : 'bg-az-canvas text-az-disabled-text border-az-hairline cursor-not-allowed line-through'
+                    )}
+                  >
+                    {v.size.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Stock status - dynamic based on selection */}
-      <div className='flex items-center gap-3'>
-        {currentVariant ? (
-          <>
-            <Badge className='bg-aloe-10/10 text-aloe-10 border border-aloe-10/20 rounded-pill px-4 py-1 text-xs font-medium'>
-              Con stock
-            </Badge>
-            <span className='text-shade-40 text-sm'>
-              {currentVariant.stock} disponibles
-            </span>
-          </>
-        ) : hasStock ? (
-          <span className='text-shade-40 text-sm'>Selecciona un talle</span>
-        ) : (
-          <Badge className='bg-red-500/10 text-red-400 border border-red-500/20 rounded-pill px-4 py-1 text-xs font-medium'>
-            Sin stock
-          </Badge>
         )}
-      </div>
 
-      {/* CTA */}
-      <div className='border-t border-hairline-dark pt-8 flex flex-col sm:flex-row gap-3'>
-        {hasStock ? (
-          <div className='w-full'>
-            {selectedSize ? (
+        {/* Stock status */}
+        <div className='flex items-center gap-3'>
+          {currentVariant ? (
+            currentVariant.stock > 0 ? (
+              <>
+                <span className='inline-flex items-center gap-1.5 az-caption-bold bg-az-success/10 text-az-success px-3 py-1 rounded-az-full'>
+                  <span className='w-1.5 h-1.5 rounded-full bg-az-success'></span>
+                  En stock
+                </span>
+                <span className='az-body-sm text-az-stone'>
+                  {currentVariant.stock} disponibles
+                </span>
+              </>
+            ) : (
+              <span className='az-caption-bold text-az-critical'>Sin stock en este talle</span>
+            )
+          ) : hasStock ? (
+            <span className='az-body-sm text-az-stone'>Seleccioná un talle para continuar</span>
+          ) : (
+            <span className='az-caption-bold bg-az-critical/10 text-az-critical px-3 py-1 rounded-az-full'>
+              Sin stock
+            </span>
+          )}
+        </div>
+
+        {/* CTA — desktop */}
+        <div className='hidden md:block border-t border-az-hairline-soft pt-6'>
+          {hasStock ? (
+            selectedSize ? (
               <AddToCart
                 cart={cart}
                 item={{
@@ -112,25 +127,52 @@ export default function ProductAction({
                 }}
               />
             ) : (
-              <Button
-                variant='outlineOnDark'
+              <button
                 disabled
-                className='rounded-pill w-full opacity-40 cursor-not-allowed'
+                className='w-full az-button-md bg-az-disabled-text text-white py-4 rounded-az-full cursor-not-allowed'
               >
-                Elige un talle para comprar
-              </Button>
-            )}
-          </div>
+                Elegí un talle para comprar
+              </button>
+            )
+          ) : (
+            <button
+              disabled
+              className='w-full az-button-md bg-az-disabled-text text-white py-4 rounded-az-full cursor-not-allowed'
+            >
+              Sin stock
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile sticky bottom bar */}
+      <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-az-canvas border-t border-az-hairline-soft px-4 py-3 flex items-center gap-3'>
+        <div className='flex-1'>
+          <p className='az-caption text-az-stone'>Precio</p>
+          <p className='az-body-md-bold text-az-ink-deep'>{formattedPrice}</p>
+        </div>
+        {hasStock && selectedSize ? (
+          <AddToCart
+            cart={cart}
+            item={{
+              productId: product.id,
+              name: product.name,
+              slug: product.slug,
+              price: String(product.price),
+              qty: 1,
+              image: product.images![0],
+              size: selectedSize,
+            }}
+          />
         ) : (
-          <Button
-            variant='outlineOnDark'
+          <button
             disabled
-            className='rounded-pill w-full opacity-40 cursor-not-allowed'
+            className='az-button-md bg-az-disabled-text text-white px-6 py-3 rounded-az-full cursor-not-allowed'
           >
-            Sin stock
-          </Button>
+            {hasStock ? 'Elegí un talle' : 'Sin stock'}
+          </button>
         )}
       </div>
-    </div>
+    </>
   );
 }

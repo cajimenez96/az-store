@@ -63,15 +63,15 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
 
   return existItem ? (
     <div className='flex items-center gap-2'>
-      <Button type='button' variant='outlineOnDark' onClick={handleRemoveFromCart}>
+      <Button type='button' variant='outlineLight' onClick={handleRemoveFromCart}>
         {isPending ? (
           <Loader className='w-4 h-4 animate-spin' />
         ) : (
           <Minus className='w-4 h-4' />
         )}
       </Button>
-      <span className='px-4 text-white font-medium'>{existItem.qty}</span>
-      <Button type='button' variant='outlineOnDark' onClick={handleAddToCart}>
+      <span className='px-4 text-az-ink-deep font-medium'>{existItem.qty}</span>
+      <Button type='button' variant='outlineLight' onClick={handleAddToCart}>
         {isPending ? (
           <Loader className='w-4 h-4 animate-spin' />
         ) : (
@@ -80,7 +80,7 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
       </Button>
     </div>
   ) : (
-    <Button className='w-full' variant='primaryPill' type='button' onClick={handleAddToCart}>
+    <Button className='w-full' variant='buyCta' type='button' onClick={handleAddToCart}>
       {isPending ? (
         <Loader className='w-4 h-4 animate-spin' />
       ) : (
