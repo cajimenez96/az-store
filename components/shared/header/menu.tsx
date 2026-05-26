@@ -5,6 +5,7 @@ import UserButton from './user-button';
 import MenuMobile from './menu-mobile';
 import { auth } from '@/auth';
 import { getMyCart } from '@/lib/actions/cart.actions';
+import ThemeToggle from '@/components/shared/theme-toggle';
 
 const Menu = async () => {
   const [cart, session] = await Promise.all([getMyCart(), auth()]);
@@ -33,6 +34,7 @@ const Menu = async () => {
           </Link>
         </Button>
 
+        <ThemeToggle />
         <UserButton />
       </nav>
 

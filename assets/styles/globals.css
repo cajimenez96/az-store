@@ -58,6 +58,19 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* az- theme-sensitive tokens — light mode */
+    --az-canvas: 255 255 255;
+    --az-surface-soft: 241 244 247;
+    --az-ink-deep: 10 19 23;
+    --az-ink: 28 30 33;
+    --az-charcoal: 68 73 80;
+    --az-slate: 75 76 79;
+    --az-steel: 93 108 123;
+    --az-stone: 133 149 164;
+    --az-hairline: 206 208 212;
+    --az-hairline-soft: 222 227 233;
+    --az-disabled-text: 188 192 196;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -84,6 +97,19 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* az- theme-sensitive tokens — dark mode */
+    --az-canvas: 17 19 22;
+    --az-surface-soft: 30 34 38;
+    --az-ink-deep: 240 244 248;
+    --az-ink: 221 225 231;
+    --az-charcoal: 162 170 180;
+    --az-slate: 138 146 152;
+    --az-steel: 107 122 138;
+    --az-stone: 78 92 110;
+    --az-hairline: 45 49 56;
+    --az-hairline-soft: 35 40 48;
+    --az-disabled-text: 74 85 112;
   }
 }
 

@@ -72,21 +72,21 @@ export default {
   			'az-critical-strong': '#f0284a',
 
   			// ── DESIGN.md — Surface ─────────────────────────────────────────────────
-  			'az-canvas':        '#ffffff',
-  			'az-surface-soft':  '#f1f4f7',
+  			'az-canvas':        'rgb(var(--az-canvas) / <alpha-value>)',
+  			'az-surface-soft':  'rgb(var(--az-surface-soft) / <alpha-value>)',
 
   			// ── DESIGN.md — Text ────────────────────────────────────────────────────
-  			'az-ink-deep':      '#0a1317',
-  			'az-ink':           '#1c1e21',
-  			'az-charcoal':      '#444950',
-  			'az-slate':         '#4b4c4f',
-  			'az-steel':         '#5d6c7b',
-  			'az-stone':         '#8595a4',
+  			'az-ink-deep':      'rgb(var(--az-ink-deep) / <alpha-value>)',
+  			'az-ink':           'rgb(var(--az-ink) / <alpha-value>)',
+  			'az-charcoal':      'rgb(var(--az-charcoal) / <alpha-value>)',
+  			'az-slate':         'rgb(var(--az-slate) / <alpha-value>)',
+  			'az-steel':         'rgb(var(--az-steel) / <alpha-value>)',
+  			'az-stone':         'rgb(var(--az-stone) / <alpha-value>)',
 
   			// ── DESIGN.md — Hairlines ───────────────────────────────────────────────
-  			'az-hairline':      '#ced0d4',
-  			'az-hairline-soft': '#dee3e9',
-  			'az-disabled-text': '#bcc0c4',
+  			'az-hairline':      'rgb(var(--az-hairline) / <alpha-value>)',
+  			'az-hairline-soft': 'rgb(var(--az-hairline-soft) / <alpha-value>)',
+  			'az-disabled-text': 'rgb(var(--az-disabled-text) / <alpha-value>)',
 
   			// ── Legacy tokens (used by existing components — remove as redesign progresses) ──
   			'canvas-night': '#000000',

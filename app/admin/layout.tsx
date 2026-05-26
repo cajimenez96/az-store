@@ -16,7 +16,7 @@ export default async function AdminLayout({
   return (
     <div className='flex flex-col min-h-screen bg-az-surface-soft'>
       {/* Admin top bar */}
-      <header className='sticky top-0 z-50 bg-az-ink-deep border-b border-white/10'>
+      <header className='sticky top-0 z-50 bg-[#0a1317] border-b border-white/10'>
         <div className='container mx-auto'>
           <div className='flex items-center h-14 px-4 gap-4'>
             <Link href='/' className='flex items-center gap-2 shrink-0'>

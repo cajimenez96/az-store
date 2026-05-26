@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ShoppingCart, Menu as MenuIcon, LogOut } from 'lucide-react';
+import ThemeToggle from '@/components/shared/theme-toggle';
 import {
   Sheet,
   SheetContent,
@@ -75,6 +76,13 @@ const MenuMobile = ({
                 )}
               </Link>
             </Button>
+
+            <div className='h-px bg-az-hairline-soft my-1' />
+
+            <div className='flex items-center justify-between px-3 py-2'>
+              <span className='az-body-sm text-az-stone'>Apariencia</span>
+              <ThemeToggle />
+            </div>
 
             <div className='h-px bg-az-hairline-soft my-1' />
 
