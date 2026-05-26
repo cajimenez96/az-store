@@ -291,11 +291,12 @@ export async function updateOrderToPaid({
 
           // Guard atómico: decrementa solo si hay stock suficiente.
           // Previene stock negativo en compras simultáneas (race condition).
-          const affected = await tx.$executeRaw`
-            UPDATE "ProductVariant"
-            SET stock = stock - ${item.qty}
-            WHERE id = ${variant.id} AND stock >= ${item.qty}
-          `;
+          const affected = await tx.$executeRawUnsafe(
+            `UPDATE "ProductVariant" SET stock = stock - $1 WHERE id = $2::uuid AND stock >= $3`,
+            item.qty,
+            variant.id,
+            item.qty
+          );
 
           if (affected === 0) {
             throw new Error(
