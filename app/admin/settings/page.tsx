@@ -1,13 +1,15 @@
 import { requireAdmin } from '@/lib/auth-guard';
-import { getBankSettings } from '@/lib/actions/settings.actions';
+import { getBankSettings, getMercadoPagoSettings } from '@/lib/actions/settings.actions';
 import { Metadata } from 'next';
 import BankSettingsForm from './bank-settings-form';
+import MercadoPagoSettingsForm from './mercadopago-settings-form';
 
 export const metadata: Metadata = { title: 'Configuración' };
 
 const SettingsPage = async () => {
   await requireAdmin();
   const bankSettings = await getBankSettings();
+  const mpSettings = await getMercadoPagoSettings();
 
   return (
     <div className='max-w-2xl space-y-8'>
@@ -24,6 +26,16 @@ const SettingsPage = async () => {
           </p>
         </div>
         <BankSettingsForm initialValues={bankSettings} />
+      </section>
+
+      <section className='bg-az-canvas border border-az-hairline-soft rounded-az-lg p-6 space-y-4'>
+        <div className='border-b border-az-hairline-soft pb-3'>
+          <h2 className='az-body-lg-bold text-az-ink-deep'>MercadoPago</h2>
+          <p className='az-body-sm text-az-stone mt-0.5'>
+            Credenciales para procesar pagos mediante MercadoPago.
+          </p>
+        </div>
+        <MercadoPagoSettingsForm initialValues={mpSettings} />
       </section>
     </div>
   );

@@ -1,5 +1,5 @@
 const encoder = new TextEncoder();
-const key = new TextEncoder().encode(process.env.ENCRYPTION_KEY || 'default-fallback-encryption-key-please-change-in-production'); // Retrieve key from env var
+const key = new TextEncoder().encode(process.env.ENCRYPTION_KEY || 'default-fallback-encryption-key-please-change-in-production');
 
 // Hash function with key-based encryption
 export const hash = async (plainPassword: string): Promise<string> => {
@@ -26,6 +26,15 @@ export const compare = async (
 ): Promise<boolean> => {
   const hashedPassword = await hash(plainPassword);
   return hashedPassword === encryptedPassword;
+};
+
+// Simple token storage (stored as-is in DB, protected by HTTPS + DB security)
+export const encryptToken = async (token: string): Promise<string> => {
+  return token;
+};
+
+export const decryptToken = async (encryptedToken: string): Promise<string> => {
+  return encryptedToken;
 };
 // // Use Web Crypto API compatible with Edge Functions
 

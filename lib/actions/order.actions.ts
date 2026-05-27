@@ -21,7 +21,7 @@ import {
   sendTransferRejected,
 } from '../email';
 import { Preference } from 'mercadopago';
-import { mpClient } from '../mercadopago';
+import { getMercadoPagoClient } from '../mercadopago';
 import { getBankSettings } from './settings.actions';
 
 // Create order and create the order items
@@ -822,6 +822,7 @@ export async function createMercadoPagoOrder(orderId: string) {
 
     if (!order) throw new Error('Orden no encontrada');
 
+    const mpClient = await getMercadoPagoClient();
     const preference = new Preference(mpClient);
     
     // Prepare items for Mercado Pago

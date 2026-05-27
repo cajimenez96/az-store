@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { Payment } from 'mercadopago';
-import { mpClient } from '@/lib/mercadopago';
+import { getMercadoPagoClient } from '@/lib/mercadopago';
 import { updateOrderToPaid } from '@/lib/actions/order.actions';
 
 function verifyMPSignature(
@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Notification received but not a payment' });
     }
 
+    const mpClient = await getMercadoPagoClient();
     const paymentClient = new Payment(mpClient);
     const payment = await paymentClient.get({ id: Number(paymentId) });
 
