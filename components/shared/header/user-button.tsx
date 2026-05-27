@@ -68,7 +68,7 @@ const UserButton = async () => {
             </Link>
           </DropdownMenuItem>
 
-          {session?.user?.role !== 'admin' && (
+          {session?.user?.role === 'user' && (
             <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
               <Link href='/user/orders' className='w-full'>
                 Historial de Pedidos
@@ -76,10 +76,18 @@ const UserButton = async () => {
             </DropdownMenuItem>
           )}
 
-          {session?.user?.role === 'admin' && (
+          {(session?.user?.role === 'admin' || session?.user?.role === 'seller') && (
             <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
-              <Link href='/admin/overview' className='w-full'>
-                Administrador
+              <Link href='/admin' className='w-full'>
+                {session?.user?.role === 'admin' ? 'Administrador' : 'Panel de Vendedor'}
+              </Link>
+            </DropdownMenuItem>
+          )}
+
+          {session?.user?.role === 'seller' && (
+            <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
+              <Link href='/user/orders' className='w-full'>
+                Mis Pedidos
               </Link>
             </DropdownMenuItem>
           )}
