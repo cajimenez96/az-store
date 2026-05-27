@@ -33,14 +33,6 @@ export const PAYMENT_METHODS = process.env.PAYMENT_METHODS
 export const DEFAULT_PAYMENT_METHOD =
   process.env.DEFAULT_PAYMENT_METHOD || 'MercadoPago';
 
-export const BANK_TRANSFER_INFO = {
-  bank: process.env.BANK_NAME || 'Banco Galicia',
-  accountHolder: process.env.BANK_ACCOUNT_HOLDER || 'AZ Marketing SRL',
-  cbu: process.env.BANK_CBU || '0070999620000000000000',
-  alias: process.env.BANK_ALIAS || 'AZ.MARKETING.MP',
-  cuit: process.env.BANK_CUIT || '30-00000000-0',
-};
-
 export const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 12;
 
 export const productDefaultValues = {
