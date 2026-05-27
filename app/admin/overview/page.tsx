@@ -7,6 +7,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getOrderSummary } from '@/lib/actions/order.actions';
+import { getSellerCommissionSummary, getMyCommissionRate } from '@/lib/actions/user.actions';
 import { formatCurrency, formatDateTime, formatNumber, cn } from '@/lib/utils';
 import {
   BadgeDollarSign,
@@ -16,12 +17,15 @@ import {
   AlertTriangle,
   Truck,
   Clock,
+  Percent,
 } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Charts from './charts';
 import { requireAdminOrSeller } from '@/lib/auth-guard';
+import { auth } from '@/auth';
 import SettingForm from './setting-form';
+import CommissionEditor from './commission-editor';
 import { Button } from '@/components/ui/button';
 
 
@@ -80,9 +84,16 @@ function MetricCard({
 
 
 const AdminOverviewPage = async () => {
-  await requireAdminOrSeller();
+  const session = await requireAdminOrSeller();
+  const isAdmin = session?.user?.role === 'admin';
 
   const summary = await getOrderSummary();
+
+  const commissionSummary = isAdmin ? await getSellerCommissionSummary() : null;
+  const sellerOwnRate =
+    !isAdmin && session?.user?.id
+      ? await getMyCommissionRate(session.user.id)
+      : null;
 
   return (
     <div className='space-y-6'>
@@ -136,6 +147,72 @@ const AdminOverviewPage = async () => {
           sublabel='Talles con 2 o menos unidades'
         />
       </div>
+
+      {/* Commission section */}
+      {isAdmin && commissionSummary !== null && (
+        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5'>
+          <p className='az-body-md-bold text-az-ink-deep mb-4'>Comisiones de Vendedores</p>
+          {commissionSummary.length === 0 ? (
+            <p className='az-body-sm text-az-stone py-4 text-center'>No hay vendedores registrados.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Vendedor</TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Email</TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Comisión</TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Total vendido</TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Comisión ganada</TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {commissionSummary.map((seller) => (
+                  <TableRow
+                    key={seller.id}
+                    className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
+                  >
+                    <TableCell className='az-body-sm-bold text-az-ink py-3'>{seller.name}</TableCell>
+                    <TableCell className='az-body-sm text-az-charcoal py-3'>{seller.email}</TableCell>
+                    <TableCell className='az-body-sm text-az-ink-deep py-3 text-right tabular-nums'>
+                      {seller.commissionRate != null
+                        ? `${Math.round(seller.commissionRate * 100)}%`
+                        : '—'}
+                    </TableCell>
+                    <TableCell className='az-body-sm text-az-ink-deep py-3 text-right tabular-nums'>
+                      {formatCurrency(seller.totalSales)}
+                    </TableCell>
+                    <TableCell className='az-body-sm-bold text-az-ink-deep py-3 text-right tabular-nums'>
+                      {formatCurrency(seller.totalCommission)}
+                    </TableCell>
+                    <TableCell className='py-3 text-right'>
+                      <CommissionEditor
+                        sellerId={seller.id}
+                        sellerName={seller.name}
+                        currentRate={seller.commissionRate}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      )}
+
+      {!isAdmin && sellerOwnRate !== undefined && (
+        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 flex items-center gap-3'>
+          <div className='w-9 h-9 rounded-az-lg bg-az-surface-soft flex items-center justify-center text-az-primary'>
+            <Percent className='w-4 h-4' />
+          </div>
+          <div>
+            <p className='az-caption-bold text-az-stone uppercase tracking-wider'>Tu comisión por ventas POS</p>
+            <p className='az-heading-sm text-az-ink-deep mt-0.5'>
+              {sellerOwnRate != null ? `${Math.round(sellerOwnRate * 100)}%` : 'Sin comisión asignada'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Charts + recent sales */}
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7'>

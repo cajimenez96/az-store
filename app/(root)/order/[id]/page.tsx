@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { getOrderById } from '@/lib/actions/order.actions';
+import { getBankSettings } from '@/lib/actions/settings.actions';
 import { notFound, redirect } from 'next/navigation';
 import OrderDetailsTable from './order-details-table';
 import { ShippingAddress } from '@/types';
@@ -26,6 +27,8 @@ const OrderDetailsPage = async (props: {
     return redirect('/unauthorized');
   }
 
+  const bankInfo = await getBankSettings();
+
   return (
     <OrderDetailsTable
       order={{
@@ -34,6 +37,7 @@ const OrderDetailsPage = async (props: {
       }}
       isAdmin={session?.user?.role === 'admin' || false}
       isSeller={session?.user?.role === 'seller' || false}
+      bankInfo={bankInfo}
     />
   );
 };

@@ -847,12 +847,23 @@ export async function createPosOrder(data: {
       throw new Error('El carrito del POS está vacío');
     }
 
+    // Capture seller identity and commission rate
+    const sellerId = session?.user?.id ?? null;
+    const sellerData = sellerId
+      ? await prisma.user.findUnique({ where: { id: sellerId }, select: { commissionRate: true } })
+      : null;
+
     // 1. Calculate prices
     const itemsPriceVal = items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
     const itemsPrice = round2(itemsPriceVal);
     const shippingPrice = 0;
     const taxPrice = round2(0.15 * itemsPrice);
     const totalPrice = round2(itemsPrice + taxPrice);
+
+    const commissionAmount =
+      sellerData?.commissionRate && sellerData.commissionRate > 0
+        ? round2(Number(totalPrice) * sellerData.commissionRate)
+        : null;
 
     // 2. Find or create POS customer user
     let customerUser = null;
@@ -936,6 +947,8 @@ export async function createPosOrder(data: {
           isDelivered: true,
           deliveredAt: new Date(),
           shippingStatus: 'Entregado',
+          sellerId: sellerId,
+          commissionAmount: commissionAmount !== null ? commissionAmount : undefined,
         }
       });
 

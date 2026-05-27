@@ -13,6 +13,7 @@ const links = [
   { title: 'Inventario', href: '/admin/inventory' },
   { title: 'Pedidos', href: '/admin/orders' },
   { title: 'Usuarios', href: '/admin/users' },
+  { title: 'Settings', href: '/admin/settings', adminOnly: true },
 ];
 
 const MainNav = ({
@@ -23,6 +24,7 @@ const MainNav = ({
   const pathname = usePathname();
 
   const filteredLinks = links.filter((item) => {
+    if ('adminOnly' in item && item.adminOnly && role !== 'admin') return false;
     if (role === 'seller') {
       if (
         item.title === 'Categorías' ||

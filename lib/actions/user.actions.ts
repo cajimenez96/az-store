@@ -296,6 +296,66 @@ export async function searchPosCustomers(query: string) {
   }
 }
 
+// Update the commission rate for a seller (admin only)
+export async function updateSellerCommission(userId: string, percentage: number) {
+  await requireAdmin();
+  if (percentage < 0 || percentage > 100) {
+    return { success: false, message: 'La comisión debe ser un valor entre 0 y 100' };
+  }
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+  if (!user || user.role !== 'seller') {
+    return { success: false, message: 'El usuario no es un vendedor' };
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { commissionRate: percentage / 100 },
+  });
+  revalidatePath('/admin/users');
+  revalidatePath('/admin/overview');
+  return { success: true, message: 'Comisión actualizada' };
+}
+
+// Get commission summary for all sellers (admin only)
+export async function getSellerCommissionSummary() {
+  const sellers = await prisma.user.findMany({
+    where: { role: 'seller' },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      commissionRate: true,
+    },
+    orderBy: { name: 'asc' },
+  });
+
+  const summaries = await Promise.all(
+    sellers.map(async (seller) => {
+      const result = await prisma.order.aggregate({
+        where: { sellerId: seller.id, isPaid: true },
+        _sum: { commissionAmount: true, totalPrice: true },
+        _count: { id: true },
+      });
+      return {
+        ...seller,
+        totalCommission: Number(result._sum.commissionAmount ?? 0),
+        totalSales: Number(result._sum.totalPrice ?? 0),
+        orderCount: result._count.id,
+      };
+    })
+  );
+
+  return summaries;
+}
+
+// Get the commission rate for a specific user (for seller self-view)
+export async function getMyCommissionRate(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { commissionRate: true },
+  });
+  return user?.commissionRate ?? null;
+}
+
 // Create a new customer directly from the POS interface
 export async function createPosCustomer(data: {
   name: string;

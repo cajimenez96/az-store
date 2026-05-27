@@ -25,19 +25,30 @@ import {
   rejectBankTransfer,
   createMercadoPagoOrder,
 } from '@/lib/actions/order.actions';
-import { BANK_TRANSFER_INFO } from '@/lib/constants';
 import { UploadButton } from '@/lib/uploadthing';
 import ShippingStatusForm from './shipping-status-form';
+
+interface BankInfo {
+  bank: string;
+  accountHolder: string;
+  cbu: string;
+  alias: string;
+  cuit: string;
+}
 
 const OrderDetailsTable = ({
   order,
   isAdmin,
   isSeller,
+  bankInfo,
 }: {
   order: Omit<Order, 'paymentResult'>;
   isAdmin: boolean;
   isSeller?: boolean;
+  bankInfo: BankInfo;
 }) => {
+  const { bank, accountHolder, cbu, alias, cuit } = bankInfo;
+
   const {
     id,
     shippingAddress,
@@ -245,11 +256,11 @@ const OrderDetailsTable = ({
                         <div className="p-4 rounded-az-xl bg-az-surface-soft border border-az-hairline-soft space-y-2 text-sm text-az-charcoal">
                           <h3 className="az-body-sm-bold text-az-ink-deep">Datos para la Transferencia</h3>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                            <p><strong>Banco:</strong> {BANK_TRANSFER_INFO.bank}</p>
-                            <p><strong>Titular:</strong> {BANK_TRANSFER_INFO.accountHolder}</p>
-                            <p><strong>CBU:</strong> {BANK_TRANSFER_INFO.cbu}</p>
-                            <p><strong>Alias:</strong> {BANK_TRANSFER_INFO.alias}</p>
-                            <p><strong>CUIT:</strong> {BANK_TRANSFER_INFO.cuit}</p>
+                            <p><strong>Banco:</strong> {bank}</p>
+                            <p><strong>Titular:</strong> {accountHolder}</p>
+                            <p><strong>CBU:</strong> {cbu}</p>
+                            <p><strong>Alias:</strong> {alias}</p>
+                            <p><strong>CUIT:</strong> {cuit}</p>
                           </div>
                         </div>
 
