@@ -25,7 +25,7 @@ const AdminInventoryPage = async (props: {
     stock: string;
   }>;
 }) => {
-  await requireAdminOrSeller();
+  const session = await requireAdminOrSeller();
 
   const searchParams = await props.searchParams;
 
@@ -41,6 +41,7 @@ const AdminInventoryPage = async (props: {
     category: categorySlug,
     brand: brandSlug,
     stock: stockFilter,
+    sellerId: session?.user?.role === 'seller' ? session.user.id : undefined,
   });
 
   const categoriesResult = await getAllCategories();

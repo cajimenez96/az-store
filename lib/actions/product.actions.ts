@@ -301,6 +301,7 @@ export async function getInventory({
   category,
   brand,
   stock,
+  sellerId,
 }: {
   limit?: number;
   page: number;
@@ -308,6 +309,7 @@ export async function getInventory({
   category?: string;
   brand?: string;
   stock?: string;
+  sellerId?: string;
 }) {
   const queryFilter: Prisma.ProductVariantWhereInput =
     query && query !== 'all'
@@ -338,12 +340,17 @@ export async function getInventory({
     stockFilter = { stock: { lte: criticalStockThreshold } };
   }
 
+  const sellerFilter: Prisma.ProductVariantWhereInput = sellerId
+    ? { product: { sellerId } }
+    : {};
+
   const data = await prisma.productVariant.findMany({
     where: {
       ...queryFilter,
       ...categoryFilter,
       ...brandFilter,
       ...stockFilter,
+      ...sellerFilter,
     },
     include: {
       product: {
@@ -365,6 +372,7 @@ export async function getInventory({
       ...categoryFilter,
       ...brandFilter,
       ...stockFilter,
+      ...sellerFilter,
     }
   });
 
