@@ -140,6 +140,13 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
+model PasswordResetToken {
+  token     String   @id @unique
+  email     String
+  expiresAt DateTime @db.Timestamp(6)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
 model Cart {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId        String?  @db.Uuid

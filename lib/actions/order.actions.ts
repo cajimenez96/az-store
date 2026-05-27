@@ -13,9 +13,16 @@ import { paypal } from '../paypal';
 import { revalidatePath } from 'next/cache';
 import { PAGE_SIZE } from '../constants';
 import { Prisma } from '@prisma/client';
-import { sendPurchaseReceipt, sendNewSaleNotification, sendShippingUpdate } from '@/email';
+import {
+  sendPurchaseReceipt,
+  sendNewSaleNotification,
+  sendShippingUpdate,
+  sendTransferApproved,
+  sendTransferRejected,
+} from '../email';
 import { Preference } from 'mercadopago';
 import { mpClient } from '../mercadopago';
+import { getBankSettings } from './settings.actions';
 
 // Create order and create the order items
 export async function createOrder() {
@@ -128,6 +135,29 @@ export async function createOrder() {
     });
 
     if (!insertedOrderId) throw new Error('No se pudo crear la orden');
+
+    // Send confirmation email asynchronously
+    (async () => {
+      try {
+        const createdOrder = await getOrderById(insertedOrderId);
+        if (createdOrder) {
+          let bankInfo;
+          if (user.paymentMethod === 'TransferenciaBancaria') {
+            bankInfo = await getBankSettings();
+          }
+
+          await sendPurchaseReceipt({
+            order: {
+              ...createdOrder,
+              user: { name: user.name || 'Cliente', email: user.email },
+            } as any,
+            bankInfo,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to send order confirmation email:', error);
+      }
+    })();
 
     return {
       success: true,
@@ -644,6 +674,20 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
 
     revalidatePath(`/order/${orderId}`);
 
+    // Send receipt uploaded notification asynchronously
+    (async () => {
+      try {
+        const updatedOrder = await getOrderById(orderId);
+        if (updatedOrder) {
+          await sendNewSaleNotification({
+            order: updatedOrder as any,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to send receipt uploaded notification:', error);
+      }
+    })();
+
     return {
       success: true,
       message: 'Comprobante de pago guardado correctamente',
@@ -676,6 +720,20 @@ export async function approveBankTransfer(orderId: string) {
 
     revalidatePath(`/order/${orderId}`);
     revalidatePath('/admin/orders');
+
+    // Send transfer approved email asynchronously
+    (async () => {
+      try {
+        const approvedOrder = await getOrderById(orderId);
+        if (approvedOrder) {
+          await sendTransferApproved({
+            order: approvedOrder as any,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to send transfer approved email:', error);
+      }
+    })();
 
     return {
       success: true,
@@ -730,6 +788,20 @@ export async function rejectBankTransfer(orderId: string) {
 
     revalidatePath(`/order/${orderId}`);
     revalidatePath('/admin/orders');
+
+    // Send transfer rejected email asynchronously
+    (async () => {
+      try {
+        const rejectedOrder = await getOrderById(orderId);
+        if (rejectedOrder) {
+          await sendTransferRejected({
+            order: rejectedOrder as any,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to send transfer rejected email:', error);
+      }
+    })();
 
     return {
       success: true,

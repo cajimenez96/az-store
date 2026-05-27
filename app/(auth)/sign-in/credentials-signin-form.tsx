@@ -46,7 +46,12 @@ const CredentialsSignInForm = () => {
           />
         </div>
         <div>
-          <Label htmlFor='password' className='az-body-sm-bold text-az-ink-deep mb-1.5 block'>Contraseña</Label>
+          <div className='flex items-center justify-between mb-1.5'>
+            <Label htmlFor='password' className='az-body-sm-bold text-az-ink-deep'>Contraseña</Label>
+            <Link href='/forgot-password' className='az-body-sm text-az-primary hover:text-az-primary-hover'>
+              ¿Olvidaste?
+            </Link>
+          </div>
           <Input
             id='password'
             name='password'
