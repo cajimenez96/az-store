@@ -21,12 +21,14 @@ import {
 } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Charts from './charts';
+import dynamic from 'next/dynamic';
 import { requireAdminOrSeller } from '@/lib/auth-guard';
 import { auth } from '@/auth';
 import SettingForm from './setting-form';
 import CommissionEditor from './commission-editor';
 import { Button } from '@/components/ui/button';
+
+const Charts = dynamic(() => import('./charts'), { ssr: true });
 
 
 

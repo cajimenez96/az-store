@@ -4,6 +4,48 @@ import ProductImages from '@/components/shared/product/product-images';
 import { getMyCart } from '@/lib/actions/cart.actions';
 import ProductAction from '@/components/shared/product/product-action';
 import Link from 'next/link';
+import { Metadata } from 'next';
+import { prisma } from '@/db/prisma';
+
+// ISR: regenerate every 1 hour
+export const revalidate = 3600;
+
+// Pre-generate PDPs for all products at build time
+export async function generateStaticParams() {
+  try {
+    const products = await prisma.product.findMany({
+      select: { slug: true },
+    });
+    return products.map((product) => ({
+      slug: product.slug,
+    }));
+  } catch (error) {
+    console.error('Error generating static params for products:', error);
+    return [];
+  }
+}
+
+// Dynamic metadata for SEO
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await props.params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return { title: 'Producto no encontrado' };
+  }
+
+  return {
+    title: product.name,
+    description: product.description || `Compra ${product.name} en AZ Store`,
+    openGraph: {
+      title: product.name,
+      description: product.description || undefined,
+      images: product.images[0] ? [{ url: product.images[0] }] : [],
+    },
+  };
+}
 
 const ProductDetailsPage = async (props: {
   params: Promise<{ slug: string }>;
