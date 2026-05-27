@@ -10,8 +10,8 @@ export default function UserLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className='bg-canvas-cream dark:bg-canvas-night min-h-screen flex flex-col text-black dark:text-white'>
-      <div className='border-b border-hairline-light dark:border-hairline-dark bg-white dark:bg-canvas-night-elevated'>
+    <div className='bg-az-surface-soft min-h-screen flex flex-col text-az-ink'>
+      <div className='border-b border-az-hairline-soft bg-az-canvas'>
         <div className='container mx-auto px-4'>
           <div className='flex items-center h-16'>
             <Link href='/' className='w-22'>

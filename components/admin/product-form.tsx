@@ -175,9 +175,9 @@ const ProductForm = ({
       >
         {/* Left Column - Form Fields */}
         <div className='lg:col-span-2 space-y-8'>
-          <Card className="shadow-level-2 border-hairline-light">
+          <Card className="shadow-az-card border-az-hairline-soft">
             <CardHeader>
-              <CardTitle className="text-xl font-display font-[330]">Información Básica</CardTitle>
+              <CardTitle className="az-body-lg-bold">Información Básica</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className='flex flex-col md:flex-row gap-5'>
@@ -329,7 +329,7 @@ const ProductForm = ({
                 
                 {/* Variants (Stock per Size) */}
                 {categoryId && (
-                  <div className="border border-hairline-light rounded-md p-4 bg-zinc-50/50 mt-4">
+                  <div className="border border-az-hairline-soft rounded-az-lg p-4 bg-az-surface-soft mt-4">
                     <FormLabel className="mb-4 block text-base">Inventario por Talles</FormLabel>
                     {fields.length === 0 ? (
                       <p className="text-sm text-muted-foreground">La categoría seleccionada no tiene talles asignados.</p>
@@ -384,9 +384,9 @@ const ProductForm = ({
             </CardContent>
           </Card>
 
-          <Card className="shadow-level-2 border-hairline-light">
+          <Card className="shadow-az-card border-az-hairline-soft">
             <CardHeader>
-              <CardTitle className="text-xl font-display font-[330]">Imágenes y Destacado</CardTitle>
+              <CardTitle className="az-body-lg-bold">Imágenes y Destacado</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className='upload-field'>
@@ -397,7 +397,7 @@ const ProductForm = ({
                   render={() => (
                     <FormItem className='w-full'>
                       <FormLabel>Imágenes del Producto</FormLabel>
-                      <div className='p-4 border border-hairline-light rounded-md mt-2 space-y-4'>
+                      <div className='p-4 border border-az-hairline-soft rounded-az-lg mt-2 space-y-4'>
                         <div className='flex flex-wrap gap-4'>
                           {images.map((image: string, idx: number) => (
                             <div key={image} className="relative w-24 h-24 group">
@@ -425,7 +425,7 @@ const ProductForm = ({
                           ))}
                           {userRole !== 'seller' && (
                             <FormControl>
-                              <div className="flex items-center justify-center w-24 h-24 border-2 border-dashed border-zinc-300 rounded-sm hover:bg-zinc-50 transition-colors">
+                              <div className="flex items-center justify-center w-24 h-24 border-2 border-dashed border-az-hairline rounded-az-sm hover:bg-az-surface-soft transition-colors">
                                 <UploadButton
                                   endpoint='imageUploader'
                                   onClientUploadComplete={(res: { url: string }[]) => {
@@ -454,7 +454,7 @@ const ProductForm = ({
                 />
               </div>
 
-              <div className='upload-field pt-4 border-t border-hairline-light'>
+              <div className='upload-field pt-4 border-t border-az-hairline-soft'>
                 <FormField
                   control={form.control}
                   name='isFeatured'
@@ -473,7 +473,7 @@ const ProductForm = ({
                 />
                 
                 {isFeatured && (
-                  <div className="mt-4 border border-hairline-light p-4 rounded-md">
+                  <div className="mt-4 border border-az-hairline-soft p-4 rounded-az-lg">
                     <p className="text-sm text-zinc-500 mb-4">Sube un banner ancho para la página principal.</p>
                     {banner ? (
                       <div className="relative group">
@@ -518,11 +518,11 @@ const ProductForm = ({
         {/* Right Column - Preview & Actions */}
         <div className='space-y-6'>
           <div className="sticky top-24">
-            <Card className="shadow-level-2 border-hairline-light overflow-hidden bg-zinc-50/50">
-              <CardHeader className="bg-white border-b border-hairline-light pb-4">
+            <Card className="shadow-az-card border-az-hairline-soft overflow-hidden bg-az-surface-soft">
+              <CardHeader className="bg-az-canvas border-b border-az-hairline-soft pb-4">
                 <CardTitle className="text-sm uppercase tracking-widest text-zinc-500 font-medium text-center">Vista Previa</CardTitle>
               </CardHeader>
-              <CardContent className="p-6 flex justify-center bg-zinc-50">
+              <CardContent className="p-6 flex justify-center bg-az-surface-soft">
                 <div className="w-full max-w-[300px] pointer-events-none">
                   <ProductCard product={previewProduct} />
                 </div>
@@ -533,8 +533,8 @@ const ProductForm = ({
               type='submit'
               size='lg'
               disabled={form.formState.isSubmitting}
-              variant='primaryPill'
-              className='w-full mt-6 shadow-level-2 hover:shadow-level-3 transition-shadow py-6 text-base font-semibold'
+              variant='buyCta'
+              className='w-full mt-6 shadow-az-card transition-shadow py-6 text-base font-semibold'
             >
               {form.formState.isSubmitting ? 'Enviando...' : `${type === 'Create' ? 'Crear Producto' : 'Guardar Cambios'}`}
             </Button>

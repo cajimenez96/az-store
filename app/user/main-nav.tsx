@@ -30,10 +30,10 @@ const MainNav = ({
           key={item.href}
           href={item.href}
           className={cn(
-            'text-sm font-medium transition-colors hover:text-black dark:hover:text-white',
+            'az-body-sm transition-colors hover:text-az-ink-deep',
             pathname.includes(item.href)
-              ? 'text-black dark:text-white font-semibold'
-              : 'text-zinc-500 dark:text-zinc-400'
+              ? 'text-az-ink-deep az-body-sm-bold'
+              : 'text-az-stone'
           )}
         >
           {item.title}

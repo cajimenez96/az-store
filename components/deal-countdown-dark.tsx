@@ -44,17 +44,17 @@ const DealCountdownDark = () => {
     time.days === 0 && time.hours === 0 && time.minutes === 0 && time.seconds === 0;
 
   return (
-    <section className='bg-surface-elevated-dark section-cinematic'>
+    <section className='bg-[#0a1317] section-cinematic'>
       <div className='wrapper'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-12 items-center'>
           {/* Content */}
           <div>
-            <p className='eyebrow-cap text-link-mint mb-4'>Oferta Limitada</p>
+            <p className='eyebrow-cap text-az-success mb-4'>Oferta Limitada</p>
             <h2 className='display-lg text-white mb-6'>
               {expired ? 'La oferta ha terminado' : 'Oferta del Mes'}
             </h2>
             {!expired && (
-              <p className='text-shade-40 text-base leading-relaxed mb-10 max-w-sm'>
+              <p className='text-white/60 text-base leading-relaxed mb-10 max-w-sm'>
                 Aprovechá nuestras ofertas exclusivas del mes. Calidad premium a precios inmejorables.
               </p>
             )}
@@ -70,16 +70,16 @@ const DealCountdownDark = () => {
                 ].map(({ label, value }) => (
                   <div
                     key={label}
-                    className='bg-canvas-night-elevated border border-hairline-dark rounded-xl p-3 text-center'
+                    className='bg-white/5 border border-white/10 rounded-xl p-3 text-center'
                   >
                     <p className='display-md text-white leading-none mb-1'>{value}</p>
-                    <p className='eyebrow-cap text-shade-40'>{label}</p>
+                    <p className='eyebrow-cap text-white/45'>{label}</p>
                   </div>
                 ))}
               </div>
             )}
 
-            <Button asChild variant='outlineOnDark' className='rounded-pill px-8'>
+            <Button asChild variant='outlineOnDark' className='rounded-full px-8'>
               <Link href='/search'>
                 {expired ? 'Ver promociones actuales' : 'Ver productos en oferta'}
               </Link>

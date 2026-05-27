@@ -23,7 +23,7 @@ const SignUpForm = () => {
     const { pending } = useFormStatus();
 
     return (
-      <Button disabled={pending} className='w-full' variant='primaryPill'>
+      <Button disabled={pending} className='w-full' variant='buyCta'>
         {pending ? 'Registrando...' : 'Registrarse'}
       </Button>
     );
@@ -34,29 +34,29 @@ const SignUpForm = () => {
       <input type='hidden' name='callbackUrl' value={callbackUrl} />
       <div className='space-y-6'>
         <div>
-          <Label htmlFor='name' className='text-sm font-medium text-black mb-1.5 block'>Nombre</Label>
+          <Label htmlFor='name' className='az-body-sm-bold text-az-ink-deep mb-1.5 block'>Nombre</Label>
           <Input
             id='name'
             name='name'
             type='text'
             autoComplete='name'
             defaultValue={signUpDefaultValues.name}
-            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+            className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>
         <div>
-          <Label htmlFor='email' className='text-sm font-medium text-black mb-1.5 block'>Correo electrónico</Label>
+          <Label htmlFor='email' className='az-body-sm-bold text-az-ink-deep mb-1.5 block'>Correo electrónico</Label>
           <Input
             id='email'
             name='email'
             type='text'
             autoComplete='email'
             defaultValue={signUpDefaultValues.email}
-            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+            className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>
         <div>
-          <Label htmlFor='password' className='text-sm font-medium text-black mb-1.5 block'>Contraseña</Label>
+          <Label htmlFor='password' className='az-body-sm-bold text-az-ink-deep mb-1.5 block'>Contraseña</Label>
           <Input
             id='password'
             name='password'
@@ -64,11 +64,11 @@ const SignUpForm = () => {
             required
             autoComplete='password'
             defaultValue={signUpDefaultValues.password}
-            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+            className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>
         <div>
-          <Label htmlFor='confirmPassword' className='text-sm font-medium text-black mb-1.5 block'>Confirmar contraseña</Label>
+          <Label htmlFor='confirmPassword' className='az-body-sm-bold text-az-ink-deep mb-1.5 block'>Confirmar contraseña</Label>
           <Input
             id='confirmPassword'
             name='confirmPassword'
@@ -76,7 +76,7 @@ const SignUpForm = () => {
             required
             autoComplete='confirmPassword'
             defaultValue={signUpDefaultValues.confirmPassword}
-            className='bg-white border-hairline-light rounded-md text-black focus-visible:ring-black focus-visible:ring-offset-0'
+            className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>
         <div>
@@ -87,9 +87,9 @@ const SignUpForm = () => {
           <div className='text-center text-destructive font-medium text-sm'>{data.message}</div>
         )}
 
-        <div className='text-sm text-center text-zinc-500'>
+        <div className='az-body-sm text-center text-az-stone'>
           ¿Ya tenés una cuenta?{' '}
-          <Link href='/sign-in' target='_self' className='text-black underline hover:text-zinc-700 transition-colors font-medium'>
+          <Link href='/sign-in' target='_self' className='text-az-ink-deep underline hover:text-az-charcoal transition-colors font-medium'>
             Iniciar Sesión
           </Link>
         </div>

@@ -32,7 +32,7 @@ const SignUpPage = async (props: {
 
   return (
     <div className='w-full max-w-md mx-auto px-4'>
-      <Card className='shadow-level-3 border-0 bg-white'>
+      <Card className='border border-az-hairline-soft shadow-az-sticky bg-az-canvas'>
         <CardHeader className='space-y-4'>
           <Link href='/' className='flex-center'>
             <Image
@@ -43,8 +43,8 @@ const SignUpPage = async (props: {
               priority={true}
             />
           </Link>
-          <CardTitle className='text-center font-display font-[330] text-3xl text-black font-ss03'>Crear cuenta</CardTitle>
-          <CardDescription className='text-center text-zinc-500 text-sm'>
+          <CardTitle className='text-center az-heading-sm text-az-ink-deep'>Crear cuenta</CardTitle>
+          <CardDescription className='text-center az-body-sm text-az-stone'>
             Ingresá tus datos para registrarte
           </CardDescription>
         </CardHeader>

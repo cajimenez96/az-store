@@ -44,6 +44,10 @@ const profileFormSchema = z.object({
   floor: z.string().optional(),
 });
 
+const inputClass = 'bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0';
+const inputDisabledClass = 'bg-az-surface-soft border-az-hairline rounded-az-lg text-az-stone cursor-not-allowed';
+const labelClass = 'az-body-sm-bold text-az-ink-deep';
+
 const ProfileForm = ({ address }: ProfileFormProps) => {
   const { data: session, update } = useSession();
   const { toast } = useToast();
@@ -68,7 +72,6 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
   });
 
   const onSubmit = async (values: z.infer<typeof profileFormSchema>) => {
-    // 1. Actualizar perfil (nombre)
     const profileRes = await updateProfile({ name: values.name, email: values.email });
 
     if (!profileRes.success) {
@@ -78,7 +81,6 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
       });
     }
 
-    // 2. Si se completó algún campo de dirección, se valida e intenta guardar la dirección
     const hasAnyAddressField = !!(
       values.fullName ||
       values.streetAddress ||
@@ -134,31 +136,31 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
   };
 
   return (
-    <div className='bg-white dark:bg-canvas-night-elevated shadow-level-3 rounded-lg border border-hairline-light dark:border-hairline-dark p-6 md:p-8 w-full animate-fade-in'>
+    <div className='bg-az-canvas shadow-az-card rounded-az-lg border border-az-hairline-soft p-6 md:p-8 w-full animate-fade-in'>
       <Form {...form}>
         <form
           className='grid grid-cols-1 lg:grid-cols-12 gap-8'
           onSubmit={form.handleSubmit(onSubmit)}
         >
           {/* Columna Izquierda: Datos Personales */}
-          <div className='lg:col-span-4 space-y-4 bg-zinc-50/50 dark:bg-zinc-900/20 p-5 rounded-lg border border-zinc-200/50 dark:border-zinc-800/40 self-start w-full'>
-            <h3 className='font-display font-[330] text-xl text-black dark:text-white border-b border-hairline-light dark:border-hairline-dark pb-2 mb-4'>Datos Personales</h3>
+          <div className='lg:col-span-4 space-y-4 bg-az-surface-soft p-5 rounded-az-lg border border-az-hairline-soft self-start w-full'>
+            <h3 className='az-body-lg-bold text-az-ink-deep border-b border-az-hairline-soft pb-2 mb-4'>Datos Personales</h3>
             <div className='flex flex-col gap-4'>
               <FormField
                 control={form.control}
                 name='email'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Correo electrónico</FormLabel>
+                    <FormLabel className={labelClass}>Correo electrónico</FormLabel>
                     <FormControl>
                       <Input
                         disabled
                         placeholder='Email'
-                        className='bg-canvas-cream dark:bg-[#1a1a1a] border-hairline-light dark:border-hairline-dark rounded-md text-zinc-500 cursor-not-allowed'
+                        className={inputDisabledClass}
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription className='text-xs text-zinc-400'>
+                    <FormDescription className='az-caption text-az-stone'>
                       El correo electrónico no puede ser modificado.
                     </FormDescription>
                     <FormMessage />
@@ -170,11 +172,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 name='name'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Nombre</FormLabel>
+                    <FormLabel className={labelClass}>Nombre</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Nombre'
-                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -187,8 +189,8 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
 
           {/* Columna Derecha: Dirección de Envío */}
           <div className='lg:col-span-8 space-y-4'>
-            <h3 className='font-display font-[330] text-xl text-black dark:text-white border-b border-hairline-light dark:border-hairline-dark pb-2 mb-2'>Dirección de Envío Predeterminada</h3>
-            <p className='text-xs text-zinc-500 mb-4'>
+            <h3 className='az-body-lg-bold text-az-ink-deep border-b border-az-hairline-soft pb-2 mb-2'>Dirección de Envío Predeterminada</h3>
+            <p className='az-caption text-az-stone mb-4'>
               Completá estos datos para que se carguen automáticamente en tu próximo checkout.
             </p>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -198,11 +200,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   name='fullName'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Nombre del Destinatario</FormLabel>
+                      <FormLabel className={labelClass}>Nombre del Destinatario</FormLabel>
                       <FormControl>
                         <Input
                           placeholder='Nombre y apellido de quien recibe'
-                          className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                          className={inputClass}
                           {...field}
                         />
                       </FormControl>
@@ -218,11 +220,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   name='contactEmail'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Email de Contacto</FormLabel>
+                      <FormLabel className={labelClass}>Email de Contacto</FormLabel>
                       <FormControl>
                         <Input
                           placeholder='Correo electrónico para avisos de envío'
-                          className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                          className={inputClass}
                           {...field}
                         />
                       </FormControl>
@@ -238,11 +240,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   name='streetAddress'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Calle y Altura</FormLabel>
+                      <FormLabel className={labelClass}>Calle y Altura</FormLabel>
                       <FormControl>
                         <Input
                           placeholder='Ej: Comb. de los Pozos 1026'
-                          className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                          className={inputClass}
                           {...field}
                         />
                       </FormControl>
@@ -257,11 +259,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 name='floor'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Piso (Opcional)</FormLabel>
+                    <FormLabel className={labelClass}>Piso (Opcional)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Ej: 2'
-                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -274,11 +276,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 name='apartment'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Depto (Opcional)</FormLabel>
+                    <FormLabel className={labelClass}>Depto (Opcional)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Ej: B'
-                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -292,11 +294,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 name='phone'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Teléfono</FormLabel>
+                    <FormLabel className={labelClass}>Teléfono</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Ej: +54 9 11 1234-5678'
-                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -310,11 +312,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 name='postalCode'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Código Postal</FormLabel>
+                    <FormLabel className={labelClass}>Código Postal</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Código postal'
-                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -328,7 +330,7 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 name='province'
                 render={({ field }) => (
                   <FormItem className='flex flex-col'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300 h-5 mt-1'>Provincia</FormLabel>
+                    <FormLabel className={cn(labelClass, 'h-5 mt-1')}>Provincia</FormLabel>
                     <Popover open={openProvince} onOpenChange={setOpenProvince}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -336,8 +338,8 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                             variant='outline'
                             role='combobox'
                             className={cn(
-                              'w-full justify-between bg-white dark:bg-black border-hairline-light dark:border-hairline-dark text-black dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900',
-                              !field.value && 'text-muted-foreground'
+                              'w-full justify-between bg-az-canvas border-az-hairline text-az-ink hover:bg-az-surface-soft',
+                              !field.value && 'text-az-stone'
                             )}
                           >
                             {field.value
@@ -347,7 +349,7 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-white dark:bg-canvas-night-elevated border-hairline-light dark:border-hairline-dark' align="start">
+                      <PopoverContent className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft' align='start'>
                         <Command className='bg-transparent'>
                           <CommandInput placeholder='Buscar provincia...' className='border-none outline-none ring-0' />
                           <CommandList>
@@ -361,11 +363,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                                     form.setValue('province', prov);
                                     setOpenProvince(false);
                                   }}
-                                  className='cursor-pointer text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10'
+                                  className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
                                 >
                                   <Check
                                     className={cn(
-                                      'mr-2 h-4 w-4 text-aloe-10',
+                                      'mr-2 h-4 w-4 text-az-primary',
                                       prov === field.value ? 'opacity-100' : 'opacity-0'
                                     )}
                                   />
@@ -387,11 +389,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                 name='city'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>Ciudad / Localidad</FormLabel>
+                    <FormLabel className={labelClass}>Ciudad / Localidad</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Ciudad / Localidad'
-                        className='bg-white dark:bg-black border-hairline-light dark:border-hairline-dark rounded-md text-black dark:text-white focus-visible:ring-black dark:focus-visible:ring-white focus-visible:ring-offset-0'
+                        className={inputClass}
                         {...field}
                       />
                     </FormControl>
@@ -406,12 +408,12 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                   name='country'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel className='text-sm font-medium text-black dark:text-zinc-300'>País</FormLabel>
+                      <FormLabel className={labelClass}>País</FormLabel>
                       <FormControl>
                         <Input
                           disabled
                           placeholder='País'
-                          className='bg-canvas-cream dark:bg-[#1a1a1a] border-hairline-light dark:border-hairline-dark rounded-md text-zinc-500 cursor-not-allowed'
+                          className={inputDisabledClass}
                           {...field}
                         />
                       </FormControl>
@@ -423,12 +425,12 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
             </div>
           </div>
 
-          <div className='lg:col-span-12 flex justify-end mt-4 border-t border-hairline-light dark:border-hairline-dark pt-6'>
+          <div className='lg:col-span-12 flex justify-end mt-4 border-t border-az-hairline-soft pt-6'>
             <Button
               type='submit'
               size='lg'
-              className='w-full sm:w-auto px-8 font-semibold'
-              variant='primaryPill'
+              className='w-full sm:w-auto px-8'
+              variant='buyCta'
               disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting ? 'Actualizando...' : 'Actualizar Perfil'}
