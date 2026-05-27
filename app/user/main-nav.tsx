@@ -4,7 +4,11 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
-const links = [
+interface MainNavProps extends React.HTMLAttributes<HTMLElement> {
+  userRole?: string;
+}
+
+const baseLinks = [
   {
     title: 'Perfil',
     href: '/user/profile',
@@ -15,11 +19,22 @@ const links = [
   },
 ];
 
+const sellerLinks = [
+  {
+    title: 'Admin',
+    href: '/admin',
+  },
+];
+
 const MainNav = ({
   className,
+  userRole,
   ...props
-}: React.HTMLAttributes<HTMLElement>) => {
+}: MainNavProps) => {
   const pathname = usePathname();
+
+  const links = userRole === 'seller' ? [...baseLinks, ...sellerLinks] : baseLinks;
+
   return (
     <nav
       className={cn('flex items-center space-x-4 lg:space-x-6', className)}

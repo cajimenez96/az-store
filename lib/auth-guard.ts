@@ -10,6 +10,16 @@ export async function requireAdmin() {
 
   return session
 }
+export async function requireSeller() {
+  const session = await auth()
+
+  if (session?.user?.role !== 'seller') {
+    redirect('/unauthorized')
+  }
+
+  return session
+}
+
 export async function requireAdminOrSeller() {
   const session = await auth()
 

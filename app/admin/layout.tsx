@@ -4,14 +4,14 @@ import Link from 'next/link';
 import Menu from '@/components/shared/header/menu';
 import MainNav from './main-nav';
 import AdminSearch from '@/components/admin/admin-search';
-import { auth } from '@/auth';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 
 export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await requireAdminOrSeller();
 
   return (
     <div className='flex flex-col min-h-screen bg-az-surface-soft'>
