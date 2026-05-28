@@ -1161,3 +1161,76 @@ export async function createPosOrder(data: {
     return { success: false, message: formatError(error) };
   }
 }
+
+// Get abandoned cart metrics for admin dashboard
+export async function getAbandonedCartMetrics() {
+  try {
+    await requireAdmin();
+
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    // Count abandoned carts in the last week
+    // Note: Can't filter JSON arrays directly, will count all and filter by items length in app
+    const allAbandonedCarts = await prisma.cart.findMany({
+      where: {
+        updatedAt: {
+          gte: oneWeekAgo,
+          lt: oneHourAgo,
+        },
+        userId: {
+          not: null,
+        },
+      },
+      select: {
+        items: true,
+      },
+    });
+
+    const abandonedCartsCount = allAbandonedCarts.filter(
+      (cart) => Array.isArray(cart.items) && cart.items.length > 0
+    ).length;
+
+    // Count recovery emails sent in the last week
+    const recoveryEmailsSent = await prisma.cartRecovery.count({
+      where: {
+        sentAt: {
+          gte: oneWeekAgo,
+        },
+      },
+    });
+
+    // Count recovered carts (completed checkout after recovery)
+    const recoveredCarts = await prisma.cartRecovery.count({
+      where: {
+        sentAt: {
+          gte: oneWeekAgo,
+        },
+        recoveredAt: {
+          not: null,
+        },
+      },
+    });
+
+    // Calculate recovery rate
+    const recoveryRate =
+      recoveryEmailsSent > 0
+        ? Math.round((recoveredCarts / recoveryEmailsSent) * 100)
+        : 0;
+
+    return {
+      abandonedCartsCount,
+      recoveryEmailsSent,
+      recoveredCarts,
+      recoveryRate,
+    };
+  } catch (error) {
+    console.error('Error getting abandoned cart metrics:', error);
+    return {
+      abandonedCartsCount: 0,
+      recoveryEmailsSent: 0,
+      recoveredCarts: 0,
+      recoveryRate: 0,
+    };
+  }
+}

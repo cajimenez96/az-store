@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getOrderSummary } from '@/lib/actions/order.actions';
+import { getOrderSummary, getAbandonedCartMetrics } from '@/lib/actions/order.actions';
 import { getSellerCommissionSummary, getMyCommissionRate } from '@/lib/actions/user.actions';
 import { formatCurrency, formatDateTime, formatNumber, cn } from '@/lib/utils';
 import {
@@ -18,6 +18,8 @@ import {
   Truck,
   Clock,
   Percent,
+  ShoppingCart,
+  RotateCcw,
 } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -97,6 +99,8 @@ const AdminOverviewPage = async () => {
       ? await getMyCommissionRate(session.user.id)
       : null;
 
+  const abandonedCartMetrics = isAdmin ? await getAbandonedCartMetrics() : null;
+
   return (
     <div className='space-y-6'>
       <h1 className='az-heading-lg text-az-ink-deep'>Panel de Control</h1>
@@ -149,6 +153,32 @@ const AdminOverviewPage = async () => {
           sublabel='Talles con 2 o menos unidades'
         />
       </div>
+
+      {/* Abandoned cart metrics */}
+      {isAdmin && abandonedCartMetrics && (
+        <div className='grid gap-4 md:grid-cols-3'>
+          <MetricCard
+            label='Carritos Abandonados'
+            value={formatNumber(abandonedCartMetrics.abandonedCartsCount)}
+            icon={ShoppingCart}
+            accent='warning'
+            sublabel='Últimos 7 días sin actividad >1h'
+          />
+          <MetricCard
+            label='Emails de Recuperación'
+            value={formatNumber(abandonedCartMetrics.recoveryEmailsSent)}
+            icon={Clock}
+            sublabel='Enviados en los últimos 7 días'
+          />
+          <MetricCard
+            label='Tasa de Recuperación'
+            value={`${abandonedCartMetrics.recoveryRate}%`}
+            icon={RotateCcw}
+            accent='primary'
+            sublabel={`${formatNumber(abandonedCartMetrics.recoveredCarts)} carritos recuperados`}
+          />
+        </div>
+      )}
 
       {/* Commission section */}
       {isAdmin && commissionSummary !== null && (
