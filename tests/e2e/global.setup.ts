@@ -17,24 +17,36 @@ export default async function globalSetup() {
   }
 
   try {
-    // Create test admin user
+    // Create both login users - the e2e-admin for DB records, and admin@example.com for UI login
     const adminId = uuidv4();
-    const adminEmail = 'e2e-admin@example.com';
-    const adminPassword = 'E2eTest@123';
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const hashedPassword = await bcrypt.hash('E2eTest@123', 10);
 
+    // E2E admin user (for DB records)
     await prisma.user.upsert({
-      where: { email: adminEmail },
+      where: { email: 'e2e-admin@example.com' },
       update: {},
       create: {
         id: adminId,
-        email: adminEmail,
+        email: 'e2e-admin@example.com',
         name: 'E2E Admin',
         password: hashedPassword,
         role: 'admin',
       },
     });
-    console.log('✓ Admin user created or already exists');
+
+    // Login user with default credentials (for UI login in setup)
+    await prisma.user.upsert({
+      where: { email: 'admin@example.com' },
+      update: {},
+      create: {
+        id: uuidv4(),
+        email: 'admin@example.com',
+        name: 'Admin User',
+        password: await bcrypt.hash('123456', 10),
+        role: 'admin',
+      },
+    });
+    console.log('✓ Admin users created or already exist');
 
     // Create test brand
     const brandId = uuidv4();
@@ -79,9 +91,7 @@ export default async function globalSetup() {
     const productId = uuidv4();
     const product = await prisma.product.upsert({
       where: { slug: 'e2e-test-product' },
-      update: {
-        stock: 100,
-      },
+      update: {},
       create: {
         id: productId,
         name: 'E2E Test Product',
@@ -114,7 +124,7 @@ export default async function globalSetup() {
 
     // Login and save session
     const browser = await chromium.launch();
-    const context = await browser.createContext();
+    const context = await browser.newContext();
     const page = await context.newPage();
 
     // Navigate to login
