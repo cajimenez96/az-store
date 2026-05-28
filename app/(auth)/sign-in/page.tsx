@@ -47,7 +47,9 @@ const SignInPage = async (props: {
               priority={true}
             />
           </Link>
-          <CardTitle className='text-center az-heading-sm text-az-ink-deep'>Iniciar Sesión</CardTitle>
+          <CardTitle className='text-center az-heading-sm text-az-ink-deep'>
+            Iniciar Sesión
+          </CardTitle>
           <CardDescription className='text-center az-body-sm text-az-stone'>
             Ingresá a tu cuenta
           </CardDescription>
