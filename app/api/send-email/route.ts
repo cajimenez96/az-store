@@ -6,6 +6,8 @@ import {
   transferApprovedTemplate,
   transferRejectedTemplate,
   shippingUpdateTemplate,
+  welcomeTemplate,
+  saleNotificationTemplate,
 } from '@/lib/email-templates';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -97,6 +99,23 @@ export async function POST(request: Request) {
           data.status,
           data.trackingNumber,
           data.estimatedDelivery
+        );
+        recipientEmail = data.email;
+        break;
+
+      case 'welcome':
+        subject = '¡Bienvenido a AZ Store!';
+        html = welcomeTemplate(data.customerName, data.email);
+        recipientEmail = data.email;
+        break;
+
+      case 'sale-notification':
+        subject = `¡Vendiste un producto! - ${data.productName}`;
+        html = saleNotificationTemplate(
+          data.productName,
+          data.qty,
+          data.price,
+          data.sellerName
         );
         recipientEmail = data.email;
         break;

@@ -299,3 +299,66 @@ export function shippingUpdateTemplate(
     ${emailFooter()}
   `;
 }
+
+export function welcomeTemplate(customerName: string, email: string): string {
+  return `
+    ${emailHeader()}
+    <div class="content">
+      <h1>¡Bienvenido a AZ Store!</h1>
+      <p>Hola ${customerName},</p>
+      <p>Tu cuenta ha sido creada exitosamente. Estamos emocionados de tenerte en nuestra comunidad.</p>
+
+      <div class="info-box">
+        <p style="margin: 0;"><strong>Email de tu cuenta:</strong> ${email}</p>
+      </div>
+
+      <h2>¿Qué podés hacer ahora?</h2>
+      <ul style="padding-left: 20px;">
+        <li>Explorar nuestro catálogo de productos</li>
+        <li>Guardar tus favoritos para comprar después</li>
+        <li>Recibir notificaciones de nuevos productos y promociones</li>
+        <li>Gestionar tus órdenes y seguimientos</li>
+      </ul>
+
+      <div style="text-align: center;">
+        <a href="${BASE_URL}/search" class="button">Explorar catálogo</a>
+      </div>
+
+      <p>Si tienes alguna pregunta, nuestro equipo de soporte está disponible en <a href="mailto:support@azstore.com" class="link">support@azstore.com</a></p>
+      <p style="font-size: 12px; color: #9ca3af;">Ten en cuenta que este email fue generado automáticamente cuando se registró tu cuenta. No respondas a este email directamente.</p>
+    </div>
+    ${emailFooter()}
+  `;
+}
+
+export function saleNotificationTemplate(
+  productName: string,
+  qty: number,
+  price: string,
+  sellerName: string
+): string {
+  return `
+    ${emailHeader()}
+    <div class="content">
+      <h1 style="color: #059669;">¡Vendiste un producto!</h1>
+      <p>Hola ${sellerName},</p>
+      <p>Uno de tus productos ha sido vendido. Aquí están los detalles:</p>
+
+      <div class="info-box">
+        <strong>${productName}</strong><br>
+        <span style="color: #6b7280;">Cantidad: ${qty}</span><br>
+        <span style="color: #6b7280;">Precio unitario: $${parseFloat(price).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span><br>
+        <strong style="color: #059669; font-size: 16px;">Monto total: $${(parseFloat(price) * qty).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+      </div>
+
+      <p>Este monto será transferido a tu cuenta bancaria de acuerdo con nuestros términos de pago.</p>
+
+      <div style="text-align: center;">
+        <a href="${BASE_URL}/admin/overview" class="button">Ver mis ventas</a>
+      </div>
+
+      <p style="font-size: 12px; color: #9ca3af; font-style: italic;">Este es un email de notificación automática. No respondas a este mensaje.</p>
+    </div>
+    ${emailFooter()}
+  `;
+}

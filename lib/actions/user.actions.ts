@@ -13,6 +13,7 @@ import { hash } from 'bcryptjs';
 import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
 import { PAGE_SIZE } from '../constants';
+import { sendWelcomeEmail } from '../email';
 import { ShippingAddress } from '@/types';
 import { z } from 'zod';
 import { requireAdmin, requireAdminOrSeller } from '@/lib/auth-guard';
@@ -75,6 +76,9 @@ export async function signUpUser(prevState: unknown, formData: FormData) {
         password: hashedPassword,
       },
     });
+
+    // Send welcome email
+    await sendWelcomeEmail({ email: user.email, name: user.name });
 
     await signIn('credentials', {
       email: user.email,

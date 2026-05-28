@@ -19,6 +19,7 @@ import {
   sendShippingUpdate,
   sendTransferApproved,
   sendTransferRejected,
+  sendSaleNotification,
 } from '../email';
 import { Preference } from 'mercadopago';
 import { getMercadoPagoClient } from '../mercadopago';
@@ -136,7 +137,7 @@ export async function createOrder() {
 
     if (!insertedOrderId) throw new Error('No se pudo crear la orden');
 
-    // Send confirmation email asynchronously
+    // Send confirmation email and seller notifications asynchronously
     (async () => {
       try {
         const createdOrder = await getOrderById(insertedOrderId);
@@ -153,9 +154,36 @@ export async function createOrder() {
             } as any,
             bankInfo,
           });
+
+          // Send sale notifications to sellers
+          await Promise.all(
+            (createdOrder.orderitems as any[]).map(async (item) => {
+              const product = await prisma.product.findUnique({
+                where: { id: item.productId },
+                select: { sellerId: true },
+              });
+
+              if (product?.sellerId) {
+                const seller = await prisma.user.findUnique({
+                  where: { id: product.sellerId },
+                  select: { email: true, name: true },
+                });
+
+                if (seller?.email) {
+                  await sendSaleNotification({
+                    sellerEmail: seller.email,
+                    sellerName: seller.name || 'Vendedor',
+                    productName: item.name,
+                    qty: item.qty,
+                    price: item.price.toString(),
+                  });
+                }
+              }
+            })
+          );
         }
       } catch (error) {
-        console.error('Failed to send order confirmation email:', error);
+        console.error('Failed to send emails:', error);
       }
     })();
 
@@ -1095,6 +1123,33 @@ export async function createPosOrder(data: {
     });
 
     if (!insertedOrderId) throw new Error('No se pudo procesar la venta en local');
+
+    // Send sale notifications to sellers
+    await Promise.all(
+      items.map(async (item) => {
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId },
+          select: { sellerId: true },
+        });
+
+        if (product?.sellerId) {
+          const seller = await prisma.user.findUnique({
+            where: { id: product.sellerId },
+            select: { email: true, name: true },
+          });
+
+          if (seller?.email) {
+            await sendSaleNotification({
+              sellerEmail: seller.email,
+              sellerName: seller.name || 'Vendedor',
+              productName: item.name,
+              qty: item.qty,
+              price: item.price.toString(),
+            });
+          }
+        }
+      })
+    );
 
     return {
       success: true,

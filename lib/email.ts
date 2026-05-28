@@ -211,3 +211,68 @@ export async function sendShippingUpdate({
     console.error('Failed to send shipping update email:', error);
   }
 }
+
+/**
+ * Send welcome email to new customer
+ * E9 - sent when customer registers
+ */
+export async function sendWelcomeEmail({ email, name }: { email: string; name: string }) {
+  if (!email) return;
+
+  try {
+    await fetch(`${BASE_URL}/api/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+      },
+      body: JSON.stringify({
+        type: 'welcome',
+        email,
+        customerName: name,
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+  }
+}
+
+/**
+ * Send sale notification to seller
+ * E10 - sent when seller's product is sold
+ */
+export async function sendSaleNotification({
+  sellerEmail,
+  sellerName,
+  productName,
+  qty,
+  price,
+}: {
+  sellerEmail: string;
+  sellerName: string;
+  productName: string;
+  qty: number;
+  price: string;
+}) {
+  if (!sellerEmail) return;
+
+  try {
+    await fetch(`${BASE_URL}/api/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+      },
+      body: JSON.stringify({
+        type: 'sale-notification',
+        email: sellerEmail,
+        sellerName,
+        productName,
+        qty,
+        price,
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to send sale notification email:', error);
+  }
+}
