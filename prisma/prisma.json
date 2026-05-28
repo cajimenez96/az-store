@@ -1,3 +1,3 @@
 {
-  "seed": "bun run tsx prisma/seed.ts"
+  "seed": "bunx tsx prisma/seed.ts"
 }

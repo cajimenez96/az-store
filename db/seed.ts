@@ -1,12 +1,35 @@
 import { PrismaClient } from '@prisma/client';
-import sampleData from './sample-data';
 import { hash } from 'bcryptjs';
 import slugify from 'slugify';
+import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_BRAND_ID, DEFAULT_CATEGORY_ID } from '../lib/constants';
+
+const testUsers = [
+  {
+    email: 'admin@qa.example.com',
+    password: 'Admin@QA2026',
+    name: 'Admin User',
+    role: 'admin' as const,
+  },
+  {
+    email: 'seller@qa.example.com',
+    password: 'Seller@QA2026',
+    name: 'Seller User',
+    role: 'seller' as const,
+  },
+  {
+    email: 'user@qa.example.com',
+    password: 'User@QA2026',
+    name: 'Regular User',
+    role: 'user' as const,
+  },
+];
 
 async function main() {
   const prisma = new PrismaClient();
-  
+
+  console.log('\n🌱 Seeding database...\n');
+
   // Wipe in reverse dependency order due to cascades/foreign keys
   await prisma.productVariant.deleteMany();
   await prisma.orderItem.deleteMany();
@@ -30,91 +53,37 @@ async function main() {
     data: { id: DEFAULT_CATEGORY_ID, name: 'Sin categoría', slug: 'sin-categoria' },
   });
 
-  // Create Categories and a default Size
-  const categoryNames = Array.from(
-    new Set(sampleData.products.map((p) => p.category))
-  );
-  
-  const categories = [];
-  for (const name of categoryNames) {
-    const cat = await prisma.category.create({
-      data: {
-        name,
-        slug: slugify(name, { lower: true }),
+  // Seed users
+  for (const userData of testUsers) {
+    const hashedPassword = await hash(userData.password, 10);
+    await prisma.user.upsert({
+      where: { email: userData.email },
+      update: { password: hashedPassword },
+      create: {
+        id: uuidv4(),
+        email: userData.email,
+        name: userData.name,
+        password: hashedPassword,
+        role: userData.role,
       },
     });
-    categories.push(cat);
-
-    // Create a default size for this category
-    await prisma.size.create({
-      data: {
-        name: 'M',
-        categoryId: cat.id,
-      },
-    });
+    console.log(`✓ ${userData.role.toUpperCase()} created: ${userData.email}`);
   }
 
-  // Create Brands
-  const brandNames = Array.from(
-    new Set(sampleData.products.map((p) => p.brand))
-  );
-  
-  const brands = [];
-  for (const name of brandNames) {
-    const brand = await prisma.brand.create({
-      data: {
-        name,
-        slug: slugify(name, { lower: true }),
-      },
-    });
-    brands.push(brand);
-  }
+  console.log('\n✅ Seeding completed!\n');
+  console.log('📝 Test Users:');
+  console.log('─────────────────────────────────────────────');
+  testUsers.forEach((user) => {
+    console.log(`Role: ${user.role.toUpperCase()}`);
+    console.log(`  Email:    ${user.email}`);
+    console.log(`  Password: ${user.password}`);
+    console.log('');
+  });
 
-  // Insert Products and Variants
-  for (const product of sampleData.products) {
-    const cat = categories.find((c) => c.name === product.category);
-    const brand = brands.find((b) => b.name === product.brand);
-    if (!cat || !brand) continue;
-
-    const size = await prisma.size.findFirst({ where: { categoryId: cat.id } });
-    
-    const dbProduct = await prisma.product.create({
-      data: {
-        name: product.name,
-        slug: product.slug,
-        categoryId: cat.id,
-        description: product.description,
-        images: product.images,
-        price: product.price,
-        brandId: brand.id,
-        rating: product.rating,
-        numReviews: product.numReviews,
-        isFeatured: product.isFeatured,
-        banner: product.banner,
-      },
-    });
-
-    if (size) {
-      await prisma.productVariant.create({
-        data: {
-          productId: dbProduct.id,
-          sizeId: size.id,
-          stock: product.stock,
-        },
-      });
-    }
-  }
-
-  const users = [];
-  for (let i = 0; i < sampleData.users.length; i++) {
-    users.push({
-      ...sampleData.users[i],
-      password: await hash(sampleData.users[i].password, 10),
-    });
-  }
-  await prisma.user.createMany({ data: users });
-
-  console.log('Database seeded successfully!');
+  await prisma.$disconnect();
 }
 
-main();
+main().catch((e) => {
+  console.error('❌ Seeding failed:', e);
+  process.exit(1);
+});

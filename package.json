@@ -19,6 +19,9 @@
     "email": "cp .env ./node_modules/react-email && email dev --dir email --port 3001",
     "analyze": "ANALYZE=true next build"
   },
+  "prisma": {
+    "seed": "bunx tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@auth/core": "0.37.4",
     "@auth/prisma-adapter": "^2.7.4",
