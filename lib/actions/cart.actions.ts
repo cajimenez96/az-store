@@ -82,7 +82,10 @@ export async function addItemToCart(data: CartItem) {
 
       // Add to database
       await prisma.cart.create({
-        data: newCart,
+        data: {
+          ...newCart,
+          updatedAt: new Date(),
+        },
       });
 
       // Revalidate product page
@@ -123,6 +126,7 @@ export async function addItemToCart(data: CartItem) {
         data: {
           items: cart.items as Prisma.CartUpdateitemsInput[],
           ...calcPrice(cart.items as CartItem[]),
+          updatedAt: new Date(),
         },
       });
 
@@ -219,6 +223,7 @@ export async function removeItemFromCart(productId: string, size?: string) {
       data: {
         items: cart.items as Prisma.CartUpdateitemsInput[],
         ...calcPrice(cart.items as CartItem[]),
+        updatedAt: new Date(),
       },
     });
 
@@ -252,7 +257,7 @@ export async function mergeCart(userId: string, sessionCartId: string) {
       // If user has no cart, associate the session cart to the user
       await prisma.cart.update({
         where: { id: sessionCart.id },
-        data: { userId },
+        data: { userId, updatedAt: new Date() },
       });
     } else {
       const userItems = userCart.items as CartItem[];
@@ -294,6 +299,7 @@ export async function mergeCart(userId: string, sessionCartId: string) {
         data: {
           items: userItems as Prisma.CartUpdateitemsInput[],
           ...calcPrice(userItems),
+          updatedAt: new Date(),
         },
       });
 
