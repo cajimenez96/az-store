@@ -135,24 +135,20 @@ Resend v4 + React Email v3 instalados. Implementar cobertura completa:
 - **E5-E7**: actualizar plantillas MP a español + az- design + agregar email de envío ✓
 - **E8**: password reset — `PasswordResetToken` en DB + páginas `/forgot-password` y `/reset-password` ✓
 
-### 6.4 SEO y metadata (v2.2)
+### 6.4 SEO y metadata (v2.2 — PRÓXIMO)
 `generateMetadata()` dinámico en PDP, `sitemap.xml` generado desde DB, `robots.txt`, structured data JSON-LD para productos, canonical URLs.
 
-### 6.5 Reseñas y Ratings (v2.2)
-- Tabla `Review` (rating 1-5, texto, imágenes, userId, productId)
-- UI en PDP: carrusel de reseñas, form para agregar
-- Rating promedio en product card
-- Filtro por rating en búsqueda
-- Admin puede moderar/eliminar reseñas
+### 6.5 Reseñas y Ratings (v2.4 — POSPUESTO)
+Implementar en v2.4. Reseñas y ratings pospuestas a favor de SEO, carrito abandonado, cupones, E2E tests.
 
-### 6.6 Cupones y Descuentos (v2.2)
+### 6.6 Cupones y Descuentos (v2.3)
 - Tabla `Coupon` (código, tipo: %, monto; validez fechas, stock, usesMax)
 - Input en checkout para aplicar cupón
 - Cálculo en `calcPrice()` antes de tax y shipping
 - Admin CRUD: crear, editar, ver historial de uso
 - Validación: código existe, no expirado, stock disponible, usuario no lo usó
 
-### 6.7 Carrito Abandonado (v2.3)
+### 6.7 Carrito Abandonado (v2.2)
 - Cron job cada 1h: detecta carritos sin actividad > 1h
 - Email automático con recovery link
 - Link pre-carga carrito + cupón de reactivación (-10%)
