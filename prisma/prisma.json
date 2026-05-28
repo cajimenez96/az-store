@@ -1,0 +1,3 @@
+{
+  "seed": "bun run tsx prisma/seed.ts"
+}

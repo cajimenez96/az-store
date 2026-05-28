@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
+    "db:seed": "bun run tsx prisma/seed.ts",
     "email": "cp .env ./node_modules/react-email && email dev --dir email --port 3001",
     "analyze": "ANALYZE=true next build"
   },
