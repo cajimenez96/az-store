@@ -164,6 +164,16 @@ model Cart {
   user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model CartRecovery {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cartId    String   @db.Uuid
+  email     String
+  token     String   @unique
+  sentAt    DateTime @default(now()) @db.Timestamp(6)
+  recoveredAt DateTime? @db.Timestamp(6)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
 model Order {
   id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId           String      @db.Uuid
