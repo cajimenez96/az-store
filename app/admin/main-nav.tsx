@@ -10,6 +10,7 @@ const links = [
   { title: 'Productos', href: '/admin/products' },
   { title: 'Categorías', href: '/admin/categories' },
   { title: 'Marcas', href: '/admin/brands' },
+  { title: 'Promociones', href: '/admin/promotions', adminOnly: true },
   { title: 'Inventario', href: '/admin/inventory' },
   { title: 'Pedidos', href: '/admin/orders' },
   { title: 'Usuarios', href: '/admin/users', adminOnly: true },

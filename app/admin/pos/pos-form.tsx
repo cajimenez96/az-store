@@ -365,6 +365,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
             <div className='relative flex-1'>
               <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-az-stone h-4 w-4' />
               <Input
+                    data-testid='pos-customer-search'
                 type='text'
                 placeholder='Buscar producto por nombre, marca o slug...'
                 value={searchQuery}
@@ -540,6 +541,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                         onClick={() => handleUpdateQty(item.productId, item.size, -1)}
                         className='px-2 hover:bg-az-surface-soft text-az-charcoal h-full flex items-center justify-center border-r border-az-hairline-soft'
                       >
+                        data-testid="pos-item-dec"
                         <Minus className='h-3 w-3' />
                       </button>
                       <span className='px-3 az-caption-bold text-az-ink-deep min-w-[24px] text-center tabular-nums'>
@@ -590,9 +592,11 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='relative'>
                   <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-az-stone h-3.5 w-3.5' />
                   <Input
+                    data-testid='pos-customer-search'
                     type='text'
-                    placeholder='Buscar por Nombre, DNI, Email o Teléfono...'
-                    value={customerSearchQuery}
+                  <Input
+                    data-testid="pos-customer-search"
+                    type="text"
                     onChange={(e) => {
                       setCustomerSearchQuery(e.target.value);
                       setShowSearchResults(true);
@@ -665,6 +669,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <div className='space-y-1'>
                 <Label htmlFor='posCustName' className='az-caption-bold text-az-stone uppercase tracking-wider'>Nombre Completo</Label>
                 <Input
+                    data-testid='pos-customer-search'
                   id='posCustName'
                   placeholder='Consumidor Final'
                   value={customerName}
@@ -676,6 +681,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <div className='space-y-1'>
                 <Label htmlFor='posCustEmail' className='az-caption-bold text-az-stone uppercase tracking-wider'>Correo Electrónico</Label>
                 <Input
+                    data-testid='pos-customer-search'
                   id='posCustEmail'
                   type='email'
                   placeholder='consumidorfinal@local...'
@@ -688,6 +694,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <div className='space-y-1'>
                 <Label htmlFor='posCustDni' className='az-caption-bold text-az-stone uppercase tracking-wider'>Documento (DNI)</Label>
                 <Input
+                    data-testid='pos-customer-search'
                   id='posCustDni'
                   placeholder='DNI del cliente'
                   value={customerDni}
@@ -699,6 +706,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <div className='space-y-1'>
                 <Label htmlFor='posCustPhone' className='az-caption-bold text-az-stone uppercase tracking-wider'>Teléfono de Contacto</Label>
                 <Input
+                    data-testid='pos-customer-search'
                   id='posCustPhone'
                   placeholder='Teléfono'
                   value={customerPhone}
@@ -710,6 +718,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <div className='col-span-2 space-y-1'>
                 <Label htmlFor='posCustAddress' className='az-caption-bold text-az-stone uppercase tracking-wider'>Domicilio (Dirección)</Label>
                 <Input
+                    data-testid='pos-customer-search'
                   id='posCustAddress'
                   placeholder='Calle y número (ej. Comb. de las Piedras 1026)'
                   value={customerAddress}
@@ -869,6 +878,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='space-y-1.5'>
                   <Label htmlFor='modalName' className='az-caption-bold text-az-stone uppercase tracking-wider'>Nombre Completo *</Label>
                   <Input
+                    data-testid='pos-customer-search'
                     id='modalName'
                     required
                     placeholder='Ej: Carlos Jimenez'
@@ -880,6 +890,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='space-y-1.5'>
                   <Label htmlFor='modalEmail' className='az-caption-bold text-az-stone uppercase tracking-wider'>Email *</Label>
                   <Input
+                    data-testid='pos-customer-search'
                     id='modalEmail'
                     type='email'
                     required
@@ -892,6 +903,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='space-y-1.5'>
                   <Label htmlFor='modalDni' className='az-caption-bold text-az-stone uppercase tracking-wider'>Documento (DNI)</Label>
                   <Input
+                    data-testid='pos-customer-search'
                     id='modalDni'
                     placeholder='Ej: 38444555'
                     value={newCustomerForm.dni}
@@ -902,6 +914,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='space-y-1.5'>
                   <Label htmlFor='modalPhone' className='az-caption-bold text-az-stone uppercase tracking-wider'>Teléfono de Contacto</Label>
                   <Input
+                    data-testid='pos-customer-search'
                     id='modalPhone'
                     placeholder='Ej: 3814445555'
                     value={newCustomerForm.phone}
@@ -912,6 +925,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='col-span-2 space-y-1.5'>
                   <Label htmlFor='modalStreet' className='az-caption-bold text-az-stone uppercase tracking-wider'>Domicilio (Calle y Altura)</Label>
                   <Input
+                    data-testid='pos-customer-search'
                     id='modalStreet'
                     placeholder='Ej: Comb. de las Piedras 1026'
                     value={newCustomerForm.streetAddress}
@@ -922,6 +936,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='space-y-1.5'>
                   <Label htmlFor='modalCity' className='az-caption-bold text-az-stone uppercase tracking-wider'>Ciudad</Label>
                   <Input
+                    data-testid='pos-customer-search'
                     id='modalCity'
                     placeholder='Tucumán'
                     value={newCustomerForm.city}
@@ -932,6 +947,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <div className='space-y-1.5'>
                   <Label htmlFor='modalProvince' className='az-caption-bold text-az-stone uppercase tracking-wider'>Provincia</Label>
                   <Input
+                    data-testid='pos-customer-search'
                     id='modalProvince'
                     placeholder='Tucumán'
                     value={newCustomerForm.province}

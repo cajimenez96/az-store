@@ -12,7 +12,11 @@
     "test:watch": "jest --watch",
     "test:integration": "jest --config jest.integration.config.ts --no-coverage",
     "test:integration:watch": "jest --config jest.integration.config.ts --watch",
-    "email": "cp .env ./node_modules/react-email && email dev --dir email --port 3001"
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "email": "cp .env ./node_modules/react-email && email dev --dir email --port 3001",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@auth/core": "0.37.4",
@@ -63,6 +67,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",
+    "@playwright/test": "^1.60.0",
     "@prisma/client": "6.5.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.0",

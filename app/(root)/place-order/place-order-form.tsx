@@ -22,7 +22,7 @@ const PlaceOrderForm = () => {
   const PlaceOrderButton = () => {
     const { pending } = useFormStatus();
     return (
-      <Button disabled={pending} className='w-full' variant='buyCta' size='lg'>
+      <Button disabled={pending} className='w-full' variant='buyCta' size='lg' data-testid='place-order-submit'>
         {pending ? (
           <Loader className='w-4 h-4 animate-spin mr-2' />
         ) : (

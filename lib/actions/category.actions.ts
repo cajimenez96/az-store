@@ -2,27 +2,31 @@
 
 import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
 import { requireAdmin } from '@/lib/auth-guard';
 import { DEFAULT_CATEGORY_ID } from '../constants';
 
 // ─── CATEGORIES ─────────────────────────────────────────────────────────────
 
-export async function getAllCategories() {
-  try {
-    const categories = await prisma.category.findMany({
-      orderBy: { name: 'asc' },
-      include: {
-        sizes: true,
-        subCategories: { orderBy: { name: 'asc' } },
-        _count: { select: { products: true } },
-      },
-    });
-    return { success: true, data: categories };
-  } catch (error) {
-    return { success: false, message: formatError(error) };
-  }
-}
+export const getAllCategories = unstable_cache(
+  async () => {
+    try {
+      const categories = await prisma.category.findMany({
+        orderBy: { name: 'asc' },
+        include: {
+          sizes: true,
+          subCategories: { orderBy: { name: 'asc' } },
+          _count: { select: { products: true } },
+        },
+      });
+      return { success: true, data: categories };
+    } catch (error) {
+      return { success: false, message: formatError(error) };
+    }
+  },
+  ['all-categories'],
+  { revalidate: 3600, tags: ['categories'] }
+);
 
 export async function getCategoryById(id: string) {
   try {

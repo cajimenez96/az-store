@@ -2,21 +2,24 @@
 import { prisma } from '@/db/prisma';
 import { convertToPlainObject, formatError } from '../utils';
 import { LATEST_PRODUCTS_LIMIT, PAGE_SIZE } from '../constants';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_cache } from 'next/cache';
 import { insertProductSchema, updateProductSchema } from '../validators';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
-// Get latest products
-export async function getLatestProducts() {
-  const data = await prisma.product.findMany({
-    take: LATEST_PRODUCTS_LIMIT,
-    orderBy: { createdAt: 'desc' },
-    include: { category: true, subCategory: true, brand: true, variants: { include: { size: true } } },
-  });
-
-  return convertToPlainObject(data);
-}
+// Get latest products (cached for 1 hour during ISR window)
+export const getLatestProducts = unstable_cache(
+  async () => {
+    const data = await prisma.product.findMany({
+      take: LATEST_PRODUCTS_LIMIT,
+      orderBy: { createdAt: 'desc' },
+      include: { category: true, subCategory: true, brand: true, variants: { include: { size: true } } },
+    });
+    return convertToPlainObject(data);
+  },
+  ['latest-products'],
+  { revalidate: 3600, tags: ['products'] }
+);
 
 // Get single product by it's slug
 export async function getProductBySlug(slug: string) {
@@ -285,22 +288,25 @@ export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
 }
 
 // Get featured products
-export async function getFeaturedProducts() {
-  const data = await prisma.product.findMany({
-    where: {
-      isFeatured: true,
-      banner: {
-        not: null,
-        notIn: [''],
+export const getFeaturedProducts = unstable_cache(
+  async () => {
+    const data = await prisma.product.findMany({
+      where: {
+        isFeatured: true,
+        banner: {
+          not: null,
+          notIn: [''],
+        },
       },
-    },
-    include: { category: true, brand: true, variants: { include: { size: true } } },
-    orderBy: { createdAt: 'desc' },
-    take: 4,
-  });
-
-  return convertToPlainObject(data);
-}
+      include: { category: true, brand: true, variants: { include: { size: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+    });
+    return convertToPlainObject(data);
+  },
+  ['featured-products'],
+  { revalidate: 3600, tags: ['products'] }
+);
 
 import { getSetting } from './setting.actions';
 

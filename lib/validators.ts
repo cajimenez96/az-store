@@ -219,3 +219,20 @@ export const updateShippingStatusSchema = z.object({
     .default(''),
 });
 
+// Promotion Schemas
+export const insertPromotionSchema = z.object({
+  title: z.string().min(1, 'El título es requerido'),
+  subtitle: z.string().optional(),
+  linkUrl: z.string().url('URL inválida').optional().or(z.literal('')),
+  linkLabel: z.string().optional(),
+  bgColor: z.string().default('#000000'),
+  textColor: z.string().default('#ffffff'),
+  isActive: z.boolean().default(true),
+  startsAt: z.string().optional(),
+  endsAt: z.string().optional(),
+});
+
+export const updatePromotionSchema = insertPromotionSchema.extend({
+  id: z.string().uuid('ID inválido'),
+});
+
