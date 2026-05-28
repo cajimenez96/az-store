@@ -1,7 +1,6 @@
 import { prisma } from '@/db/prisma';
 import { hash } from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_BRAND_ID, DEFAULT_CATEGORY_ID } from '../lib/constants';
 
 const testUsers = [
   {
@@ -25,33 +24,9 @@ const testUsers = [
 ];
 
 async function main() {
-  console.log('\n🌱 Seeding database...\n');
+  console.log('\n🌱 Seeding test users...\n');
 
   try {
-    // Wipe in reverse dependency order due to cascades/foreign keys
-    await prisma.productVariant.deleteMany();
-    await prisma.orderItem.deleteMany();
-    await prisma.review.deleteMany();
-    await prisma.product.deleteMany();
-    await prisma.size.deleteMany();
-    await prisma.subCategory.deleteMany();
-    await prisma.category.deleteMany();
-    await prisma.brand.deleteMany();
-
-    await prisma.account.deleteMany();
-    await prisma.session.deleteMany();
-    await prisma.verificationToken.deleteMany();
-    await prisma.user.deleteMany();
-
-    // Create sentinel default records (must exist before any product references them)
-    await prisma.brand.create({
-      data: { id: DEFAULT_BRAND_ID, name: 'Sin marca', slug: 'sin-marca' },
-    });
-    await prisma.category.create({
-      data: { id: DEFAULT_CATEGORY_ID, name: 'Sin categoría', slug: 'sin-categoria' },
-    });
-
-    // Seed users
     for (const userData of testUsers) {
       const hashedPassword = await hash(userData.password, 10);
       await prisma.user.upsert({

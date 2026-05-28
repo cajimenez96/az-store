@@ -1,8 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
-import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_BRAND_ID, DEFAULT_CATEGORY_ID } from '../lib/constants';
 
 const testUsers = [
   {
@@ -28,62 +26,40 @@ const testUsers = [
 async function main() {
   const prisma = new PrismaClient();
 
-  console.log('\n🌱 Seeding database...\n');
+  console.log('\n🌱 Seeding test users...\n');
 
-  // Wipe in reverse dependency order due to cascades/foreign keys
-  await prisma.productVariant.deleteMany();
-  await prisma.orderItem.deleteMany();
-  await prisma.review.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.size.deleteMany();
-  await prisma.subCategory.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.brand.deleteMany();
+  try {
+    for (const userData of testUsers) {
+      const hashedPassword = await hash(userData.password, 10);
+      await prisma.user.upsert({
+        where: { email: userData.email },
+        update: { password: hashedPassword },
+        create: {
+          id: uuidv4(),
+          email: userData.email,
+          name: userData.name,
+          password: hashedPassword,
+          role: userData.role,
+        },
+      });
+      console.log(`✓ ${userData.role.toUpperCase()} created: ${userData.email}`);
+    }
 
-  await prisma.account.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.verificationToken.deleteMany();
-  await prisma.user.deleteMany();
-
-  // Create sentinel default records (must exist before any product references them)
-  await prisma.brand.create({
-    data: { id: DEFAULT_BRAND_ID, name: 'Sin marca', slug: 'sin-marca' },
-  });
-  await prisma.category.create({
-    data: { id: DEFAULT_CATEGORY_ID, name: 'Sin categoría', slug: 'sin-categoria' },
-  });
-
-  // Seed users
-  for (const userData of testUsers) {
-    const hashedPassword = await hash(userData.password, 10);
-    await prisma.user.upsert({
-      where: { email: userData.email },
-      update: { password: hashedPassword },
-      create: {
-        id: uuidv4(),
-        email: userData.email,
-        name: userData.name,
-        password: hashedPassword,
-        role: userData.role,
-      },
+    console.log('\n✅ Seeding completed!\n');
+    console.log('📝 Test Users:');
+    console.log('─────────────────────────────────────────────');
+    testUsers.forEach((user) => {
+      console.log(`Role: ${user.role.toUpperCase()}`);
+      console.log(`  Email:    ${user.email}`);
+      console.log(`  Password: ${user.password}`);
+      console.log('');
     });
-    console.log(`✓ ${userData.role.toUpperCase()} created: ${userData.email}`);
+  } catch (error) {
+    console.error('❌ Seeding failed:', error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
   }
-
-  console.log('\n✅ Seeding completed!\n');
-  console.log('📝 Test Users:');
-  console.log('─────────────────────────────────────────────');
-  testUsers.forEach((user) => {
-    console.log(`Role: ${user.role.toUpperCase()}`);
-    console.log(`  Email:    ${user.email}`);
-    console.log(`  Password: ${user.password}`);
-    console.log('');
-  });
-
-  await prisma.$disconnect();
 }
 
-main().catch((e) => {
-  console.error('❌ Seeding failed:', e);
-  process.exit(1);
-});
+main();
