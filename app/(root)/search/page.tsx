@@ -30,12 +30,14 @@ export async function generateMetadata(props: {
     category: string;
     subCategory: string;
     price: string;
+    page: string;
   }>;
 }): Promise<Metadata> {
   const {
     q = 'all',
     category = 'all',
     price = 'all',
+    page = '1',
   } = await props.searchParams;
 
   const parts: string[] = [];
@@ -43,9 +45,16 @@ export async function generateMetadata(props: {
   if (category && category !== 'all') parts.push(category);
   if (price && price !== 'all') parts.push(`Precio ${price}`);
 
+  const isFiltered =
+    (q !== 'all' && q !== '') ||
+    (category !== 'all' && category !== '') ||
+    (price !== 'all' && price !== '') ||
+    Number(page) > 1;
+
   return {
     title: parts.length > 0 ? `Búsqueda: ${parts.join(' · ')}` : 'Catálogo de Productos',
     description: 'Buscá y filtrá productos por categoría, precio y más.',
+    robots: isFiltered ? { index: false, follow: true } : undefined,
   };
 }
 

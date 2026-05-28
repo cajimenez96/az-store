@@ -15,6 +15,10 @@ import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Iniciar Sesión',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const SignInPage = async (props: {

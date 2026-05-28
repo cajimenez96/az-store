@@ -7,6 +7,33 @@ import ProductCarouselDark from '@/components/shared/product/product-carousel-da
 import ProductCardDark from '@/components/shared/product/product-card-dark';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Metadata } from 'next';
+import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from '@/lib/constants';
+
+export const metadata: Metadata = {
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    url: SERVER_URL,
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: APP_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    images: ['/opengraph-image.png'],
+  },
+};
 
 export default async function Homepage() {
   const latestProducts = await getLatestProducts();

@@ -6,6 +6,7 @@ import ProductAction from '@/components/shared/product/product-action';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { prisma } from '@/db/prisma';
+import { SERVER_URL } from '@/lib/constants';
 
 // ISR: regenerate every 1 hour
 export const revalidate = 3600;
@@ -36,13 +37,31 @@ export async function generateMetadata(props: {
     return { title: 'Producto no encontrado' };
   }
 
+  const description = product.description || `Compra ${product.name} en AZ Store`;
+  const imageUrl = product.images[0] || '/opengraph-image.png';
+
   return {
     title: product.name,
-    description: product.description || `Compra ${product.name} en AZ Store`,
+    description,
     openGraph: {
+      type: 'website',
       title: product.name,
-      description: product.description || undefined,
-      images: product.images[0] ? [{ url: product.images[0] }] : [],
+      description,
+      url: `${SERVER_URL}/product/${product.slug}`,
+      images: [
+        {
+          url: imageUrl,
+          width: 800,
+          height: 800,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description,
+      images: [imageUrl],
     },
   };
 }
@@ -61,8 +80,36 @@ const ProductDetailsPage = async (props: {
     minimumFractionDigits: 0,
   }).format(Number(product.price));
 
+  const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: product.images,
+    brand: {
+      '@type': 'Brand',
+      name: product.brand?.name || 'AZ Store',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: product.price.toString(),
+      priceCurrency: 'ARS',
+      availability:
+        totalStock > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+    },
+  };
+
   return (
-    <div className='bg-az-canvas min-h-screen'>
+    <>
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className='bg-az-canvas min-h-screen'>
       <div className='az-wrapper py-8 md:py-12'>
         {/* Breadcrumb */}
         <nav className='flex items-center gap-2 az-body-sm text-az-stone mb-8'>
@@ -130,6 +177,7 @@ const ProductDetailsPage = async (props: {
       {/* Bottom padding on mobile to account for sticky bar */}
       <div className='h-20 md:hidden' />
     </div>
+    </>
   );
 };
 

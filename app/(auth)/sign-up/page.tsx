@@ -15,6 +15,10 @@ import SignUpForm from './sign-up-form';
 
 export const metadata: Metadata = {
   title: 'Registrarse',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const SignUpPage = async (props: {
