@@ -6,7 +6,7 @@ import { convertToPlainObject, formatError, round2 } from '../utils';
 import { auth } from '@/auth';
 import { getMyCart } from './cart.actions';
 import { getUserById } from './user.actions';
-import { insertOrderSchema } from '../validators';
+import { insertOrderSchema, updateShippingStatusSchema } from '../validators';
 import { prisma } from '@/db/prisma';
 import { CartItem, PaymentResult, ShippingAddress } from '@/types';
 import { paypal } from '../paypal';
@@ -633,7 +633,10 @@ export async function deliverOrder(orderId: string) {
 export async function updateShippingStatus(orderId: string, status: string, notes?: string) {
   try {
     await requireAdminOrSeller();
-    
+
+    // Validate input
+    const validated = updateShippingStatusSchema.parse({ status, notes });
+
     const order = await prisma.order.findFirst({
       where: { id: orderId },
     });
@@ -643,8 +646,8 @@ export async function updateShippingStatus(orderId: string, status: string, note
     await prisma.order.update({
       where: { id: orderId },
       data: {
-        shippingStatus: status,
-        shippingNotes: notes || null,
+        shippingStatus: validated.status,
+        shippingNotes: validated.notes || null,
       },
     });
 

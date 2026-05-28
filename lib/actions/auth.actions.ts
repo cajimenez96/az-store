@@ -63,7 +63,10 @@ export async function requestPasswordReset(
     try {
       const emailResponse = await fetch(`${baseUrl}/api/send-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+        },
         body: JSON.stringify({
           type: 'password-reset',
           email: user.email,

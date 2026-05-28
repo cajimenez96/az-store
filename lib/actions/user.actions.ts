@@ -9,7 +9,7 @@ import {
 } from '../validators';
 import { auth, signIn, signOut } from '@/auth';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
-import { hash } from '../encrypt';
+import { hash } from 'bcryptjs';
 import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
 import { PAGE_SIZE } from '../constants';
@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { requireAdmin, requireAdminOrSeller } from '@/lib/auth-guard';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
+import { loginLimiter } from '@/lib/rate-limiter';
 
 // Sign in the user with credentials
 export async function signInWithCredentials(
@@ -29,6 +30,13 @@ export async function signInWithCredentials(
       email: formData.get('email'),
       password: formData.get('password'),
     });
+
+    // Rate limit login attempts per email
+    const identifier = `login:${user.email}`;
+    const { success } = await loginLimiter.limit(identifier);
+    if (!success) {
+      return { success: false, message: 'Demasiados intentos. Intentá de nuevo en 15 minutos.' };
+    }
 
     await signIn('credentials', user);
 
@@ -58,13 +66,13 @@ export async function signUpUser(prevState: unknown, formData: FormData) {
 
     const plainPassword = user.password;
 
-    user.password = await hash(user.password);
+    const hashedPassword = await hash(user.password, 10);
 
     await prisma.user.create({
       data: {
         name: user.name,
         email: user.email,
-        password: user.password,
+        password: hashedPassword,
       },
     });
 

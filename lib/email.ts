@@ -57,7 +57,10 @@ export async function sendPurchaseReceipt({
   try {
     await fetch(`${BASE_URL}/api/send-email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+      },
       body: JSON.stringify({
         type: 'order-confirmation',
         email: order.user.email,
@@ -121,7 +124,10 @@ export async function sendTransferApproved({
   try {
     await fetch(`${BASE_URL}/api/send-email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+      },
       body: JSON.stringify({
         type: 'transfer-approved',
         email: order.user.email,
@@ -151,7 +157,10 @@ export async function sendTransferRejected({
   try {
     await fetch(`${BASE_URL}/api/send-email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+      },
       body: JSON.stringify({
         type: 'transfer-rejected',
         email: order.user.email,
@@ -184,7 +193,10 @@ export async function sendShippingUpdate({
   try {
     await fetch(`${BASE_URL}/api/send-email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+      },
       body: JSON.stringify({
         type: 'shipping-update',
         email: order.user.email,

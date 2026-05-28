@@ -13,6 +13,15 @@ const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
 
 export async function POST(request: Request) {
   try {
+    // Verify internal secret to prevent unauthorized email sending
+    const internalSecret = request.headers.get('x-internal-secret');
+    if (internalSecret !== process.env.INTERNAL_API_SECRET) {
+      return Response.json(
+        { error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { type, ...data } = body;
 

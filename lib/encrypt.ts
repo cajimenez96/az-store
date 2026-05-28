@@ -1,32 +1,6 @@
-const encoder = new TextEncoder();
-const key = new TextEncoder().encode(process.env.ENCRYPTION_KEY || 'default-fallback-encryption-key-please-change-in-production');
-
-// Hash function with key-based encryption
-export const hash = async (plainPassword: string): Promise<string> => {
-  const passwordData = encoder.encode(plainPassword);
-
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    key,
-    { name: 'HMAC', hash: { name: 'SHA-256' } },
-    false,
-    ['sign', 'verify']
-  );
-
-  const hashBuffer = await crypto.subtle.sign('HMAC', cryptoKey, passwordData);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-};
-
-// Compare function using key from env var
-export const compare = async (
-  plainPassword: string,
-  encryptedPassword: string
-): Promise<boolean> => {
-  const hashedPassword = await hash(plainPassword);
-  return hashedPassword === encryptedPassword;
-};
+// Utility functions for token management
+// DEPRECATED: Use bcryptjs for password hashing in lib/actions/user.actions.ts
+// Do not use hash() / compare() for passwords — use bcryptjs instead
 
 // Simple token storage (stored as-is in DB, protected by HTTPS + DB security)
 export const encryptToken = async (token: string): Promise<string> => {

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import sampleData from './sample-data';
-import { hash } from '@/lib/encrypt';
+import { hash } from 'bcryptjs';
 import slugify from 'slugify';
 import { DEFAULT_BRAND_ID, DEFAULT_CATEGORY_ID } from '../lib/constants';
 
@@ -109,7 +109,7 @@ async function main() {
   for (let i = 0; i < sampleData.users.length; i++) {
     users.push({
       ...sampleData.users[i],
-      password: await hash(sampleData.users[i].password),
+      password: await hash(sampleData.users[i].password, 10),
     });
   }
   await prisma.user.createMany({ data: users });

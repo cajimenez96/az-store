@@ -43,10 +43,14 @@ export const signUpFormSchema = z
   .object({
     name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
     email: z.string().email('Dirección de correo electrónico inválida'),
-    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    password: z
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres')
+      .regex(/[A-Z]/, 'La contraseña debe incluir al menos una mayúscula')
+      .regex(/[0-9]/, 'La contraseña debe incluir al menos un número'),
     confirmPassword: z
       .string()
-      .min(6, 'La confirmación de contraseña debe tener al menos 6 caracteres'),
+      .min(8, 'La confirmación de contraseña debe tener al menos 8 caracteres'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
@@ -181,5 +185,37 @@ export const insertBrandSchema = z.object({
 
 export const updateBrandSchema = insertBrandSchema.extend({
   id: z.string().min(1, 'El ID es requerido'),
+});
+
+// Password reset schemas
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres')
+      .regex(/[A-Z]/, 'La contraseña debe incluir al menos una mayúscula')
+      .regex(/[0-9]/, 'La contraseña debe incluir al menos un número'),
+    confirmPassword: z
+      .string()
+      .min(8, 'La confirmación debe tener al menos 8 caracteres'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  });
+
+// Order schemas
+export const updateShippingStatusSchema = z.object({
+  status: z.enum(
+    ['Pendiente', 'En Preparacion', 'En Camino', 'Entregado'],
+    {
+      errorMap: () => ({ message: 'Estado de envío inválido' }),
+    }
+  ),
+  notes: z
+    .string()
+    .max(500, 'Las notas no pueden exceder 500 caracteres')
+    .optional()
+    .default(''),
 });
 
