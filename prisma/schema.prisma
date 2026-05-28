@@ -55,6 +55,8 @@ model Product {
   images          String[]
   brandId         String           @db.Uuid
   brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  sellerId        String?          @db.Uuid
+  seller          User?            @relation(fields: [sellerId], references: [id], onDelete: SetNull)
   description     String
   price           Decimal          @default(0) @db.Decimal(12, 2)
   rating          Decimal          @default(0) @db.Decimal(3, 2)
@@ -99,6 +101,7 @@ model User {
   Cart           Cart[]
   Order          Order[]
   Review         Review[]
+  products       Product[]
 }
 
 model Account {

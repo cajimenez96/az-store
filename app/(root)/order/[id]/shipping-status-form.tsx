@@ -31,7 +31,7 @@ export default function ShippingStatusForm({
 
   return (
     <div className="mt-4 p-4 rounded-az-xl bg-az-surface-soft border border-az-hairline-soft space-y-3">
-      <h3 className="az-body-sm-bold text-az-ink-deep">Actualizar Estado de Envío (Administrador)</h3>
+      <h3 className="az-body-sm-bold text-az-ink-deep">Actualizar Estado de Envío</h3>
       <div className="space-y-2">
         <label className="az-caption-bold text-az-stone uppercase tracking-wider block">Nuevo Estado</label>
         <select

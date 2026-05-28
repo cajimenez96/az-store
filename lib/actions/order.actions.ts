@@ -487,10 +487,14 @@ export async function getAllOrders({
   limit = PAGE_SIZE,
   page,
   query,
+  status,
+  paymentMethod,
 }: {
   limit?: number;
   page: number;
   query: string;
+  status?: string;
+  paymentMethod?: string;
 }) {
   const queryFilter: Prisma.OrderWhereInput =
     query && query !== 'all'
@@ -504,9 +508,25 @@ export async function getAllOrders({
         }
       : {};
 
+  let statusFilter: Prisma.OrderWhereInput = {};
+  if (status === 'pending') {
+    statusFilter = { isPaid: false };
+  } else if (status === 'paid') {
+    statusFilter = { isPaid: true, isDelivered: false };
+  } else if (status === 'delivered') {
+    statusFilter = { isDelivered: true };
+  }
+
+  const paymentMethodFilter: Prisma.OrderWhereInput =
+    paymentMethod && paymentMethod !== 'all'
+      ? { paymentMethod: { contains: paymentMethod } }
+      : {};
+
   const data = await prisma.order.findMany({
     where: {
       ...queryFilter,
+      ...statusFilter,
+      ...paymentMethodFilter,
     },
     orderBy: { createdAt: 'desc' },
     take: limit,
@@ -514,7 +534,13 @@ export async function getAllOrders({
     include: { user: { select: { name: true } } },
   });
 
-  const dataCount = await prisma.order.count();
+  const dataCount = await prisma.order.count({
+    where: {
+      ...queryFilter,
+      ...statusFilter,
+      ...paymentMethodFilter,
+    }
+  });
 
   return {
     data,

@@ -12,7 +12,7 @@ const links = [
   { title: 'Marcas', href: '/admin/brands' },
   { title: 'Inventario', href: '/admin/inventory' },
   { title: 'Pedidos', href: '/admin/orders' },
-  { title: 'Usuarios', href: '/admin/users' },
+  { title: 'Usuarios', href: '/admin/users', adminOnly: true },
   { title: 'Settings', href: '/admin/settings', adminOnly: true },
 ];
 
@@ -25,14 +25,6 @@ const MainNav = ({
 
   const filteredLinks = links.filter((item) => {
     if ('adminOnly' in item && item.adminOnly && role !== 'admin') return false;
-    if (role === 'seller') {
-      if (
-        item.title === 'Categorías' ||
-        item.title === 'Marcas' ||
-        item.title === 'Usuarios'
-      )
-        return false;
-    }
     return true;
   });
 

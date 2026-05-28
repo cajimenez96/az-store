@@ -15,42 +15,35 @@ import Pagination from '@/components/shared/pagination';
 import DeleteDialog from '@/components/shared/delete-dialog';
 import { requireAdminOrSeller } from '@/lib/auth-guard';
 import { CheckCircle2, XCircle, Package } from 'lucide-react';
+import OrderFilters from './order-filters';
 
 export const metadata: Metadata = {
   title: 'Pedidos (Admin)',
 };
 
 const AdminOrdersPage = async (props: {
-  searchParams: Promise<{ page: string; query: string }>;
+  searchParams: Promise<{ page: string; query: string; status: string; paymentMethod: string }>;
 }) => {
-  const { page = '1', query: searchText } = await props.searchParams;
+  const { page = '1', query: searchText = '', status = '', paymentMethod = '' } = await props.searchParams;
 
   await requireAdminOrSeller();
 
   const orders = await getAllOrders({
     page: Number(page),
     query: searchText,
+    status,
+    paymentMethod,
   });
 
   return (
     <div className='space-y-5'>
-      <div className='flex items-center gap-3'>
-        <h1 className='az-heading-lg text-az-ink-deep'>Pedidos</h1>
-        {searchText && (
-          <div className='flex items-center gap-2 az-body-sm text-az-charcoal'>
-            Filtrado por <i>&quot;{searchText}&quot;</i>
-            <Link href='/admin/orders'>
-              <Button
-                variant='outline'
-                size='sm'
-                className='h-7 az-caption-bold rounded-az-full border-az-hairline-soft text-az-ink hover:bg-az-ink-deep hover:text-white hover:border-az-ink-deep transition-colors'
-              >
-                Quitar Filtro
-              </Button>
-            </Link>
-          </div>
-        )}
-      </div>
+      <h1 className='az-heading-lg text-az-ink-deep'>Pedidos</h1>
+
+      <OrderFilters
+        currentQuery={searchText}
+        currentStatus={status}
+        currentPaymentMethod={paymentMethod}
+      />
 
       <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft overflow-hidden'>
         <div className='overflow-x-auto'>

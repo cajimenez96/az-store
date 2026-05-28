@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import DeleteDialog from '@/components/shared/delete-dialog';
-import { requireAdmin } from '@/lib/auth-guard';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 import { DEFAULT_CATEGORY_ID } from '@/lib/constants';
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminCategoriesPage() {
-  await requireAdmin();
+  await requireAdminOrSeller();
   const { data: categories, success } = await getAllCategories();
 
   if (!success || !categories) {

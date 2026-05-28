@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import ProductForm from '@/components/admin/product-form';
-import { requireAdmin } from '@/lib/auth-guard';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 import { getAllCategories } from '@/lib/actions/category.actions';
 import { getAllBrands } from '@/lib/actions/brand.actions';
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const CreateProductPage = async () => {
-  await requireAdmin();
+  await requireAdminOrSeller();
   const { data: categories } = await getAllCategories();
   const brands = await getAllBrands();
 

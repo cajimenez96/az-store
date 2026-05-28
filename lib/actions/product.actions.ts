@@ -47,6 +47,7 @@ export async function getAllProducts({
   price,
   rating,
   sort,
+  sellerId,
 }: {
   query: string;
   limit?: number;
@@ -56,6 +57,7 @@ export async function getAllProducts({
   price?: string;
   rating?: string;
   sort?: string;
+  sellerId?: string;
 }) {
   // Query filter
   const queryFilter: Prisma.ProductWhereInput =
@@ -102,6 +104,11 @@ export async function getAllProducts({
         }
       : {};
 
+  // Seller filter
+  const sellerFilter: Prisma.ProductWhereInput = sellerId
+    ? { sellerId }
+    : {};
+
   const data = await prisma.product.findMany({
     where: {
       ...queryFilter,
@@ -109,6 +116,7 @@ export async function getAllProducts({
       ...subCategoryFilter,
       ...priceFilter,
       ...ratingFilter,
+      ...sellerFilter,
     },
     include: { category: true, subCategory: true, brand: true, variants: { include: { size: true } } },
     orderBy:
@@ -127,8 +135,10 @@ export async function getAllProducts({
     where: {
       ...queryFilter,
       ...categoryFilter,
+      ...subCategoryFilter,
       ...priceFilter,
       ...ratingFilter,
+      ...sellerFilter,
     }
   });
 
@@ -138,12 +148,12 @@ export async function getAllProducts({
   };
 }
 
-import { requireAdmin, requireAdminOrSeller } from '@/lib/auth-guard';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 
 // Delete a product
 export async function deleteProduct(id: string) {
   try {
-    await requireAdmin();
+    await requireAdminOrSeller();
     const productExists = await prisma.product.findFirst({
       where: { id },
     });
@@ -166,9 +176,9 @@ export async function deleteProduct(id: string) {
 // Create a product
 export async function createProduct(data: z.infer<typeof insertProductSchema>) {
   try {
-    await requireAdmin();
+    const session = await requireAdminOrSeller();
     const productData = insertProductSchema.parse(data);
-    
+
     // We separate the variants from the product core data
     const { variants, ...coreData } = productData;
 
@@ -177,6 +187,7 @@ export async function createProduct(data: z.infer<typeof insertProductSchema>) {
         data: {
           ...coreData,
           subCategoryId: coreData.subCategoryId || null,
+          sellerId: session?.user?.role === 'seller' ? session.user.id : null,
         },
       });
 
@@ -301,7 +312,6 @@ export async function getInventory({
   category,
   brand,
   stock,
-  sellerId,
 }: {
   limit?: number;
   page: number;
@@ -309,7 +319,6 @@ export async function getInventory({
   category?: string;
   brand?: string;
   stock?: string;
-  sellerId?: string;
 }) {
   const queryFilter: Prisma.ProductVariantWhereInput =
     query && query !== 'all'
@@ -340,17 +349,12 @@ export async function getInventory({
     stockFilter = { stock: { lte: criticalStockThreshold } };
   }
 
-  const sellerFilter: Prisma.ProductVariantWhereInput = sellerId
-    ? { product: { sellerId } }
-    : {};
-
   const data = await prisma.productVariant.findMany({
     where: {
       ...queryFilter,
       ...categoryFilter,
       ...brandFilter,
       ...stockFilter,
-      ...sellerFilter,
     },
     include: {
       product: {
@@ -372,7 +376,6 @@ export async function getInventory({
       ...categoryFilter,
       ...brandFilter,
       ...stockFilter,
-      ...sellerFilter,
     }
   });
 

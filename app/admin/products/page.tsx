@@ -21,7 +21,7 @@ const AdminProductsPage = async (props: {
     category: string;
   }>;
 }) => {
-  await requireAdminOrSeller();
+  const session = await requireAdminOrSeller();
 
   const searchParams = await props.searchParams;
 

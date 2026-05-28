@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import DeleteDialog from '@/components/shared/delete-dialog';
 import { deleteSize } from '@/lib/actions/size.actions';
-import { requireAdmin } from '@/lib/auth-guard';
+import { requireAdminOrSeller } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Editar Categoría',
@@ -24,7 +24,7 @@ const UpdateCategoryPage = async (props: {
     id: string;
   }>;
 }) => {
-  await requireAdmin();
+  await requireAdminOrSeller();
   const { id } = await props.params;
   const { data: category, success } = await getCategoryById(id);
 

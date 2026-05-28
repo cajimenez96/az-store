@@ -304,8 +304,8 @@ const OrderDetailsTable = ({
                   </div>
                 )}
 
-                {/* Admin Approval view for TransferenciaBancaria with Receipt */}
-                {isAdmin && !isPaid && paymentMethod === 'TransferenciaBancaria' && receiptUrl && (
+                {/* Admin/Seller Approval view for TransferenciaBancaria with Receipt */}
+                {(isAdmin || isSeller) && !isPaid && paymentMethod === 'TransferenciaBancaria' && receiptUrl && (
                   <div className="mt-4 border-t border-az-hairline-soft pt-4 space-y-4">
                     <div className="bg-amber-50 border border-amber-200/60 p-4 rounded-az-xl text-az-ink space-y-3">
                       <div className="flex items-center gap-2 text-amber-700 font-semibold">
@@ -356,7 +356,7 @@ const OrderDetailsTable = ({
                       <span className="font-semibold">Notas:</span> {order.shippingNotes}
                     </p>
                   )}
-                  {isAdmin && (
+                  {(isAdmin || isSeller) && (
                     <ShippingStatusForm
                       orderId={order.id}
                       currentStatus={order.shippingStatus || 'Pendiente'}
@@ -450,7 +450,7 @@ const OrderDetailsTable = ({
                   )}
 
                   {/* Standard admin buttons for bank transfer fallback when no receipt is uploaded */}
-                  {isAdmin && !isPaid && paymentMethod === 'TransferenciaBancaria' && !receiptUrl && (
+                  {(isAdmin || isSeller) && !isPaid && paymentMethod === 'TransferenciaBancaria' && !receiptUrl && (
                     <div className="space-y-2">
                       <p className="az-caption text-az-stone text-center">Falta comprobante del cliente</p>
                       <MarkAsPaidButton />
@@ -458,7 +458,7 @@ const OrderDetailsTable = ({
                   )}
 
                   {/* Mark as Delivered Action */}
-                  {isAdmin && isPaid && !isDelivered && <MarkAsDeliveredButton />}
+                  {(isAdmin || isSeller) && isPaid && !isDelivered && <MarkAsDeliveredButton />}
                 </div>
               </CardContent>
             </Card>

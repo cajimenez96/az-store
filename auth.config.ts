@@ -28,7 +28,7 @@ export const authConfig = {
 
       if (!auth && protectedPaths.some((p) => p.test(pathname))) return false;
 
-      if (auth && /\/admin/.test(pathname) && auth.user?.role !== 'admin') {
+      if (auth && /\/admin/.test(pathname) && auth.user?.role !== 'admin' && auth.user?.role !== 'seller') {
         return NextResponse.redirect(new URL('/unauthorized', request.url));
       }
 
