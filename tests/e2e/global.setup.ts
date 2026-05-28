@@ -127,23 +127,7 @@ export default async function globalSetup() {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    // Navigate to login
-    await page.goto('http://localhost:3000/sign-in');
-
-    // Fill login form with hardcoded credentials
-    await page.fill('#email', 'admin@example.com');
-    await page.fill('#password', '123456');
-
-    // Submit form
-    await page.click('button:has-text("Iniciar Sesión")');
-
-    // Wait for redirect to home
-    await page.waitForURL('http://localhost:3000/', { timeout: 10000 });
-
-    // Save storage state
-    await context.storageState({ path: authFile });
-    console.log('✓ Session saved to', authFile);
-
+    // Just close without login - each test handles its own auth
     await browser.close();
 
     console.log('✅ Test data seeded successfully\n');

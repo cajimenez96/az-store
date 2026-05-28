@@ -1,0 +1,35 @@
+{
+  "cookies": [
+    {
+      "name": "sessionCartId",
+      "value": "1d491a41-f1a0-4995-a6bc-13d8fdadf8e2",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.csrf-token",
+      "value": "3d037c74d117aa304dbae2cec9959054b9c7cdefa5601edc8a5d118026cf7bc7%7Cfd7804e47ddbd09ef74d920fc533087da6c0ec45f948993cdb20bc9af1ff964d",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authjs.callback-url",
+      "value": "http%3A%2F%2Flocalhost%3A3000",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}
