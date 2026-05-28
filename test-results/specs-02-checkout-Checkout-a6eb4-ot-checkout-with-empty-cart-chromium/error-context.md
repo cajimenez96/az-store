@@ -7,7 +7,7 @@
 # Test info
 
 - Name: specs/02-checkout.spec.ts >> Checkout Flow >> cannot checkout with empty cart
-- Location: tests/e2e/specs/02-checkout.spec.ts:123:7
+- Location: tests/e2e/specs/02-checkout.spec.ts:42:7
 
 # Error details
 
