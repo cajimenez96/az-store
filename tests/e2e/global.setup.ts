@@ -34,7 +34,7 @@ export default async function globalSetup() {
       },
     });
 
-    // Login user with default credentials (for UI login in setup)
+    // Login user with strong password (meets signup requirements: 8+ chars, uppercase, number)
     await prisma.user.upsert({
       where: { email: 'admin@example.com' },
       update: {},
@@ -42,7 +42,7 @@ export default async function globalSetup() {
         id: uuidv4(),
         email: 'admin@example.com',
         name: 'Admin User',
-        password: await bcrypt.hash('123456', 10),
+        password: await bcrypt.hash('Admin@2026', 10),
         role: 'admin',
       },
     });

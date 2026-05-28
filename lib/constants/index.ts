@@ -9,7 +9,7 @@ export const LATEST_PRODUCTS_LIMIT =
 
 export const signInDefaultValues = {
   email: 'admin@example.com',
-  password: '123456',
+  password: 'Admin@2026',
 };
 
 export const signUpDefaultValues = {
