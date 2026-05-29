@@ -13,8 +13,10 @@ const FooterDark = async () => {
         {/* Main footer grid */}
         <div className='grid grid-cols-1 md:grid-cols-4 gap-10 py-16'>
           {/* Brand column */}
-          <div className='col-span-1 md:col-span-2'>
-            <p className='text-white font-semibold text-lg mb-3'>{APP_NAME}</p>
+          <div className='col-span-1 md:col-span-2 space-y-5'>
+            <span className='hidden lg:block font-serif font-bold text-white uppercase tracking-[0.1em] text-3xl leading-none'>
+              {APP_NAME}
+            </span>
             <p className='az-body-sm text-white/60 leading-relaxed max-w-xs'>
               Tu tienda online de confianza. Calidad, variedad y la mejor
               atención al cliente.
@@ -98,14 +100,21 @@ const FooterDark = async () => {
           <p className='az-caption text-white/45'>
             &copy; {currentYear} {APP_NAME}. Todos los derechos reservados.
           </p>
-          {/* <div className='flex gap-5'>
-            <Link href='#' className='az-caption text-white/45 hover:text-white transition-colors'>
+          <div className='flex gap-5'>
+            {/* <Link href='#' className='az-caption text-white/45 hover:text-white transition-colors'>
               Privacidad
-            </Link>
-            <Link href='#' className='az-caption text-white/45 hover:text-white transition-colors'>
-              Términos
-            </Link>
-          </div> */}
+            </Link> */}
+            <p className='az-caption text-white/45 flex gap-1'>
+              Sitio desarrollado por
+              <Link
+                href='https://www.azmarketing.com.ar/'
+                target='_blank'
+                className='az-caption text-white/80 hover:text-white transition-colors'
+              >
+                AZ Marketing
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

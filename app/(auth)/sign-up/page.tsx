@@ -40,14 +40,17 @@ const SignUpPage = async (props: {
         <CardHeader className='space-y-4'>
           <Link href='/' className='flex-center'>
             <Image
-              src='/images/logo.svg'
-              width={100}
-              height={100}
+              src='/images/logo-nombre.png'
               alt={`${APP_NAME} logo`}
-              priority={true}
+              width={4000}
+              height={1303}
+              className='h-auto max-w-[310px] dark:invert'
+              priority
             />
           </Link>
-          <CardTitle className='text-center az-heading-sm text-az-ink-deep'>Crear cuenta</CardTitle>
+          {/* <CardTitle className='text-center az-heading-sm text-az-ink-deep'>
+            Crear cuenta
+          </CardTitle> */}
           <CardDescription className='text-center az-body-sm text-az-stone'>
             Ingresá tus datos para registrarte
           </CardDescription>

@@ -118,6 +118,13 @@ export default {
   				'Arial',
   				'sans-serif',
   			],
+  			// editorial serif — Cormorant Garamond (used for brand wordmark)
+  			serif: [
+  				'var(--font-cormorant)',
+  				'Cormorant Garamond',
+  				'Georgia',
+  				'serif',
+  			],
   			// legacy aliases — replaced by sans
   			display: [
   				'var(--font-geist)',

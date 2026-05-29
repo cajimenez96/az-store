@@ -32,7 +32,7 @@ const emailHeader = () => `
   <body>
     <div class="container">
       <div class="header">
-        <img src="${BASE_URL}/images/logo.svg" width="40" height="40" alt="AZ Store" />
+        <img src="${BASE_URL}/images/logo-m-negro.png" width="40" height="40" alt="AZ Store" />
       </div>
 `;
 
@@ -49,7 +49,10 @@ const emailFooter = () => `
   </html>
 `;
 
-export function passwordResetTemplate(email: string, resetLink: string): string {
+export function passwordResetTemplate(
+  email: string,
+  resetLink: string
+): string {
   return `
     ${emailHeader()}
     <div class="content">

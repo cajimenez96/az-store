@@ -10,14 +10,14 @@ const Header = () => {
       <div className='az-wrapper flex items-center justify-between h-16 gap-4 lg:gap-8'>
         {/* Logo */}
         <Link href='/' className='flex items-center gap-3 shrink-0'>
-          <Image
-            src='/images/logo.svg'
+          {/* <Image
+            src='/images/logo-m-negro.png'
             alt={`${APP_NAME} logo`}
-            height={36}
-            width={36}
+            height={50}
+            width={50}
             priority
-          />
-          <span className='hidden lg:block az-body-md-bold text-az-ink-deep tracking-tight'>
+          /> */}
+          <span className='hidden lg:block font-serif font-bold text-az-ink-deep uppercase tracking-[0.1em] text-xl leading-none'>
             {APP_NAME}
           </span>
         </Link>
@@ -30,10 +30,10 @@ const Header = () => {
         {/* Right: menu/user actions */}
         <Menu />
       </div>
-      
+
       {/* Mobile Search (visible only on mobile, below the main header bar) */}
       <div className='md:hidden px-4 pb-3'>
-         <Search />
+        <Search />
       </div>
     </header>
   );

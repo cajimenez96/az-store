@@ -37,22 +37,20 @@ const SignInPage = async (props: {
   return (
     <div className='w-full max-w-md mx-auto px-4'>
       <Card className='border border-az-hairline-soft shadow-az-sticky bg-az-canvas'>
-        <CardHeader className='space-y-4'>
+        <CardHeader className='space-y-12'>
           <Link href='/' className='flex-center'>
             <Image
-              src='/images/logo.svg'
-              width={100}
-              height={100}
+              src='/images/logo-nombre.png'
               alt={`${APP_NAME} logo`}
-              priority={true}
+              width={4000}
+              height={1303}
+              className='h-auto max-w-[310px] dark:invert'
+              priority
             />
           </Link>
-          <CardTitle className='text-center az-heading-sm text-az-ink-deep'>
+          <CardTitle className='az-heading-sm text-az-ink-deep text-center'>
             Iniciar Sesión
           </CardTitle>
-          <CardDescription className='text-center az-body-sm text-az-stone'>
-            Ingresá a tu cuenta
-          </CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>
           <CredentialsSignInForm />

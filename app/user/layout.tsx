@@ -20,10 +20,11 @@ export default async function UserLayout({
           <div className='flex items-center h-16'>
             <Link href='/' className='w-22'>
               <Image
-                src='/images/logo.svg'
-                height={48}
-                width={48}
+                src='/images/logo-m-blanco.png'
+                height={32}
+                width={32}
                 alt={APP_NAME}
+                className='brightness-0 invert'
               />
             </Link>
             <MainNav className='mx-6' userRole={userRole} />

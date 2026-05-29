@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
+import { Geist, Cormorant_Garamond } from 'next/font/google';
 import '@/assets/styles/globals.css';
 import { APP_DESCRIPTION, APP_NAME, SERVER_URL } from '@/lib/constants';
 import { ThemeProvider } from 'next-themes';
@@ -8,6 +8,12 @@ import { Toaster } from '@/components/ui/toaster';
 const geist = Geist({
   subsets: ['latin'],
   variable: '--font-geist',
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['700'],
+  variable: '--font-cormorant',
 });
 
 export const metadata: Metadata = {
@@ -48,7 +54,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='es' suppressHydrationWarning>
-      <body className={`${geist.variable} ${geist.className} antialiased`}>
+      <body className={`${geist.variable} ${cormorant.variable} ${geist.className} antialiased`}>
         <ThemeProvider
           attribute='class'
           defaultTheme='light'
