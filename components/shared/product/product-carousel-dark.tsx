@@ -20,13 +20,15 @@ const ProductCarouselDark = ({ data }: { data: Product[] }) => {
     return (
       <section className='relative flex items-center justify-center bg-az-ink-deep overflow-hidden pt-24 pb-32 md:pt-32 md:pb-48 min-h-[60vh]'>
         <div className='az-wrapper relative z-10 text-center'>
-          <p className='az-caption-bold text-white/60 uppercase tracking-widest mb-6'>Nueva Colección</p>
-          <h1 className='az-hero-display text-white mb-8 max-w-4xl mx-auto'>
+          <p className='az-caption-bold text-white/60 dark:text-hairline-dark/60 uppercase tracking-widest mb-6'>
+            Nueva Colección
+          </p>
+          <h1 className='az-hero-display text-white dark:text-hairline-dark mb-8 max-w-4xl mx-auto'>
             Estilo que habla por vos
           </h1>
           <Link
             href='/search'
-            className='inline-block bg-white text-az-ink-deep px-8 py-4 rounded-az-full az-button-md hover:bg-az-surface-soft transition-colors duration-150'
+            className='inline-block bg-white dark:bg-[#0a1317] text-az-ink-deep px-8 py-4 rounded-az-full az-button-md hover:bg-az-surface-soft transition-colors duration-150'
           >
             Explorar colección
           </Link>
@@ -67,7 +69,9 @@ const ProductCarouselDark = ({ data }: { data: Product[] }) => {
 
                 {/* Text content — sits at bottom left, like a magazine spread */}
                 <div className='relative z-10 az-wrapper pb-16 md:pb-24'>
-                  <p className='az-caption-bold text-white/60 uppercase tracking-widest mb-4'>Destacado</p>
+                  <p className='az-caption-bold text-white/60 uppercase tracking-widest mb-4'>
+                    Destacado
+                  </p>
                   <h1 className='az-heading-md text-white mb-6 max-w-2xl'>
                     {product.name}
                   </h1>

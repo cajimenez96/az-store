@@ -23,7 +23,7 @@ const UserButton = async () => {
         size='sm'
         className='h-9 px-4 rounded-az-full'
       >
-        <Link href='/sign-in'>
+        <Link href='/sign-in' className='dark:hover:text-az-ink-button'>
           <UserIcon className='h-3.5 w-3.5' />
           Iniciar Sesión
         </Link>
@@ -62,30 +62,45 @@ const UserButton = async () => {
 
           <DropdownMenuSeparator className='bg-az-hairline-soft' />
 
-          <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
+          <DropdownMenuItem
+            asChild
+            className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'
+          >
             <Link href='/user/profile' className='w-full'>
               Mi Perfil
             </Link>
           </DropdownMenuItem>
 
           {session?.user?.role === 'user' && (
-            <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
+            <DropdownMenuItem
+              asChild
+              className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'
+            >
               <Link href='/user/orders' className='w-full'>
                 Historial de Pedidos
               </Link>
             </DropdownMenuItem>
           )}
 
-          {(session?.user?.role === 'admin' || session?.user?.role === 'seller') && (
-            <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
+          {(session?.user?.role === 'admin' ||
+            session?.user?.role === 'seller') && (
+            <DropdownMenuItem
+              asChild
+              className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'
+            >
               <Link href='/admin' className='w-full'>
-                {session?.user?.role === 'admin' ? 'Administrador' : 'Panel de Vendedor'}
+                {session?.user?.role === 'admin'
+                  ? 'Administrador'
+                  : 'Panel de Vendedor'}
               </Link>
             </DropdownMenuItem>
           )}
 
           {session?.user?.role === 'seller' && (
-            <DropdownMenuItem asChild className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'>
+            <DropdownMenuItem
+              asChild
+              className='az-body-sm text-az-ink hover:bg-az-surface-soft focus:bg-az-surface-soft cursor-pointer rounded-az-lg mx-1'
+            >
               <Link href='/user/orders' className='w-full'>
                 Mis Pedidos
               </Link>
