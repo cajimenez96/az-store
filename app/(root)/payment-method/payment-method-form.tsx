@@ -76,12 +76,17 @@ const PaymentMethodForm = ({
         <div className='space-y-1 border-b border-az-hairline-soft pb-5'>
           <h1 className='az-heading-sm text-az-ink-deep'>Método de Pago</h1>
           <p className='az-body-sm text-az-steel'>
-            Seleccioná la opción que prefieras para realizar el pago de tu pedido.
+            Seleccioná la opción que prefieras para realizar el pago de tu
+            pedido.
           </p>
         </div>
 
         <Form {...form}>
-          <form method='post' className='space-y-6' onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            method='post'
+            className='space-y-6'
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name='type'
@@ -98,6 +103,7 @@ const PaymentMethodForm = ({
                         return (
                           <FormItem key={method} className='space-y-0'>
                             <FormLabel
+                              htmlFor={`payment-${method}`}
                               className={cn(
                                 'flex items-center gap-4 rounded-az-xl border p-4 cursor-pointer transition-all duration-150',
                                 isSelected
@@ -112,14 +118,17 @@ const PaymentMethodForm = ({
                                   checked={isSelected}
                                   className={cn(
                                     'border-az-hairline',
-                                    isSelected && 'border-az-primary text-az-primary'
+                                    isSelected &&
+                                      'border-az-primary text-az-primary'
                                   )}
                                 />
                               </FormControl>
                               <span
                                 className={cn(
                                   'az-body-sm-bold flex-1 select-none',
-                                  isSelected ? 'text-az-ink-deep' : 'text-az-ink'
+                                  isSelected
+                                    ? 'text-az-ink-deep'
+                                    : 'text-az-ink'
                                 )}
                               >
                                 {DISPLAY_NAMES[method] ?? method}

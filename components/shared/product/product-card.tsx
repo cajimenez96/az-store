@@ -3,8 +3,27 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import ProductPrice from './product-price';
 
-const ProductCard = ({ product }: { product: { slug: string; images: string[]; name: string; brand?: string | { name: string } | null; price: string | number; variants?: { stock: number }[] } }) => {
-  const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) || 0;
+const ProductCard = ({
+  product,
+}: {
+  product: {
+    slug: string;
+    images: string[];
+    name: string;
+    brand?: string | { name: string } | null;
+    price: string | number;
+    stock?: number;
+    variants?: { stock: number }[];
+  };
+}) => {
+  const stock =
+    product.stock ||
+    (product.variants as { stock: number }[] | undefined)?.reduce(
+      (acc, v) => acc + v.stock,
+      0
+    ) ||
+    0;
+
   return (
     <Card className='w-full max-w-sm'>
       <CardHeader className='p-0 items-center'>
@@ -20,7 +39,11 @@ const ProductCard = ({ product }: { product: { slug: string; images: string[]; n
       </CardHeader>
       <CardContent className='p-4 grid gap-4'>
         <div className='text-xs'>
-          {product.brand ? (typeof product.brand === 'string' ? product.brand : product.brand.name) : ''}
+          {product.brand
+            ? typeof product.brand === 'string'
+              ? product.brand
+              : product.brand.name
+            : ''}
         </div>
         <Link href={`/product/${product.slug}`}>
           <h2 className='text-sm font-medium'>{product.name}</h2>

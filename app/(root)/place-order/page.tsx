@@ -62,16 +62,25 @@ const PlaceOrderPage = async () => {
             <div className='flex items-center justify-between pb-3 border-b border-az-hairline-soft'>
               <div className='flex items-center gap-2'>
                 <MapPin className='w-4 h-4 text-az-steel' />
-                <h2 className='az-body-md-bold text-az-ink-deep'>Dirección de Envío</h2>
+                <h2 className='az-body-md-bold text-az-ink-deep'>
+                  Dirección de Envío
+                </h2>
               </div>
               <Link href='/shipping-address'>
-                <Button id='edit-shipping' variant='outlineLight' size='sm'>
+                <Button
+                  id='edit-shipping'
+                  variant='outlineLight'
+                  className='border border-az-ink-button/20'
+                  size='sm'
+                >
                   Editar
                 </Button>
               </Link>
             </div>
             <div className='az-body-sm text-az-charcoal space-y-1'>
-              <p className='az-body-sm-bold text-az-ink-deep'>{userAddress.fullName}</p>
+              <p className='az-body-sm-bold text-az-ink-deep'>
+                {userAddress.fullName}
+              </p>
               <p>
                 {userAddress.streetAddress}
                 {userAddress.floor ? `, Piso ${userAddress.floor}` : ''}
@@ -83,7 +92,9 @@ const PlaceOrderPage = async () => {
               <p>
                 CP {userAddress.postalCode} · {userAddress.country}
               </p>
-              {userAddress.phone && <p className='text-az-steel'>{userAddress.phone}</p>}
+              {userAddress.phone && (
+                <p className='text-az-steel'>{userAddress.phone}</p>
+              )}
             </div>
           </div>
 
@@ -92,10 +103,17 @@ const PlaceOrderPage = async () => {
             <div className='flex items-center justify-between pb-3 border-b border-az-hairline-soft mb-3'>
               <div className='flex items-center gap-2'>
                 <CreditCard className='w-4 h-4 text-az-steel' />
-                <h2 className='az-body-md-bold text-az-ink-deep'>Método de Pago</h2>
+                <h2 className='az-body-md-bold text-az-ink-deep'>
+                  Método de Pago
+                </h2>
               </div>
               <Link href='/payment-method'>
-                <Button id='edit-payment' variant='outlineLight' size='sm'>
+                <Button
+                  id='edit-payment'
+                  variant='outlineLight'
+                  className='border border-az-ink-button/20'
+                  size='sm'
+                >
                   Editar
                 </Button>
               </Link>
@@ -117,7 +135,9 @@ const PlaceOrderPage = async () => {
               <Table>
                 <TableHeader>
                   <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
-                    <TableHead className='az-body-sm-bold text-az-ink h-10'>Producto</TableHead>
+                    <TableHead className='az-body-sm-bold text-az-ink h-10'>
+                      Producto
+                    </TableHead>
                     <TableHead className='az-body-sm-bold text-az-ink text-center h-10'>
                       Cantidad
                     </TableHead>
@@ -151,7 +171,9 @@ const PlaceOrderPage = async () => {
                               {item.name}
                             </span>
                             {item.size && (
-                              <span className='az-caption text-az-steel'>Talle: {item.size}</span>
+                              <span className='az-caption text-az-steel'>
+                                Talle: {item.size}
+                              </span>
                             )}
                           </div>
                         </Link>

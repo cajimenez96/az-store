@@ -5,36 +5,58 @@ import Image from 'next/image';
 import { useUploadThing } from '@/lib/uploadthing';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Plus, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-interface ImageUploadFieldProps {
-  images: string[];
-  onChange: (images: string[]) => void;
+type UploadEndpoint = 'imageUploader' | 'receiptUploader';
+
+interface FileUploadFieldProps {
+  files: string[];
+  onChange: (files: string[]) => void;
   disabled?: boolean;
+  endpoint: UploadEndpoint;
+  accept?: string;
+  multiple?: boolean;
+  maxFiles?: number;
+  placeholder?: string;
+  description?: string;
+  fileType?: 'image' | 'document';
 }
 
-/**
- * Full-area drag-and-drop image uploader.
- * Supports: click-to-browse, drag & drop (multi-file), and URL input.
- */
-export function ImageUploadField({
-  images,
+export function FileUploadField({
+  files,
   onChange,
-  disabled,
-}: ImageUploadFieldProps) {
+  disabled = false,
+  endpoint,
+  accept = 'image/*',
+  multiple = true,
+  maxFiles = 10,
+  placeholder = 'Arrastrá archivos o hacé clic para seleccionar',
+  description,
+  fileType = 'image',
+}: FileUploadFieldProps) {
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const { startUpload, isUploading } = useUploadThing('imageUploader');
+  const { startUpload, isUploading } = useUploadThing(endpoint);
 
   const handleFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files || files.length === 0) return;
+    async (fileList: FileList | null) => {
+      if (!fileList || fileList.length === 0) return;
 
-      const fileArray = Array.from(files);
+      const remaining = maxFiles - files.length;
+      if (remaining <= 0) {
+        toast({
+          variant: 'destructive',
+          description: `Máximo de archivos alcanzado (${maxFiles})`,
+        });
+        return;
+      }
+
+      const filesToUpload = Array.from(fileList).slice(0, remaining);
       const uploadedUrls: string[] = [];
 
-      for (const file of fileArray) {
+      for (const file of filesToUpload) {
         try {
           const result = await startUpload([file]);
           if (result && result[0]) {
@@ -43,20 +65,25 @@ export function ImageUploadField({
         } catch (error) {
           toast({
             variant: 'destructive',
-            description: `Error al subir imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+            description: `Error al subir archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
           });
           return;
         }
       }
 
-      onChange([...images, ...uploadedUrls]);
+      if (multiple) {
+        onChange([...files, ...uploadedUrls]);
+      } else {
+        onChange([uploadedUrls[0]]);
+      }
+
       if (uploadedUrls.length > 0) {
         toast({
-          description: `${uploadedUrls.length} imagen${uploadedUrls.length > 1 ? 'es' : ''} subida${uploadedUrls.length > 1 ? 's' : ''} exitosamente`,
+          description: `${uploadedUrls.length} archivo${uploadedUrls.length > 1 ? 's' : ''} subido${uploadedUrls.length > 1 ? 's' : ''} exitosamente`,
         });
       }
     },
-    [startUpload, onChange, images, toast]
+    [startUpload, files, files.length, maxFiles, multiple, onChange, toast]
   );
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -76,7 +103,7 @@ export function ImageUploadField({
   };
 
   const handleRemove = (idx: number) => {
-    const next = [...images];
+    const next = [...files];
     next.splice(idx, 1);
     onChange(next);
   };
@@ -84,20 +111,26 @@ export function ImageUploadField({
   return (
     <div className='space-y-3'>
       {/* Thumbnails grid */}
-      {images.length > 0 && (
+      {files.length > 0 && (
         <div className='flex flex-wrap gap-3'>
-          {images.map((src, idx) => (
+          {files.map((src, idx) => (
             <div
               key={`${src}-${idx}`}
               className='relative w-24 h-24 group rounded-az-sm overflow-hidden border border-az-hairline-soft'
             >
-              <Image
-                src={src}
-                alt={`Imagen ${idx + 1}`}
-                fill
-                className='object-cover object-center'
-                sizes='96px'
-              />
+              {fileType === 'image' ? (
+                <Image
+                  src={src}
+                  alt={`Archivo ${idx + 1}`}
+                  fill
+                  className='object-cover object-center'
+                  sizes='96px'
+                />
+              ) : (
+                <div className='w-full h-full bg-az-surface-soft flex items-center justify-center text-center p-2'>
+                  <div className='az-caption text-az-steel truncate'>{`Archivo ${idx + 1}`}</div>
+                </div>
+              )}
               {!disabled && (
                 <button
                   type='button'
@@ -113,7 +146,7 @@ export function ImageUploadField({
       )}
 
       {/* Drop zone */}
-      {!disabled && (
+      {!disabled && files.length < maxFiles && (
         <div
           role='button'
           tabIndex={0}
@@ -133,8 +166,8 @@ export function ImageUploadField({
           <input
             ref={inputRef}
             type='file'
-            accept='image/*'
-            multiple
+            accept={accept}
+            multiple={multiple}
             className='sr-only'
             onChange={(e) => handleFiles(e.target.files)}
           />
@@ -147,12 +180,8 @@ export function ImageUploadField({
           ) : (
             <>
               <Plus size={20} className='text-az-stone' />
-              <p className='az-caption text-az-ink text-center'>
-                Arrastrá imágenes o hacé clic para seleccionar
-              </p>
-              <p className='az-caption text-az-stone'>
-                PNG, JPG, WEBP — múltiples a la vez
-              </p>
+              <p className='az-caption text-az-ink text-center'>{placeholder}</p>
+              {description && <p className='az-caption text-az-stone'>{description}</p>}
             </>
           )}
         </div>
