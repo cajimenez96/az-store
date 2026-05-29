@@ -32,11 +32,8 @@ const calcPrice = (items: CartItem[]) => {
 
 export async function addItemToCart(data: CartItem) {
   try {
-    // Check for cart cookie
+    // Get cart session ID and user ID
     const sessionCartId = (await cookies()).get('sessionCartId')?.value;
-    if (!sessionCartId) throw new Error('No se encontró la sesión del carrito');
-
-    // Get session and user ID
     const session = await auth();
     let userId = session?.user?.id ? (session.user.id as string) : undefined;
 
@@ -148,11 +145,8 @@ export async function addItemToCart(data: CartItem) {
 }
 
 export async function getMyCart() {
-  // Check for cart cookie
+  // Get cart session ID and user ID
   const sessionCartId = (await cookies()).get('sessionCartId')?.value;
-  if (!sessionCartId) throw new Error('No se encontró la sesión del carrito');
-
-  // Get session and user ID
   const session = await auth();
   let userId = session?.user?.id ? (session.user.id as string) : undefined;
 
@@ -164,7 +158,10 @@ export async function getMyCart() {
     }
   }
 
-  // Get user cart from database
+  // If no user and no session ID, return undefined
+  if (!userId && !sessionCartId) return undefined;
+
+  // Get user cart from database - prioritize user cart over session cart
   const cart = await prisma.cart.findFirst({
     where: userId ? { userId: userId } : { sessionCartId: sessionCartId, userId: null },
   });
@@ -184,10 +181,6 @@ export async function getMyCart() {
 
 export async function removeItemFromCart(productId: string, size?: string) {
   try {
-    // Check for cart cookie
-    const sessionCartId = (await cookies()).get('sessionCartId')?.value;
-    if (!sessionCartId) throw new Error('No se encontró la sesión del carrito');
-
     // Get Product
     const product = await prisma.product.findFirst({
       where: { id: productId },
@@ -196,7 +189,12 @@ export async function removeItemFromCart(productId: string, size?: string) {
 
     // Get user cart
     const cart = await getMyCart();
-    if (!cart) throw new Error('Carrito no encontrado');
+    if (!cart) {
+      return {
+        success: false,
+        message: 'Carrito no encontrado',
+      };
+    }
 
     // Check for item
     const exist = (cart.items as CartItem[]).find(
