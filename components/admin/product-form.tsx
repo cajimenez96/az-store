@@ -21,13 +21,15 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { createProduct, updateProduct } from '@/lib/actions/product.actions';
-import { UploadButton } from '@/lib/uploadthing';
+import { getSizesByCategory } from '@/lib/actions/size.actions';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import Image from 'next/image';
 import { Checkbox } from '../ui/checkbox';
 import ProductCard from '../shared/product/product-card';
 import { Category, Size, SubCategory, Brand } from '@prisma/client';
 import { useEffect, useState } from 'react';
+import { UploadButton } from '@/lib/uploadthing';
 
 type CategoryWithSizes = Category & { sizes: Size[]; subCategories: SubCategory[] };
 
@@ -120,6 +122,7 @@ const ProductForm = ({
 
   // Available sub-categories for the selected category
   const [availableSubCategories, setAvailableSubCategories] = useState<SubCategory[]>([]);
+  const [currentSizes, setCurrentSizes] = useState<Size[]>([]);
 
   useEffect(() => {
     const cat = categories.find((c) => c.id === categoryId);
@@ -146,25 +149,31 @@ const ProductForm = ({
     createdAt: new Date(),
   };
 
-  // Reset variants when category changes
+  // Reconsult sizes dynamically when category changes or component mounts
   useEffect(() => {
-    if (categoryId) {
-      const selectedCategory = categories.find((c) => c.id === categoryId);
-      if (selectedCategory && selectedCategory.sizes) {
-        // Only override variants on Create, or if changing to a new category entirely on Update
-        const currentCategoryId = product?.categoryId;
-        if (type === 'Create' || currentCategoryId !== categoryId) {
-          const newVariants = selectedCategory.sizes.map((size) => ({
-            sizeId: size.id,
-            stock: 0,
-          }));
-          replace(newVariants);
-        }
+    const loadSizes = async () => {
+      if (!categoryId) {
+        replace([]);
+        setCurrentSizes([]);
+        return;
+      }
+
+      const res = await getSizesByCategory(categoryId);
+      if (res.success && res.data) {
+        setCurrentSizes(res.data);
+        const newVariants = res.data.map((size) => ({
+          sizeId: size.id,
+          stock: 0,
+        }));
+        replace(newVariants);
       } else {
         replace([]);
+        setCurrentSizes([]);
       }
-    }
-  }, [categoryId, categories, replace, type, product]);
+    };
+
+    loadSizes();
+  }, [categoryId, replace]);
 
   return (
     <Form {...form}>
@@ -336,9 +345,8 @@ const ProductForm = ({
                     ) : (
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {fields.map((field, index) => {
-                          // Find the name of the size
-                          const selectedCat = categories.find(c => c.id === categoryId);
-                          const sizeObj = selectedCat?.sizes.find(s => s.id === field.sizeId);
+                          // Find the name of the size from currentSizes (which are dynamically loaded)
+                          const sizeObj = currentSizes.find(s => s.id === field.sizeId);
                           return (
                             <div key={field.id} className="space-y-2">
                               <label className="text-sm font-medium">{sizeObj?.name || 'Talle'}</label>
@@ -397,56 +405,14 @@ const ProductForm = ({
                   render={() => (
                     <FormItem className='w-full'>
                       <FormLabel>Imágenes del Producto</FormLabel>
-                      <div className='p-4 border border-az-hairline-soft rounded-az-lg mt-2 space-y-4'>
-                        <div className='flex flex-wrap gap-4'>
-                          {images.map((image: string, idx: number) => (
-                            <div key={image} className="relative w-24 h-24 group">
-                              <Image
-                                src={image}
-                                alt='Imagen del producto'
-                                className='object-cover object-center rounded-sm w-full h-full'
-                                width={100}
-                                height={100}
-                              />
-                              {userRole !== 'seller' && (
-                                <button 
-                                  type="button" 
-                                  className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                  onClick={() => {
-                                    const newImages = [...images];
-                                    newImages.splice(idx, 1);
-                                    form.setValue('images', newImages);
-                                  }}
-                                >
-                                  &times;
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                          {userRole !== 'seller' && (
-                            <FormControl>
-                              <div className="flex items-center justify-center w-24 h-24 border-2 border-dashed border-az-hairline rounded-az-sm hover:bg-az-surface-soft transition-colors">
-                                <UploadButton
-                                  endpoint='imageUploader'
-                                  onClientUploadComplete={(res: { url: string }[]) => {
-                                    form.setValue('images', [...images, res[0].url]);
-                                  }}
-                                  onUploadError={(error: Error) => {
-                                    toast({
-                                      variant: 'destructive',
-                                      description: `ERROR! ${error.message}`,
-                                    });
-                                  }}
-                                  appearance={{
-                                    button: "bg-transparent text-black text-xs font-medium w-full h-full",
-                                    allowedContent: "hidden"
-                                  }}
-                                  content={{ button: "+" }}
-                                />
-                              </div>
-                            </FormControl>
-                          )}
-                        </div>
+                      <div className='p-4 border border-az-hairline-soft rounded-az-lg mt-2'>
+                        <FormControl>
+                          <ImageUploadField
+                            images={images}
+                            onChange={(urls) => form.setValue('images', urls)}
+                            disabled={userRole === 'seller'}
+                          />
+                        </FormControl>
                       </div>
                       <FormMessage />
                     </FormItem>

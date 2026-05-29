@@ -43,7 +43,13 @@ export async function getCategoryById(id: string) {
 export async function createCategory(data: { name: string; slug: string }) {
   try {
     await requireAdmin();
-    const category = await prisma.category.create({ data });
+    const category = await prisma.$transaction(async (tx) => {
+      const newCategory = await tx.category.create({ data });
+      await tx.size.create({
+        data: { name: 'Único', categoryId: newCategory.id },
+      });
+      return newCategory;
+    });
     revalidatePath('/admin/categories');
     return { success: true, message: 'Categoría creada exitosamente', data: category };
   } catch (error) {
