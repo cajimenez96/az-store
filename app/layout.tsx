@@ -24,9 +24,6 @@ export const metadata: Metadata = {
   description: APP_DESCRIPTION,
   metadataBase: new URL(SERVER_URL),
   keywords: ['ropa', 'indumentaria', 'tienda online', 'moda argentina', 'AZ Store'],
-  icons: {
-    icon: '/images/logo-m-blanco.png?v=1',
-  },
   openGraph: {
     type: 'website',
     locale: 'es_AR',
