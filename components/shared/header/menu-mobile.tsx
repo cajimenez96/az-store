@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ShoppingCart, Menu as MenuIcon, LogOut } from 'lucide-react';
+import { ShoppingCart, Menu as MenuIcon, LogOut, User } from 'lucide-react';
 import ThemeToggle from '@/components/shared/theme-toggle';
 import {
   Sheet,
@@ -40,6 +40,18 @@ const MenuMobile = ({
         </Link>
       </Button>
 
+      {/* User profile icon - always visible on mobile */}
+      <Button
+        asChild
+        variant='ghost'
+        className='h-9 w-9 rounded-az-full text-az-ink hover:text-az-ink-deep hover:bg-az-surface-soft'
+        aria-label='Perfil'
+      >
+        <Link href={userInfo ? '/user/profile' : '/sign-in'}>
+          <User className='h-4 w-4' />
+        </Link>
+      </Button>
+
       {/* Hamburger sheet */}
       <Sheet>
         <SheetTrigger asChild>
@@ -52,7 +64,9 @@ const MenuMobile = ({
           </Button>
         </SheetTrigger>
         <SheetContent className='flex flex-col items-start bg-az-canvas border-az-hairline-soft'>
-          <SheetTitle className='az-heading-sm text-az-ink-deep mb-2'>Menú</SheetTitle>
+          <SheetTitle className='az-heading-sm text-az-ink-deep mb-2'>
+            Menú
+          </SheetTitle>
 
           <div className='w-full flex flex-col gap-1'>
             {/* Cart row */}
@@ -72,7 +86,9 @@ const MenuMobile = ({
                 </div>
                 <span>Carrito</span>
                 {cartItemsCount > 0 && (
-                  <span className='ml-auto az-caption text-az-stone'>{cartItemsCount} items</span>
+                  <span className='ml-auto az-caption text-az-stone'>
+                    {cartItemsCount} items
+                  </span>
                 )}
               </Link>
             </Button>
@@ -90,7 +106,9 @@ const MenuMobile = ({
               /* Authenticated state */
               <>
                 <div className='px-3 py-2'>
-                  <p className='az-body-sm-bold text-az-ink-deep'>{userInfo.name}</p>
+                  <p className='az-body-sm-bold text-az-ink-deep'>
+                    {userInfo.name}
+                  </p>
                 </div>
 
                 <Button

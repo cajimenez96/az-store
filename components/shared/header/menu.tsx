@@ -35,8 +35,12 @@ const Menu = async () => {
         </Button>
 
         <ThemeToggle />
-        <UserButton />
       </nav>
+
+      {/* User button — always visible on desktop, desktop style */}
+      <div className='hidden md:block'>
+        <UserButton />
+      </div>
 
       {/* Mobile nav — client component for Sheet */}
       <MenuMobile cartItemsCount={cartItemsCount} userInfo={userInfo} />
