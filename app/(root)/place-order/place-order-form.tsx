@@ -5,14 +5,16 @@ import { Check, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFormStatus } from 'react-dom';
 import { createOrder } from '@/lib/actions/order.actions';
+import { useShippingMethod } from '@/hooks/use-shipping-method';
 
 const PlaceOrderForm = () => {
   const router = useRouter();
+  const { shippingMethod } = useShippingMethod();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    const res = await createOrder();
+    const res = await createOrder({ shippingMethod });
 
     if (res.redirectTo) {
       router.push(res.redirectTo);

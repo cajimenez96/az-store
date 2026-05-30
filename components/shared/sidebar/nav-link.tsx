@@ -16,11 +16,9 @@ export function SidebarNavLink({ link, icon: Icon, onClick }: SidebarNavLinkProp
 
   return (
     <SidebarMenuItem>
-      <button onClick={onClick} className='w-full text-left'>
-        <SidebarMenuButton isActive={isActive} icon={Icon}>
-          {link.title}
-        </SidebarMenuButton>
-      </button>
+      <SidebarMenuButton isActive={isActive} icon={Icon} onClick={onClick}>
+        {link.title}
+      </SidebarMenuButton>
     </SidebarMenuItem>
   );
 }

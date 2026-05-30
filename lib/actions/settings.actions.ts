@@ -7,6 +7,7 @@ import { encryptToken, decryptToken } from '@/lib/encrypt';
 
 const BANK_KEYS = ['BANK_NAME', 'BANK_ACCOUNT_HOLDER', 'BANK_CBU', 'BANK_ALIAS', 'BANK_CUIT'] as const;
 const MP_KEYS = ['MERCADOPAGO_ACCESS_TOKEN', 'MERCADOPAGO_PUBLIC_KEY'] as const;
+const SHIPPING_KEYS = ['FREE_SHIPPING_THRESHOLD', 'SHIPPING_FREE_CITIES'] as const;
 
 export async function getBankSettings() {
   const rows = await prisma.setting.findMany({
@@ -108,4 +109,47 @@ export async function updateMercadoPagoSettings(data: {
     console.error('Error updating MercadoPago settings:', error);
     return { success: false, message: 'Error al actualizar datos de MercadoPago' };
   }
+}
+
+export async function getShippingSettings() {
+  const rows = await prisma.setting.findMany({
+    where: { key: { in: [...SHIPPING_KEYS] } },
+  });
+  const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+
+  const freeShippingThreshold = parseFloat(
+    map['FREE_SHIPPING_THRESHOLD'] ?? process.env.FREE_SHIPPING_THRESHOLD ?? '60000'
+  );
+  const freeShippingCities = map['SHIPPING_FREE_CITIES']
+    ? JSON.parse(map['SHIPPING_FREE_CITIES'])
+    : ['San Miguel de Tucumán', 'Tafí Viejo', 'La Banda del Río Salí'];
+
+  return {
+    freeShippingThreshold,
+    freeShippingCities,
+  };
+}
+
+export async function updateShippingSettings(data: {
+  freeShippingThreshold: number;
+  freeShippingCities: string[];
+}) {
+  await requireAdmin();
+
+  const entries: [string, string][] = [
+    ['FREE_SHIPPING_THRESHOLD', data.freeShippingThreshold.toString()],
+    ['SHIPPING_FREE_CITIES', JSON.stringify(data.freeShippingCities)],
+  ];
+
+  await prisma.$transaction(
+    entries.map(([key, value]) =>
+      prisma.setting.upsert({ where: { key }, update: { value }, create: { key, value } })
+    )
+  );
+
+  revalidatePath('/admin/settings');
+  revalidatePath('/order');
+  revalidatePath('/place-order');
+  revalidatePath('/');
+  return { success: true, message: 'Configuración de envíos actualizada' };
 }

@@ -46,6 +46,7 @@ const ShippingAddressForm = ({
   const router = useRouter();
   const { toast } = useToast();
   const [openProvince, setOpenProvince] = useState(false);
+  const [openCity, setOpenCity] = useState(false);
 
   const form = useForm<z.infer<typeof shippingAddressSchema>>({
     resolver: zodResolver(shippingAddressSchema),
@@ -258,7 +259,7 @@ const ShippingAddressForm = ({
                             )}
                           >
                             {field.value
-                              ? provincias.provinces.find((p) => p === field.value)
+                              ? provincias.provinces.find((p) => p.name === field.value)?.name
                               : 'Seleccionar provincia...'}
                             <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                           </Button>
@@ -278,10 +279,11 @@ const ShippingAddressForm = ({
                             <CommandGroup>
                               {provincias.provinces.map((prov) => (
                                 <CommandItem
-                                  value={prov}
-                                  key={prov}
+                                  value={prov.name}
+                                  key={prov.id}
                                   onSelect={() => {
-                                    form.setValue('province', prov);
+                                    form.setValue('province', prov.name);
+                                    form.setValue('city', '');
                                     setOpenProvince(false);
                                   }}
                                   className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
@@ -289,10 +291,10 @@ const ShippingAddressForm = ({
                                   <Check
                                     className={cn(
                                       'mr-2 h-4 w-4 text-az-primary',
-                                      prov === field.value ? 'opacity-100' : 'opacity-0'
+                                      prov.name === field.value ? 'opacity-100' : 'opacity-0'
                                     )}
                                   />
-                                  {prov}
+                                  {prov.name}
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -305,24 +307,83 @@ const ShippingAddressForm = ({
                 )}
               />
 
-              {/* City */}
+              {/* City combobox */}
               <FormField
                 control={form.control}
                 name='city'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={labelClass}>Ciudad / Localidad</FormLabel>
-                    <FormControl>
-                      <Input
-                        id='shipping-city'
-                        placeholder='Ciudad / Localidad'
-                        className={inputClass}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const selectedProvince = provincias.provinces.find(
+                    (p) => p.name === form.getValues('province')
+                  );
+                  const cities = selectedProvince?.cities || [];
+
+                  return (
+                    <FormItem className='flex flex-col'>
+                      <FormLabel className={cn(labelClass, 'h-5 mt-1')}>
+                        Ciudad / Localidad
+                      </FormLabel>
+                      <Popover open={openCity} onOpenChange={setOpenCity}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              id='shipping-city'
+                              variant='outline'
+                              role='combobox'
+                              disabled={!form.getValues('province')}
+                              className={cn(
+                                'w-full justify-between bg-az-canvas border-az-hairline-soft text-az-ink rounded-az-lg h-11 hover:bg-az-surface-soft',
+                                !field.value && 'text-az-stone'
+                              )}
+                            >
+                              {field.value
+                                ? field.value
+                                : form.getValues('province')
+                                  ? 'Seleccionar ciudad...'
+                                  : 'Selecciona provincia primero...'}
+                              <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft rounded-az-xl'
+                          align='start'
+                        >
+                          <Command className='bg-transparent'>
+                            <CommandInput
+                              placeholder='Buscar ciudad...'
+                              className='border-none outline-none ring-0'
+                            />
+                            <CommandList>
+                              <CommandEmpty>No se encontró la ciudad.</CommandEmpty>
+                              <CommandGroup>
+                                {cities.map((city) => (
+                                  <CommandItem
+                                    value={city}
+                                    key={city}
+                                    onSelect={() => {
+                                      form.setValue('city', city);
+                                      setOpenCity(false);
+                                    }}
+                                    className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4 text-az-primary',
+                                        city === field.value ? 'opacity-100' : 'opacity-0'
+                                      )}
+                                    />
+                                    {city}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               {/* Country — disabled */}

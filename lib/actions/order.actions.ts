@@ -26,7 +26,7 @@ import { getMercadoPagoClient } from '../mercadopago';
 import { getBankSettings } from './settings.actions';
 
 // Create order and create the order items
-export async function createOrder() {
+export async function createOrder({ shippingMethod }: { shippingMethod: 'retiro' | 'envio' }) {
   try {
     const session = await auth();
     if (!session) throw new Error('Usuario no autenticado');

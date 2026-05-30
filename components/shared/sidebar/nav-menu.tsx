@@ -35,6 +35,7 @@ interface SidebarMenuButtonProps {
   isActive?: boolean;
   icon?: React.ComponentType<{ className?: string }>;
   className?: string;
+  onClick?: () => void;
 }
 
 export function SidebarMenuButton({
@@ -42,11 +43,13 @@ export function SidebarMenuButton({
   isActive = false,
   icon: Icon,
   className,
+  onClick,
 }: SidebarMenuButtonProps) {
   const { isCollapsed } = useSidebar();
 
   return (
     <button
+      onClick={onClick}
       className={cn(
         'w-full flex items-center gap-3 px-3 py-2.5 rounded-az-md text-sm font-medium',
         'transition-all duration-200 ease-in-out',

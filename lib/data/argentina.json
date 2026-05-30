@@ -1,28 +1,124 @@
 {
   "provinces": [
-    "Buenos Aires",
-    "Ciudad Autónoma de Buenos Aires",
-    "Catamarca",
-    "Chaco",
-    "Chubut",
-    "Córdoba",
-    "Corrientes",
-    "Entre Ríos",
-    "Formosa",
-    "Jujuy",
-    "La Pampa",
-    "La Rioja",
-    "Mendoza",
-    "Misiones",
-    "Neuquén",
-    "Río Negro",
-    "Salta",
-    "San Juan",
-    "San Luis",
-    "Santa Cruz",
-    "Santa Fe",
-    "Santiago del Estero",
-    "Tierra del Fuego",
-    "Tucumán"
+    {
+      "id": 1,
+      "name": "Buenos Aires",
+      "cities": ["La Plata", "Mar del Plata", "Lomas de Zamora", "Almirante Brown", "Quilmes", "Avellaneda", "San Isidro", "Vicente López", "San Martín", "Tres de Febrero", "Ituzaingó", "Morón", "Merlo", "Ramos Mejía", "Hurlingham", "Lanús", "Berazategui", "Florencio Varela", "Ezpeleta", "Bragado", "Junín", "Tandil", "Bahía Blanca", "Bolívar", "Bálcarce", "Capilla del Señor", "Castelli", "Chascomús", "Chivilcoy", "General Alvarado"]
+    },
+    {
+      "id": 2,
+      "name": "Ciudad Autónoma de Buenos Aires",
+      "cities": ["Centro", "San Telmo", "La Boca", "San Cristóbal", "Balvanera", "Almagro", "Caballito", "Flores", "Floresta", "Vélez Sársfield", "Parque Chacabuco", "Nueva Pompeya", "Barracas", "Parque Patricios", "Villa Ortúzar", "Devoto", "Villa del Parque", "Villa Pueyrredón", "Belgrano", "Colegiales", "Chacarita", "Palermo", "Recoleta", "Retiro", "San Nicolás", "Monserrat", "Constitución", "Puerto Madero", "Mataderos", "Villa Lugano"]
+    },
+    {
+      "id": 3,
+      "name": "Catamarca",
+      "cities": ["San Fernando del Valle de Catamarca", "Andalgalá", "Tinogasta", "Belén", "Londres", "Fiambalá", "Antofagasta de la Sierra", "Capayán", "Pomán", "Valliderón", "El Rodeo", "Recreo", "Santa Rosa"]
+    },
+    {
+      "id": 4,
+      "name": "Chaco",
+      "cities": ["Resistencia", "Corrientes", "Barranqueras", "Fontana", "Puerto Tirol", "Sáenz Peña", "Quitilipi", "Charata", "Punta Negra", "Las Breñas", "Machagai", "Juan José Castelli", "Tres Isletas", "Avia Terai"]
+    },
+    {
+      "id": 5,
+      "name": "Chubut",
+      "cities": ["Rawson", "Comodoro Rivadavia", "Puerto Madryn", "Trelew", "Esquel", "Gaiman", "Dolavon", "El Maitén", "Gobernador Costa", "Sarmiento", "Gualjaina", "Pico Truncado", "Los Antiguos", "Perito Moreno"]
+    },
+    {
+      "id": 6,
+      "name": "Córdoba",
+      "cities": ["Córdoba", "Carlos Paz", "Cosquín", "Jesús María", "La Falda", "Saldan", "Unquillo", "La Cumbre", "Río Ceballos", "Santa Fe de la Vera Cruz", "Mina Clavero", "Villa Dolores", "Villa de Merlo", "Laboulaye", "Río Cuarto", "Bell Ville", "Marcos Juárez"]
+    },
+    {
+      "id": 7,
+      "name": "Corrientes",
+      "cities": ["Corrientes", "Oberá", "Paso de la Cruz", "Santo Tomé", "Esquina", "Goya", "Ituzaingó", "Saladas", "Mercedes", "Moconá", "Apóstoles", "Eldorado", "Puerto Rico", "Iguazú"]
+    },
+    {
+      "id": 8,
+      "name": "Entre Ríos",
+      "cities": ["Paraná", "Gualeguaychú", "Concordia", "Gualeguay", "Victoria", "Federal", "Villaguay", "San Benito", "Colón", "Concepción del Uruguay", "Feliciano", "Nogoyá", "La Paz", "Rosario del Tala"]
+    },
+    {
+      "id": 9,
+      "name": "Formosa",
+      "cities": ["Formosa", "Clorinda", "Corrientes", "El Soberbio", "Iguazú", "Paso de la Cruz", "Pirané", "Palo Santo", "Ingeniero Juárez", "Misión Laishi", "Laishi", "Fortín Belgrano"]
+    },
+    {
+      "id": 10,
+      "name": "Jujuy",
+      "cities": ["San Salvador de Jujuy", "Purmamarca", "Tilcara", "Humahuaca", "Maimará", "Paleta del Pintor", "La Esperanza", "Volcán", "Perico", "Monterrico", "Cochinoca", "Yala"]
+    },
+    {
+      "id": 11,
+      "name": "La Pampa",
+      "cities": ["Santa Rosa", "General Pico", "Toay", "Catriló", "Guatraché", "Anguil", "Macachín", "Quemú Quemú", "Realicó", "General Acha", "Bragado"]
+    },
+    {
+      "id": 12,
+      "name": "La Rioja",
+      "cities": ["La Rioja", "Chilecito", "Chepes", "Vinchina", "Arauco", "Castro Barros", "Chamical", "Aimogasta", "Tama", "Famatina"]
+    },
+    {
+      "id": 13,
+      "name": "Mendoza",
+      "cities": ["Mendoza", "Godoy Cruz", "Maipú", "Las Heras", "Guaymallén", "Luján de Cuyo", "San Rafael", "San Martín", "Tupungato", "Junín", "Rivadavia", "Lavalle", "Santa Rosa", "Tunuyán", "Malargüe"]
+    },
+    {
+      "id": 14,
+      "name": "Misiones",
+      "cities": ["Posadas", "Oberá", "Eldorado", "Puerto Iguazú", "Garupá", "Candelaria", "Apóstoles", "San Ignacio", "Aristóbulo del Valle", "Montecarlo", "Puerto Rico", "Moconá", "Wanda"]
+    },
+    {
+      "id": 15,
+      "name": "Neuquén",
+      "cities": ["Neuquén", "San Martín de los Andes", "Junín de los Andes", "Zapala", "Rincón de los Sauces", "Plaza Huincul", "Añelo", "Chos Malal", "Cutral Co", "Senillosa", "Andacollo"]
+    },
+    {
+      "id": 16,
+      "name": "Río Negro",
+      "cities": ["Viedma", "San Carlos de Bariloche", "General Roca", "Dina", "Cipolletti", "Catriel", "Lacar", "Los Menucos", "Choele Choel", "Pomona", "Valcheta", "Ingeniero Jacobacci"]
+    },
+    {
+      "id": 17,
+      "name": "Salta",
+      "cities": ["Salta", "San Salvador de Jujuy", "Tartagal", "Orán", "Rosario de Lerma", "Cafayate", "Cachi", "Purmamarca", "Tilcara", "Cochabamba", "El Aguilar", "Iruya", "La Caleta", "Palermitano"]
+    },
+    {
+      "id": 18,
+      "name": "San Juan",
+      "cities": ["San Juan", "Desamparados", "Chimbas", "Santa Lucía", "Godoy Cruz", "Rivadavia", "Caucete", "Pocito", "Rawson", "Angaco", "Calingasta", "Valle Fértil", "Iglesia"]
+    },
+    {
+      "id": 19,
+      "name": "San Luis",
+      "cities": ["San Luis", "Villa Mercedes", "Merlo", "Nogolí", "Carolina", "Quines", "Potrero de los Funes", "Gobernador Dupuy", "Chorrillo", "Cortaderas", "Anchorena", "El Morro"]
+    },
+    {
+      "id": 20,
+      "name": "Santa Cruz",
+      "cities": ["Río Gallegos", "Caleta Olivia", "Perito Moreno", "Los Antiguos", "El Chaltén", "El Calafate", "Dolavon", "Puerto San Julián", "Pico Truncado", "Tres Lagos", "Puerto Santa Cruz"]
+    },
+    {
+      "id": 21,
+      "name": "Santa Fe",
+      "cities": ["Santa Fe", "Rosario", "Rafaela", "Venado Tuerto", "Reconquista", "Esperanza", "Pergamino", "Arequito", "Cañada de Gómez", "San Nicolás de los Arroyos", "Santo Tomé", "Granadero Baigorria", "Funes", "Casilda"]
+    },
+    {
+      "id": 22,
+      "name": "Santiago del Estero",
+      "cities": ["Santiago del Estero", "Bandera", "La Banda", "Frías", "Loreto", "Quimilí", "Brea Pozo", "Selva", "Herrera", "Atamisqui", "Saliquello", "Choya"]
+    },
+    {
+      "id": 23,
+      "name": "Tierra del Fuego",
+      "cities": ["Ushuaia", "Río Grande", "Tolhuin", "Lago Fagnano", "Estancia Fernández", "Kilometer Cinco"]
+    },
+    {
+      "id": 24,
+      "name": "Tucumán",
+      "cities": ["San Miguel de Tucumán", "Yerba Buena", "Banda del Río Salí", "Tafí del Valle", "Tafí Viejo", "Concepción", "Lules", "Alderetes", "Famaillá", "Monteros", "Aguilares", "Graneros", "Amaicha del Valle", "Trancas", "Chicligasta"]
+    }
   ]
 }

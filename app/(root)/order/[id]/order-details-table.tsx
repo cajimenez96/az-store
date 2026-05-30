@@ -300,9 +300,14 @@ const OrderDetailsTable = ({
                             files={receiptUrl ? [receiptUrl] : []}
                             onChange={async (files) => {
                               if (files && files[0]) {
-                                const result = await updateOrderReceipt(id, files[0]);
+                                const result = await updateOrderReceipt(
+                                  id,
+                                  files[0]
+                                );
                                 toast({
-                                  variant: result.success ? 'default' : 'destructive',
+                                  variant: result.success
+                                    ? 'default'
+                                    : 'destructive',
                                   description: result.message,
                                 });
                               }
@@ -496,12 +501,12 @@ const OrderDetailsTable = ({
                       {formatCurrency(itemsPrice)}
                     </div>
                   </div>
-                  <div className='flex justify-between'>
+                  {/* <div className='flex justify-between'>
                     <div className='text-az-steel'>Impuestos</div>
                     <div className='font-medium text-az-ink-deep'>
                       {formatCurrency(taxPrice)}
                     </div>
-                  </div>
+                  </div> */}
                   <div className='flex justify-between'>
                     <div className='text-az-steel'>Envío</div>
                     <div className='font-medium text-az-ink-deep'>

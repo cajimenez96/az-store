@@ -343,7 +343,7 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                             )}
                           >
                             {field.value
-                              ? provincias.provinces.find((prov) => prov === field.value)
+                              ? provincias.provinces.find((p) => p.name === field.value)?.name
                               : 'Seleccionar provincia...'}
                             <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                           </Button>
@@ -357,10 +357,11 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                             <CommandGroup>
                               {provincias.provinces.map((prov) => (
                                 <CommandItem
-                                  value={prov}
-                                  key={prov}
+                                  value={prov.name}
+                                  key={prov.id}
                                   onSelect={() => {
-                                    form.setValue('province', prov);
+                                    form.setValue('province', prov.name);
+                                    form.setValue('city', '');
                                     setOpenProvince(false);
                                   }}
                                   className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
@@ -368,10 +369,10 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
                                   <Check
                                     className={cn(
                                       'mr-2 h-4 w-4 text-az-primary',
-                                      prov === field.value ? 'opacity-100' : 'opacity-0'
+                                      prov.name === field.value ? 'opacity-100' : 'opacity-0'
                                     )}
                                   />
-                                  {prov}
+                                  {prov.name}
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -387,19 +388,73 @@ const ProfileForm = ({ address }: ProfileFormProps) => {
               <FormField
                 control={form.control}
                 name='city'
-                render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel className={labelClass}>Ciudad / Localidad</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='Ciudad / Localidad'
-                        className={inputClass}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const selectedProvince = provincias.provinces.find(
+                    (p) => p.name === form.getValues('province')
+                  );
+                  const cities = selectedProvince?.cities || [];
+                  const [openCity, setOpenCity] = useState(false);
+
+                  return (
+                    <FormItem className='w-full flex flex-col'>
+                      <FormLabel className={cn(labelClass, 'h-5 mt-1')}>
+                        Ciudad / Localidad
+                      </FormLabel>
+                      <Popover open={openCity} onOpenChange={setOpenCity}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant='outline'
+                              role='combobox'
+                              disabled={!form.getValues('province')}
+                              className={cn(
+                                'w-full justify-between bg-az-canvas border-az-hairline text-az-ink hover:bg-az-surface-soft',
+                                !field.value && 'text-az-stone'
+                              )}
+                            >
+                              {field.value
+                                ? field.value
+                                : form.getValues('province')
+                                  ? 'Seleccionar ciudad...'
+                                  : 'Selecciona provincia primero...'}
+                              <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft' align='start'>
+                          <Command className='bg-transparent'>
+                            <CommandInput placeholder='Buscar ciudad...' className='border-none outline-none ring-0' />
+                            <CommandList>
+                              <CommandEmpty>No se encontró la ciudad.</CommandEmpty>
+                              <CommandGroup>
+                                {cities.map((city) => (
+                                  <CommandItem
+                                    value={city}
+                                    key={city}
+                                    onSelect={() => {
+                                      form.setValue('city', city);
+                                      setOpenCity(false);
+                                    }}
+                                    className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4 text-az-primary',
+                                        city === field.value ? 'opacity-100' : 'opacity-0'
+                                      )}
+                                    />
+                                    {city}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <div className='col-span-1 md:col-span-2'>

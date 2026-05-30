@@ -8,17 +8,18 @@ import { prisma } from '@/db/prisma';
 import { cartItemSchema, insertCartSchema } from '../validators';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
+import { getShippingSettings } from './settings.actions';
+import { v4 as uuidv4 } from 'uuid';
 
 // Calculate cart prices
-const calcPrice = (items: CartItem[]) => {
-  const freeShippingThreshold = parseFloat(process.env.FREE_SHIPPING_THRESHOLD ?? '100');
-  const shippingFee = parseFloat(process.env.SHIPPING_PRICE ?? '10');
-  const taxRate = parseFloat(process.env.TAX_RATE ?? '0.15');
+// Note: shippingPrice is always 0 in cart. It's calculated in checkout based on shipping method (retiro/envío)
+const calcPrice = async (items: CartItem[]) => {
+  const taxRate = parseFloat(process.env.TAX_RATE ?? '0');
 
   const itemsPrice = round2(
       items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0)
     ),
-    shippingPrice = round2(itemsPrice > freeShippingThreshold ? 0 : shippingFee),
+    shippingPrice = 0, // Always 0 in cart, adjusted during checkout
     taxPrice = round2(taxRate * itemsPrice),
     totalPrice = round2(itemsPrice + taxPrice + shippingPrice);
 
@@ -33,9 +34,20 @@ const calcPrice = (items: CartItem[]) => {
 export async function addItemToCart(data: CartItem) {
   try {
     // Get cart session ID and user ID
-    const sessionCartId = (await cookies()).get('sessionCartId')?.value;
+    let sessionCartId = (await cookies()).get('sessionCartId')?.value;
     const session = await auth();
     let userId = session?.user?.id ? (session.user.id as string) : undefined;
+
+    // Generate new sessionCartId if missing (user cleared cookies)
+    if (!sessionCartId) {
+      sessionCartId = uuidv4();
+      (await cookies()).set('sessionCartId', sessionCartId, {
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+    }
 
     // Verify user exists to prevent foreign key errors with stale sessions
     if (userId) {
@@ -74,7 +86,7 @@ export async function addItemToCart(data: CartItem) {
         userId: userId,
         items: [item],
         sessionCartId: sessionCartId,
-        ...calcPrice([item]),
+        ...(await calcPrice([item])),
       });
 
       // Add to database
@@ -122,7 +134,7 @@ export async function addItemToCart(data: CartItem) {
         where: { id: cart.id },
         data: {
           items: cart.items as Prisma.CartUpdateitemsInput[],
-          ...calcPrice(cart.items as CartItem[]),
+          ...(await calcPrice(cart.items as CartItem[])),
           updatedAt: new Date(),
         },
       });
@@ -220,7 +232,7 @@ export async function removeItemFromCart(productId: string, size?: string) {
       where: { id: cart.id },
       data: {
         items: cart.items as Prisma.CartUpdateitemsInput[],
-        ...calcPrice(cart.items as CartItem[]),
+        ...(await calcPrice(cart.items as CartItem[])),
         updatedAt: new Date(),
       },
     });
@@ -296,7 +308,7 @@ export async function mergeCart(userId: string, sessionCartId: string) {
         where: { id: userCart.id },
         data: {
           items: userItems as Prisma.CartUpdateitemsInput[],
-          ...calcPrice(userItems),
+          ...(await calcPrice(userItems)),
           updatedAt: new Date(),
         },
       });

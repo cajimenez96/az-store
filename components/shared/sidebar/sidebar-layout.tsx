@@ -32,6 +32,7 @@ import { SidebarMenu } from './nav-menu';
 import { SidebarNavLink } from './nav-link';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-media-query';
+import Link from 'next/link';
 
 // Icon map using lucide-react icons
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -62,13 +63,13 @@ function SidebarLogo() {
   const { isCollapsed } = useSidebar();
 
   return (
-    <div className='flex items-center justify-center h-16 px-2'>
+    <Link href={'/'} className='flex items-center justify-center'>
       {isCollapsed ? (
         <Image
           src='/images/logo-m-negro.png'
           alt='AZ'
-          width={40}
-          height={40}
+          width={24}
+          height={25}
           className='object-contain'
         />
       ) : (
@@ -80,7 +81,7 @@ function SidebarLogo() {
           className='object-contain'
         />
       )}
-    </div>
+    </Link>
   );
 }
 
