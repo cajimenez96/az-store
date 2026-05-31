@@ -84,7 +84,6 @@ export function orderConfirmationTemplate(
   items: OrderItem[],
   itemsPrice: string,
   shippingPrice: string,
-  taxPrice: string,
   totalPrice: string,
   paymentMethod: 'MercadoPago' | 'TransferenciaBancaria',
   bankInfo?: {
@@ -152,8 +151,7 @@ export function orderConfirmationTemplate(
 
       <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Subtotal:</span><span>$${itemsPrice}</span></div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Envío:</span><span>$${shippingPrice}</span></div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><span>Impuestos:</span><span>$${taxPrice}</span></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><span>Envío:</span><span>$${shippingPrice}</span></div>
         <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 600;"><span>Total:</span><span>$${totalPrice}</span></div>
       </div>
 

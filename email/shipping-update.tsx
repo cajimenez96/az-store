@@ -38,7 +38,6 @@ ShippingUpdateEmail.PreviewProps = {
     },
     createdAt: new Date(),
     totalPrice: '100',
-    taxPrice: '10',
     shippingPrice: '10',
     itemsPrice: '80',
     orderitems: sampleData.products.map((x) => ({

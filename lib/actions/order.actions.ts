@@ -26,7 +26,15 @@ import { getMercadoPagoClient } from '../mercadopago';
 import { getBankSettings } from './settings.actions';
 
 // Create order and create the order items
-export async function createOrder({ shippingMethod }: { shippingMethod: 'retiro' | 'envio' }) {
+export async function createOrder({
+  shippingMethod,
+  promoCode: promoCodeInput,
+  appliedDiscount = 0,
+}: {
+  shippingMethod: 'retiro' | 'envio';
+  promoCode?: string;
+  appliedDiscount?: number;
+}) {
   try {
     const session = await auth();
     if (!session) throw new Error('Usuario no autenticado');
@@ -61,16 +69,91 @@ export async function createOrder({ shippingMethod }: { shippingMethod: 'retiro'
       };
     }
 
+    // Validate and apply promo code (security: validate on server side)
+    let promoCodeId: string | null = null;
+    let discountPrice = 0;
+
+    if (promoCodeInput) {
+      const normalizedCode = promoCodeInput.toUpperCase();
+      const promoCode = await prisma.promoCode.findUnique({
+        where: { code: normalizedCode },
+      });
+
+      if (!promoCode) {
+        return {
+          success: false,
+          message: 'Código promocional no válido',
+        };
+      }
+
+      if (!promoCode.isActive) {
+        return {
+          success: false,
+          message: 'Este código promocional no está activo',
+        };
+      }
+
+      const now = new Date();
+      if (promoCode.startsAt && now < promoCode.startsAt) {
+        return {
+          success: false,
+          message: 'Este código promocional aún no está disponible',
+        };
+      }
+
+      if (promoCode.endsAt && now > promoCode.endsAt) {
+        return {
+          success: false,
+          message: 'Este código promocional ha expirado',
+        };
+      }
+
+      // Check usage limit
+      if (promoCode.maxUsesPerUser) {
+        const usageCount = await prisma.promoCodeUsage.count({
+          where: {
+            promoCodeId: promoCode.id,
+            userId,
+          },
+        });
+
+        if (usageCount >= promoCode.maxUsesPerUser) {
+          return {
+            success: false,
+            message: `Ya has alcanzado el límite de usos para este código (${promoCode.maxUsesPerUser})`,
+          };
+        }
+      }
+
+      promoCodeId = promoCode.id;
+      discountPrice = Number(
+        Number(cart.itemsPrice) * (Number(promoCode.discountPercent) / 100)
+      );
+    }
+
+    // Calculate order prices
+    const itemsPrice = Number(cart.itemsPrice);
+    const itemsAfterDiscount = itemsPrice - discountPrice;
+    const totalPrice =
+      itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice);
+
     // Create order object
     const order = insertOrderSchema.parse({
       userId: user.id,
       shippingAddress: user.address,
       paymentMethod: user.paymentMethod,
-      itemsPrice: cart.itemsPrice,
+      itemsPrice: itemsPrice.toString(),
       shippingPrice: cart.shippingPrice,
       taxPrice: cart.taxPrice,
-      totalPrice: cart.totalPrice,
-    });
+      totalPrice: totalPrice.toString(),
+    }) as any;
+
+    // Add promo code information
+    if (promoCodeId) {
+      order.promoCodeId = promoCodeId;
+      order.promoCode = promoCodeInput!.toUpperCase();
+      order.discountPrice = discountPrice.toString();
+    }
 
     const expirationHours = process.env.ORDER_EXPIRATION_HOURS
       ? Number(process.env.ORDER_EXPIRATION_HOURS)
@@ -120,6 +203,17 @@ export async function createOrder({ shippingMethod }: { shippingMethod: 'retiro'
           }
         }
       }
+      // Register promo code usage
+      if (promoCodeId) {
+        await tx.promoCodeUsage.create({
+          data: {
+            promoCodeId,
+            userId,
+            orderId: insertedOrder.id,
+          },
+        });
+      }
+
       // Clear cart
       await tx.cart.update({
         where: { id: cart.id },
@@ -901,16 +995,6 @@ export async function createMercadoPagoOrder(orderId: string) {
       });
     }
 
-    if (Number(order.taxPrice) > 0) {
-      items.push({
-        id: 'tax',
-        title: 'Impuestos',
-        quantity: 1,
-        unit_price: Number(order.taxPrice),
-        currency_id: 'ARS',
-      });
-    }
-
     const response = await preference.create({
       body: {
         items,
@@ -987,8 +1071,8 @@ export async function createPosOrder(data: {
     const itemsPriceVal = items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
     const itemsPrice = round2(itemsPriceVal);
     const shippingPrice = 0;
-    const taxPrice = round2(0.15 * itemsPrice);
-    const totalPrice = round2(itemsPrice + taxPrice);
+    const taxPrice = 0;
+    const totalPrice = round2(itemsPrice);
 
     const commissionAmount =
       sellerData?.commissionRate && sellerData.commissionRate > 0

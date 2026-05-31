@@ -54,7 +54,6 @@ const OrderDetailsTable = ({
     shippingAddress,
     itemsPrice,
     shippingPrice,
-    taxPrice,
     totalPrice,
     paymentMethod,
     isDelivered,
@@ -63,6 +62,8 @@ const OrderDetailsTable = ({
     deliveredAt,
     receiptUrl,
     expiresAt,
+    promoCode,
+    discountPrice,
   } = order;
 
   const { toast } = useToast();
@@ -501,12 +502,14 @@ const OrderDetailsTable = ({
                       {formatCurrency(itemsPrice)}
                     </div>
                   </div>
-                  {/* <div className='flex justify-between'>
-                    <div className='text-az-steel'>Impuestos</div>
-                    <div className='font-medium text-az-ink-deep'>
-                      {formatCurrency(taxPrice)}
+                  {Number(discountPrice || 0) > 0 && (
+                    <div className='flex justify-between text-green-600'>
+                      <div className='text-green-700'>Descuento ({promoCode})</div>
+                      <div className='font-medium text-green-600'>
+                        -{formatCurrency(discountPrice || '0')}
+                      </div>
                     </div>
-                  </div> */}
+                  )}
                   <div className='flex justify-between'>
                     <div className='text-az-steel'>Envío</div>
                     <div className='font-medium text-az-ink-deep'>

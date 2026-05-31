@@ -49,7 +49,6 @@ export async function POST(request: Request) {
           data.items,
           data.itemsPrice,
           data.shippingPrice,
-          data.taxPrice,
           data.totalPrice,
           data.paymentMethod,
           data.bankInfo

@@ -169,11 +169,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
   // Totals calculations
   const totals = useMemo(() => {
     const subtotal = cart.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
-    const tax = subtotal * 0.15;
-    const total = subtotal + tax;
+    const total = subtotal;
     return {
       subtotal,
-      tax,
+      tax: 0,
       total,
     };
   }, [cart]);
@@ -538,10 +537,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     <div className='flex items-center border border-az-hairline-soft rounded-az-full bg-az-canvas overflow-hidden h-7'>
                       <button
                         type='button'
+                        data-testid="pos-item-dec"
                         onClick={() => handleUpdateQty(item.productId, item.size, -1)}
                         className='px-2 hover:bg-az-surface-soft text-az-charcoal h-full flex items-center justify-center border-r border-az-hairline-soft'
                       >
-                        data-testid="pos-item-dec"
                         <Minus className='h-3 w-3' />
                       </button>
                       <span className='px-3 az-caption-bold text-az-ink-deep min-w-[24px] text-center tabular-nums'>
@@ -769,10 +768,6 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <div className='flex justify-between az-body-sm text-az-charcoal'>
                 <span>Subtotal</span>
                 <span className='tabular-nums'>{formatCurrency(totals.subtotal)}</span>
-              </div>
-              <div className='flex justify-between az-caption text-az-stone'>
-                <span>Impuesto IVA (15%)</span>
-                <span className='tabular-nums'>{formatCurrency(totals.tax)}</span>
               </div>
               <div className='flex justify-between border-t border-az-hairline-soft pt-3'>
                 <span className='az-body-md-bold text-az-ink-deep'>Total a Cobrar</span>

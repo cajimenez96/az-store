@@ -15,7 +15,6 @@ interface OrderWithDetails {
   totalPrice: string | number;
   itemsPrice: string | number;
   shippingPrice: string | number;
-  taxPrice: string | number;
   paymentMethod: string;
   shippingAddress: ShippingAddress;
   shippingStatus: string | null;
@@ -69,7 +68,6 @@ export async function sendPurchaseReceipt({
         items,
         itemsPrice: String(order.itemsPrice),
         shippingPrice: String(order.shippingPrice),
-        taxPrice: String(order.taxPrice),
         totalPrice: String(order.totalPrice),
         paymentMethod: order.paymentMethod,
         bankInfo,
