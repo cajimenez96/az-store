@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { ShippingAddress } from '@/types';
 import { formatCurrency } from '@/lib/utils';
@@ -23,6 +23,13 @@ import { Cart } from '@/types';
 import { ShippingMethodProvider } from '@/hooks/use-shipping-method';
 import { PromoCodeInput } from '@/components/shared/promo-code-input';
 
+type ActiveBanner = {
+  id: string;
+  title: string;
+  discountPercent: number | null;
+  products: { id: string }[];
+} | null;
+
 interface PlaceOrderContentProps {
   cart: Cart;
   userAddress: ShippingAddress;
@@ -30,6 +37,7 @@ interface PlaceOrderContentProps {
   paymentMethod: string;
   freeShippingThreshold: number;
   PAYMENT_LABELS: Record<string, string>;
+  activeBanner?: ActiveBanner;
 }
 
 export default function PlaceOrderContent({
@@ -39,15 +47,25 @@ export default function PlaceOrderContent({
   paymentMethod,
   freeShippingThreshold,
   PAYMENT_LABELS,
+  activeBanner,
 }: PlaceOrderContentProps) {
   const [appliedPromoCode, setAppliedPromoCode] = useState<string>('');
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
+
+  const bannerDiscount = useMemo(() => {
+    if (!activeBanner?.discountPercent || !cart?.items) return 0;
+    const bannerProductIds = new Set(activeBanner.products.map((p) => p.id));
+    const bannerItemsTotal = cart.items
+      .filter((item) => bannerProductIds.has(item.productId))
+      .reduce((sum, item) => sum + Number(item.price) * item.qty, 0);
+    return (bannerItemsTotal * activeBanner.discountPercent) / 100;
+  }, [activeBanner, cart]);
 
   const itemsPrice = Number(cart.itemsPrice);
   const discountAmount = (itemsPrice * appliedDiscount) / 100;
   const shippingPrice = Number(cart.shippingPrice);
   const taxPrice = Number(cart.taxPrice);
-  const finalTotal = itemsPrice - discountAmount + shippingPrice + taxPrice;
+  const finalTotal = itemsPrice - discountAmount - bannerDiscount + shippingPrice + taxPrice;
 
   return (
     <ShippingMethodProvider>
@@ -243,6 +261,16 @@ export default function PlaceOrderContent({
                     </span>
                   </div>
                 )}
+                {bannerDiscount > 0 && (
+                  <div className='flex justify-between az-body-sm text-green-600'>
+                    <span>
+                      Descuento banner ({activeBanner?.discountPercent}%)
+                    </span>
+                    <span className='az-body-sm-bold tabular-nums'>
+                      -{formatCurrency(bannerDiscount)}
+                    </span>
+                  </div>
+                )}
                 <div className='border-t border-az-hairline-soft pt-3 flex justify-between'>
                   <span className='az-body-md-bold text-az-ink-deep'>
                     Total
@@ -268,7 +296,12 @@ export default function PlaceOrderContent({
                 />
               </div>
 
-              <PlaceOrderForm promoCode={appliedPromoCode} appliedDiscount={appliedDiscount} />
+              <PlaceOrderForm
+                promoCode={appliedPromoCode}
+                appliedDiscount={appliedDiscount}
+                bannerId={activeBanner?.id}
+                bannerDiscount={bannerDiscount > 0 ? bannerDiscount : undefined}
+              />
             </div>
           </div>
         </div>

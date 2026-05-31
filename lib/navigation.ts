@@ -13,7 +13,8 @@ export const ADMIN_NAV_LINKS: NavLink[] = [
   { title: 'Marcas', href: '/admin/brands' },
   { title: 'Inventario', href: '/admin/inventory' },
   { title: 'Pedidos', href: '/admin/orders' },
-  { title: 'Promociones', href: '/admin/promotions', visibility: 'admin-only' },
+  { title: 'Banners', href: '/admin/promotions/banners', visibility: 'admin-only' },
+  { title: 'Cupones', href: '/admin/promotions/discount-codes', visibility: 'admin-only' },
   { title: 'Usuarios', href: '/admin/users', visibility: 'admin-only' },
   { title: 'Settings', href: '/admin/settings', visibility: 'admin-only' },
 ];

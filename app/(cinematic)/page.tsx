@@ -3,7 +3,9 @@ import {
   getFeaturedProducts,
 } from '@/lib/actions/product.actions';
 import { getAllCategories } from '@/lib/actions/category.actions';
+import { getActivePromoBanners } from '@/lib/actions/promo-banner.actions';
 import ProductCarouselDark from '@/components/shared/product/product-carousel-dark';
+import PromoBannerCarousel from '@/components/shared/promo-banner-carousel';
 import ProductCardDark from '@/components/shared/product/product-card-dark';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -36,15 +38,23 @@ export const metadata: Metadata = {
 };
 
 export default async function Homepage() {
-  const latestProducts = await getLatestProducts();
-  const featuredProducts = await getFeaturedProducts();
-  const categoriesResult = await getAllCategories();
+  const [latestProducts, featuredProducts, categoriesResult, activePromoBanners] =
+    await Promise.all([
+      getLatestProducts(),
+      getFeaturedProducts(),
+      getAllCategories(),
+      getActivePromoBanners(),
+    ]);
   const categories = categoriesResult.data || [];
 
   return (
     <>
-      {/* Band 1: Hero full-bleed carousel */}
-      <ProductCarouselDark data={featuredProducts} />
+      {/* Band 1: Hero full-bleed carousel — promo banners take priority, fallback to products */}
+      {activePromoBanners.length > 0 ? (
+        <PromoBannerCarousel banners={activePromoBanners} />
+      ) : (
+        <ProductCarouselDark data={featuredProducts} />
+      )}
 
       {/* Band 2: Category grid (only render if categories exist) */}
       {categories.length > 0 && (

@@ -10,9 +10,11 @@ import { useShippingMethod } from '@/hooks/use-shipping-method';
 interface PlaceOrderFormProps {
   promoCode?: string;
   appliedDiscount?: number;
+  bannerId?: string;
+  bannerDiscount?: number;
 }
 
-const PlaceOrderForm = ({ promoCode, appliedDiscount }: PlaceOrderFormProps) => {
+const PlaceOrderForm = ({ promoCode, appliedDiscount, bannerId, bannerDiscount }: PlaceOrderFormProps) => {
   const router = useRouter();
   const { shippingMethod } = useShippingMethod();
 
@@ -25,10 +27,12 @@ const PlaceOrderForm = ({ promoCode, appliedDiscount }: PlaceOrderFormProps) => 
     setError(null);
 
     try {
-      const res = await createOrder({ 
-        shippingMethod, 
-        promoCode, 
-        appliedDiscount 
+      const res = await createOrder({
+        shippingMethod,
+        promoCode,
+        appliedDiscount,
+        bannerId,
+        bannerDiscount,
       });
 
       if (res.redirectTo) {

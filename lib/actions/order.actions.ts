@@ -30,10 +30,14 @@ export async function createOrder({
   shippingMethod,
   promoCode: promoCodeInput,
   appliedDiscount = 0,
+  bannerId,
+  bannerDiscount: clientBannerDiscount = 0,
 }: {
   shippingMethod: 'retiro' | 'envio';
   promoCode?: string;
   appliedDiscount?: number;
+  bannerId?: string;
+  bannerDiscount?: number;
 }) {
   try {
     const session = await auth();
@@ -131,9 +135,37 @@ export async function createOrder({
       );
     }
 
+    // Validate and calculate banner discount (server-side — only on banner products)
+    let verifiedBannerDiscount = 0;
+    let validBannerId: string | null = null;
+
+    if (bannerId) {
+      const now = new Date();
+      const banner = await prisma.promoBanner.findFirst({
+        where: {
+          id: bannerId,
+          isActive: true,
+          OR: [{ startsAt: null }, { startsAt: { lte: now } }],
+          AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }],
+        },
+        select: { id: true, discountPercent: true, products: { select: { id: true } } },
+      });
+
+      if (banner?.discountPercent && banner.products.length > 0) {
+        const bannerProductIds = new Set(banner.products.map((p) => p.id));
+        const bannerItemsTotal = (cart.items as CartItem[])
+          .filter((item) => bannerProductIds.has(item.productId))
+          .reduce((sum, item) => sum + Number(item.price) * item.qty, 0);
+        verifiedBannerDiscount = Number(
+          ((bannerItemsTotal * banner.discountPercent) / 100).toFixed(2)
+        );
+        validBannerId = banner.id;
+      }
+    }
+
     // Calculate order prices
     const itemsPrice = Number(cart.itemsPrice);
-    const itemsAfterDiscount = itemsPrice - discountPrice;
+    const itemsAfterDiscount = itemsPrice - discountPrice - verifiedBannerDiscount;
     const totalPrice =
       itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice);
 
@@ -152,6 +184,12 @@ export async function createOrder({
     if (promoCodeId) {
       order.promoCode = promoCodeInput!.toUpperCase();
       order.discountPrice = discountPrice.toString();
+    }
+
+    // Add banner discount information
+    if (validBannerId && verifiedBannerDiscount > 0) {
+      order.bannerId = validBannerId;
+      order.bannerDiscount = verifiedBannerDiscount.toString();
     }
 
     const expirationHours = process.env.ORDER_EXPIRATION_HOURS

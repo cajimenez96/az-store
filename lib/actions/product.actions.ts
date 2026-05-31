@@ -390,3 +390,75 @@ export async function getInventory({
     totalPages: Math.ceil(dataCount / limit),
   };
 }
+
+// Search products for the banner product picker in admin
+export async function searchProductsForPicker({
+  query,
+  categorySlug,
+  brandId,
+}: {
+  query?: string;
+  categorySlug?: string;
+  brandId?: string;
+}) {
+  const results = await prisma.product.findMany({
+    where: {
+      ...(query ? { name: { contains: query, mode: 'insensitive' } } : {}),
+      ...(categorySlug && categorySlug !== 'all' ? { category: { slug: categorySlug } } : {}),
+      ...(brandId && brandId !== 'all' ? { brandId } : {}),
+    },
+    select: {
+      id: true,
+      name: true,
+      images: true,
+      price: true,
+      category: { select: { name: true } },
+      brand: { select: { name: true } },
+    },
+    orderBy: { name: 'asc' },
+    take: 50,
+  });
+
+  // JSON round-trip strips Prisma Symbol properties (needed for RSC → Client serialization)
+  return JSON.parse(
+    JSON.stringify(
+      results.map((p) => ({
+        id: p.id,
+        name: p.name,
+        images: p.images,
+        price: p.price.toString(),
+        category: { name: p.category.name },
+        brand: { name: p.brand.name },
+      }))
+    )
+  ) as { id: string; name: string; images: string[]; price: string; category: { name: string }; brand: { name: string } }[];
+}
+
+// Get banner with its products for the search/catalog page
+export async function getProductsByBanner(bannerId: string) {
+  const now = new Date();
+  return prisma.promoBanner.findFirst({
+    where: {
+      id: bannerId,
+      isActive: true,
+      OR: [{ startsAt: null }, { startsAt: { lte: now } }],
+      AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }],
+    },
+    select: {
+      title: true,
+      discountPercent: true,
+      products: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          images: true,
+          price: true,
+          brand: { select: { name: true } },
+          category: { select: { name: true, slug: true } },
+          variants: { include: { size: true } },
+        },
+      },
+    },
+  });
+}

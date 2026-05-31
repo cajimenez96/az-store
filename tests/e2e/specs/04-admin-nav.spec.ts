@@ -4,7 +4,7 @@ test.describe('Admin Panel Navigation', () => {
   const adminPages = [
     '/admin/overview',
     '/admin/products',
-    '/admin/promotions',
+    '/admin/promotions/banners',
     '/admin/orders',
     '/admin/categories',
     '/admin/brands',

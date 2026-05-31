@@ -17,6 +17,7 @@ import {
   User,
   ShoppingCart,
   Lock,
+  Ticket,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -43,7 +44,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   '/admin/brands': Palette,
   '/admin/inventory': TrendingUp,
   '/admin/orders': ShoppingBag,
-  '/admin/promotions': Gift,
+  '/admin/promotions/banners': Gift,
+  '/admin/promotions/discount-codes': Ticket,
   '/admin/users': Users,
   '/admin/settings': Settings,
   '/user/profile': User,
