@@ -82,6 +82,12 @@ function createPrismaClient() {
             return cart.totalPrice.toString();
           },
         },
+        discountPrice: {
+          needs: { discountPrice: true },
+          compute(order) {
+            return order.discountPrice ? order.discountPrice.toString() : null;
+          },
+        },
       },
       orderItem: {
         price: {

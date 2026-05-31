@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { ShippingAddress } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
@@ -19,6 +21,7 @@ import CheckoutSteps from '@/components/shared/checkout-steps';
 import { MapPin, CreditCard, Package } from 'lucide-react';
 import { Cart } from '@/types';
 import { ShippingMethodProvider } from '@/hooks/use-shipping-method';
+import { PromoCodeInput } from '@/components/shared/promo-code-input';
 
 interface PlaceOrderContentProps {
   cart: Cart;
@@ -37,6 +40,15 @@ export default function PlaceOrderContent({
   freeShippingThreshold,
   PAYMENT_LABELS,
 }: PlaceOrderContentProps) {
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string>('');
+  const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
+
+  const itemsPrice = Number(cart.itemsPrice);
+  const discountAmount = (itemsPrice * appliedDiscount) / 100;
+  const shippingPrice = Number(cart.shippingPrice);
+  const taxPrice = Number(cart.taxPrice);
+  const finalTotal = itemsPrice - discountAmount + shippingPrice + taxPrice;
+
   return (
     <ShippingMethodProvider>
       <div className='w-full'>
@@ -223,17 +235,40 @@ export default function PlaceOrderContent({
                       : formatCurrency(cart.shippingPrice)}
                   </span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className='flex justify-between az-body-sm text-green-600'>
+                    <span>Descuento ({appliedDiscount}%)</span>
+                    <span className='az-body-sm-bold tabular-nums'>
+                      -{formatCurrency(discountAmount)}
+                    </span>
+                  </div>
+                )}
                 <div className='border-t border-az-hairline-soft pt-3 flex justify-between'>
                   <span className='az-body-md-bold text-az-ink-deep'>
                     Total
                   </span>
                   <span className='az-heading-sm text-az-ink-deep tabular-nums'>
-                    {formatCurrency(cart.totalPrice)}
+                    {formatCurrency(finalTotal)}
                   </span>
                 </div>
               </div>
 
-              <PlaceOrderForm />
+              <div className='border-t border-az-hairline-soft pt-4'>
+                <PromoCodeInput
+                  appliedCode={appliedPromoCode}
+                  appliedDiscount={appliedDiscount}
+                  onPromoApplied={(code, discount) => {
+                    setAppliedPromoCode(code);
+                    setAppliedDiscount(discount);
+                  }}
+                  onPromoRemoved={() => {
+                    setAppliedPromoCode('');
+                    setAppliedDiscount(0);
+                  }}
+                />
+              </div>
+
+              <PlaceOrderForm promoCode={appliedPromoCode} appliedDiscount={appliedDiscount} />
             </div>
           </div>
         </div>

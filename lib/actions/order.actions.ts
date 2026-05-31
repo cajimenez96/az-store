@@ -150,7 +150,6 @@ export async function createOrder({
 
     // Add promo code information
     if (promoCodeId) {
-      order.promoCodeId = promoCodeId;
       order.promoCode = promoCodeInput!.toUpperCase();
       order.discountPrice = discountPrice.toString();
     }

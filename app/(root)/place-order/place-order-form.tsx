@@ -1,44 +1,67 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Check, Loader } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Loader, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useFormStatus } from 'react-dom';
 import { createOrder } from '@/lib/actions/order.actions';
 import { useShippingMethod } from '@/hooks/use-shipping-method';
 
-const PlaceOrderForm = () => {
+interface PlaceOrderFormProps {
+  promoCode?: string;
+  appliedDiscount?: number;
+}
+
+const PlaceOrderForm = ({ promoCode, appliedDiscount }: PlaceOrderFormProps) => {
   const router = useRouter();
   const { shippingMethod } = useShippingMethod();
 
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setPending(true);
+    setError(null);
 
-    const res = await createOrder({ shippingMethod });
+    try {
+      const res = await createOrder({ 
+        shippingMethod, 
+        promoCode, 
+        appliedDiscount 
+      });
 
-    if (res.redirectTo) {
-      router.push(res.redirectTo);
+      if (res.redirectTo) {
+        router.push(res.redirectTo);
+      } else if (res.success === false) {
+        setError(res.message);
+      }
+    } catch (err) {
+      setError('Ocurrió un error al procesar tu pedido. Intenta de nuevo.');
+    } finally {
+      setPending(false);
     }
   };
 
-  const PlaceOrderButton = () => {
-    const { pending } = useFormStatus();
-    return (
-      <Button disabled={pending} className='w-full' variant='buyCta' size='lg' data-testid='place-order-submit'>
-        {pending ? (
-          <Loader className='w-4 h-4 animate-spin mr-2' />
-        ) : (
-          <Check className='w-4 h-4 mr-2' />
-        )}{' '}
-        Realizar Pedido
-      </Button>
-    );
-  };
-
   return (
-    <form onSubmit={handleSubmit} className='w-full'>
-      <PlaceOrderButton />
-    </form>
+    <div className='w-full space-y-4'>
+      {error && (
+        <div className='flex items-start gap-2 bg-red-50 p-3 rounded-az-lg border border-red-200'>
+          <AlertTriangle className='w-5 h-5 text-red-600 mt-0.5 flex-shrink-0' />
+          <p className='az-body-sm text-red-800'>{error}</p>
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className='w-full'>
+        <Button disabled={pending} className='w-full' variant='buyCta' size='lg' data-testid='place-order-submit'>
+          {pending ? (
+            <Loader className='w-4 h-4 animate-spin mr-2' />
+          ) : (
+            <Check className='w-4 h-4 mr-2' />
+          )}{' '}
+          Realizar Pedido
+        </Button>
+      </form>
+    </div>
   );
 };
 

@@ -40,6 +40,8 @@ export type Order = z.infer<typeof insertOrderSchema> & {
   paymentResult: PaymentResult;
   receiptUrl: string | null;
   expiresAt: Date | null;
+  promoCode?: string | null;
+  discountPrice?: string | null;
 };
 export type PaymentResult = z.infer<typeof paymentResultSchema>;
 export type Review = z.infer<typeof insertReviewSchema> & {

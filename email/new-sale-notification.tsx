@@ -39,6 +39,7 @@ NewSaleNotificationEmail.PreviewProps = {
     createdAt: new Date(),
     totalPrice: '100',
     shippingPrice: '10',
+    taxPrice: '0',
     itemsPrice: '80',
     orderitems: sampleData.products.map((x) => ({
       name: x.name,
