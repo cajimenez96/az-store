@@ -32,16 +32,16 @@ const emailHeader = () => `
   <body>
     <div class="container">
       <div class="header">
-        <img src="${BASE_URL}/images/logo-m-negro.png" width="40" height="40" alt="AZ Store" />
+        <img src="https://marderhombres.com.ar/images/logo-m-negro.png" width="40" height="40" alt="Marder Hombres" style="display:block; margin:0 auto;" />
       </div>
 `;
 
 const emailFooter = () => `
       <div class="footer">
-        <p style="margin: 0;">© 2026 AZ Store. Todos los derechos reservados.</p>
+        <p style="margin: 0;">© 2026 Marder Hombres. Todos los derechos reservados.</p>
         <p style="margin: 8px 0 0;">
-          <a href="${BASE_URL}" class="link">Visita nuestro sitio</a> •
-          <a href="${BASE_URL}/contact" class="link">Contacto</a>
+          <a href="https://marderhombres.com.ar" class="link">Visita nuestro sitio</a> •
+          <a href="mailto:ventas@marderhombres.com.ar" class="link">Contacto</a>
         </p>
       </div>
     </div>
@@ -295,7 +295,7 @@ export function shippingUpdateTemplate(
         <a href="${BASE_URL}/orders/${orderId}" class="button">Ver orden</a>
       </div>
 
-      <p>Si tienes preguntas sobre el envío, contactanos a <a href="mailto:support@azstore.com" class="link">support@azstore.com</a></p>
+      <p>Si tienes preguntas sobre el envío, contactanos a <a href="mailto:ventas@marderhombres.com.ar" class="link">ventas@marderhombres.com.ar</a></p>
     </div>
     ${emailFooter()}
   `;
