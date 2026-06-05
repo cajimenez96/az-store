@@ -34,7 +34,12 @@ const CredentialsSignInForm = () => {
       <input type='hidden' name='callbackUrl' value={callbackUrl} />
       <div className='space-y-6'>
         <div>
-          <Label htmlFor='email' className='az-body-sm-bold text-az-ink-deep mb-1.5 block'>Correo electrónico</Label>
+          <Label
+            htmlFor='email'
+            className='az-body-sm-bold text-az-ink-deep mb-1.5 block'
+          >
+            Correo electrónico
+          </Label>
           <Input
             id='email'
             name='email'
@@ -47,8 +52,16 @@ const CredentialsSignInForm = () => {
         </div>
         <div>
           <div className='flex items-center justify-between mb-1.5'>
-            <Label htmlFor='password' className='az-body-sm-bold text-az-ink-deep'>Contraseña</Label>
-            <Link href='/forgot-password' className='az-body-sm text-az-primary hover:text-az-primary-hover'>
+            <Label
+              htmlFor='password'
+              className='az-body-sm-bold text-az-ink-deep'
+            >
+              Contraseña
+            </Label>
+            <Link
+              href='/forgot-password'
+              className='az-body-sm text-az-primary hover:text-az-primary-hover'
+            >
               ¿Olvidaste?
             </Link>
           </div>
@@ -67,12 +80,18 @@ const CredentialsSignInForm = () => {
         </div>
 
         {data && !data.success && (
-          <div className='text-center text-destructive font-medium text-sm'>{data.message}</div>
+          <div className='text-center text-destructive font-medium text-sm'>
+            {data.message}
+          </div>
         )}
 
         <div className='az-body-sm text-center text-az-stone'>
           ¿No tenés una cuenta?{' '}
-          <Link href='/sign-up' target='_self' className='text-az-ink-deep underline hover:text-az-charcoal transition-colors font-medium'>
+          <Link
+            href='/sign-up'
+            target='_self'
+            className='text-az-ink-deep underline hover:text-az-charcoal transition-colors font-medium'
+          >
             Registrate
           </Link>
         </div>
