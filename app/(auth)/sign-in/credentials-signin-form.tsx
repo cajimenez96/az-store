@@ -46,7 +46,7 @@ const CredentialsSignInForm = () => {
             type='email'
             required
             autoComplete='off'
-
+            placeholder='tu@email.com'
             className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>
@@ -71,7 +71,7 @@ const CredentialsSignInForm = () => {
             type='password'
             required
             autoComplete='new-password'
-
+            placeholder='************'
             className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>

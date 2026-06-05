@@ -6,8 +6,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getOrderSummary, getAbandonedCartMetrics } from '@/lib/actions/order.actions';
-import { getSellerCommissionSummary, getMyCommissionRate } from '@/lib/actions/user.actions';
+import {
+  getOrderSummary,
+  getAbandonedCartMetrics,
+} from '@/lib/actions/order.actions';
+import {
+  getSellerCommissionSummary,
+  getMyCommissionRate,
+} from '@/lib/actions/user.actions';
 import { formatCurrency, formatDateTime, formatNumber, cn } from '@/lib/utils';
 import {
   BadgeDollarSign,
@@ -31,8 +37,6 @@ import CommissionEditor from './commission-editor';
 import { Button } from '@/components/ui/button';
 
 const Charts = dynamic(() => import('./charts'), { ssr: true });
-
-
 
 export const metadata: Metadata = {
   title: 'Panel de Control',
@@ -75,17 +79,25 @@ function MetricCard({
   return (
     <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 flex flex-col gap-3'>
       <div className='flex items-center justify-between'>
-        <p className='az-caption-bold text-az-steel uppercase tracking-wider'>{label}</p>
-        <div className={cn('w-8 h-8 rounded-az-lg bg-az-surface-soft flex items-center justify-center', colors.icon)}>
+        <p className='az-caption-bold text-az-steel uppercase tracking-wider'>
+          {label}
+        </p>
+        <div
+          className={cn(
+            'w-8 h-8 rounded-az-lg bg-az-surface-soft flex items-center justify-center',
+            colors.icon
+          )}
+        >
           <Icon className='w-4 h-4' />
         </div>
       </div>
-      <div className={cn('az-heading-sm tabular-nums', colors.value)}>{value}</div>
+      <div className={cn('az-heading-sm tabular-nums', colors.value)}>
+        {value}
+      </div>
       {sublabel && <p className='az-caption text-az-stone'>{sublabel}</p>}
     </div>
   );
 }
-
 
 const AdminOverviewPage = async () => {
   const session = await requireAdminOrSeller();
@@ -109,7 +121,9 @@ const AdminOverviewPage = async () => {
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
         <MetricCard
           label='Ingresos Totales'
-          value={formatCurrency(summary.totalSales._sum.totalPrice?.toString() || 0)}
+          value={formatCurrency(
+            summary.totalSales._sum.totalPrice?.toString() || 0
+          )}
           icon={BadgeDollarSign}
         />
         <MetricCard
@@ -150,7 +164,7 @@ const AdminOverviewPage = async () => {
           value={formatNumber(summary.criticalStockCount)}
           icon={AlertTriangle}
           accent='critical'
-          sublabel='Talles con 2 o menos unidades'
+          sublabel={`Talles con ${summary.criticalStockThreshold} o menos unidades`}
         />
       </div>
 
@@ -183,18 +197,32 @@ const AdminOverviewPage = async () => {
       {/* Commission section */}
       {isAdmin && commissionSummary !== null && (
         <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5'>
-          <p className='az-body-md-bold text-az-ink-deep mb-4'>Comisiones de Vendedores</p>
+          <p className='az-body-md-bold text-az-ink-deep mb-4'>
+            Comisiones de Vendedores
+          </p>
           {commissionSummary.length === 0 ? (
-            <p className='az-body-sm text-az-stone py-4 text-center'>No hay vendedores registrados.</p>
+            <p className='az-body-sm text-az-stone py-4 text-center'>
+              No hay vendedores registrados.
+            </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Vendedor</TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Email</TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Comisión</TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Total vendido</TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Comisión ganada</TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                    Vendedor
+                  </TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                    Email
+                  </TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                    Comisión
+                  </TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                    Total vendido
+                  </TableHead>
+                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                    Comisión ganada
+                  </TableHead>
                   <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'></TableHead>
                 </TableRow>
               </TableHeader>
@@ -204,8 +232,12 @@ const AdminOverviewPage = async () => {
                     key={seller.id}
                     className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
                   >
-                    <TableCell className='az-body-sm-bold text-az-ink py-3'>{seller.name}</TableCell>
-                    <TableCell className='az-body-sm text-az-charcoal py-3'>{seller.email}</TableCell>
+                    <TableCell className='az-body-sm-bold text-az-ink py-3'>
+                      {seller.name}
+                    </TableCell>
+                    <TableCell className='az-body-sm text-az-charcoal py-3'>
+                      {seller.email}
+                    </TableCell>
                     <TableCell className='az-body-sm text-az-ink-deep py-3 text-right tabular-nums'>
                       {seller.commissionRate != null
                         ? `${Math.round(seller.commissionRate * 100)}%`
@@ -238,9 +270,13 @@ const AdminOverviewPage = async () => {
             <Percent className='w-4 h-4' />
           </div>
           <div>
-            <p className='az-caption-bold text-az-stone uppercase tracking-wider'>Tu comisión por ventas POS</p>
+            <p className='az-caption-bold text-az-stone uppercase tracking-wider'>
+              Tu comisión por ventas POS
+            </p>
             <p className='az-heading-sm text-az-ink-deep mt-0.5'>
-              {sellerOwnRate != null ? `${Math.round(sellerOwnRate * 100)}%` : 'Sin comisión asignada'}
+              {sellerOwnRate != null
+                ? `${Math.round(sellerOwnRate * 100)}%`
+                : 'Sin comisión asignada'}
             </p>
           </div>
         </div>
@@ -254,13 +290,21 @@ const AdminOverviewPage = async () => {
         </div>
 
         <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-3'>
-          <p className='az-body-md-bold text-az-ink-deep mb-4'>Ventas Recientes</p>
+          <p className='az-body-md-bold text-az-ink-deep mb-4'>
+            Ventas Recientes
+          </p>
           <Table>
             <TableHeader>
               <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Comprador</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Fecha</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Total</TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                  Comprador
+                </TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                  Fecha
+                </TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                  Total
+                </TableHead>
                 <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'></TableHead>
               </TableRow>
             </TableHeader>
@@ -281,7 +325,11 @@ const AdminOverviewPage = async () => {
                   </TableCell>
                   <TableCell className='py-3'>
                     <Link href={`/order/${order.id}`}>
-                      <Button variant='outline' size='sm' className='h-7 az-caption-bold rounded-az-full border-az-hairline-soft text-az-ink hover:bg-az-ink-deep hover:text-white hover:border-az-ink-deep transition-colors'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        className='h-7 az-caption-bold rounded-az-full border-az-hairline-soft text-az-ink hover:bg-az-ink-deep hover:text-white hover:border-az-ink-deep transition-colors'
+                      >
                         Ver
                       </Button>
                     </Link>
@@ -305,18 +353,27 @@ const AdminOverviewPage = async () => {
         </div>
 
         <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-4'>
-          <p className='az-body-md-bold text-az-ink-deep mb-4'>Ingresos por Método de Pago</p>
+          <p className='az-body-md-bold text-az-ink-deep mb-4'>
+            Ingresos por Método de Pago
+          </p>
           <Table>
             <TableHeader>
               <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>Método de Pago</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>Ingresos</TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                  Método de Pago
+                </TableHead>
+                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                  Ingresos
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {summary.salesByMethod.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={2} className='text-center az-body-sm text-az-stone py-8'>
+                  <TableCell
+                    colSpan={2}
+                    className='text-center az-body-sm text-az-stone py-8'
+                  >
                     No hay datos de ingresos
                   </TableCell>
                 </TableRow>
@@ -326,8 +383,8 @@ const AdminOverviewPage = async () => {
                     item.paymentMethod === 'TransferenciaBancaria'
                       ? 'Transferencia Bancaria'
                       : item.paymentMethod === 'MercadoPago'
-                      ? 'Mercado Pago'
-                      : item.paymentMethod;
+                        ? 'Mercado Pago'
+                        : item.paymentMethod;
 
                   return (
                     <TableRow
