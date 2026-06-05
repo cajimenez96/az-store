@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { signInDefaultValues } from '@/lib/constants';
+
 import Link from 'next/link';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -46,7 +46,7 @@ const CredentialsSignInForm = () => {
             type='email'
             required
             autoComplete='email'
-            defaultValue={signInDefaultValues.email}
+
             className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>
@@ -71,7 +71,7 @@ const CredentialsSignInForm = () => {
             type='password'
             required
             autoComplete='password'
-            defaultValue={signInDefaultValues.password}
+
             className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
         </div>
