@@ -45,7 +45,7 @@ const CredentialsSignInForm = () => {
             name='email'
             type='email'
             required
-            autoComplete='email'
+            autoComplete='off'
 
             className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
@@ -70,7 +70,7 @@ const CredentialsSignInForm = () => {
             name='password'
             type='password'
             required
-            autoComplete='password'
+            autoComplete='new-password'
 
             className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0'
           />
