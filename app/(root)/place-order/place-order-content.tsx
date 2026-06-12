@@ -51,6 +51,7 @@ export default function PlaceOrderContent({
 }: PlaceOrderContentProps) {
   const [appliedPromoCode, setAppliedPromoCode] = useState<string>('');
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
+  const [appliedPaymentMethod, setAppliedPaymentMethod] = useState<string>('');
 
   const bannerDiscount = useMemo(() => {
     if (!activeBanner?.discountPercent || !cart?.items) return 0;
@@ -65,7 +66,8 @@ export default function PlaceOrderContent({
   const discountAmount = (itemsPrice * appliedDiscount) / 100;
   const shippingPrice = Number(cart.shippingPrice);
   const taxPrice = Number(cart.taxPrice);
-  const finalTotal = itemsPrice - discountAmount - bannerDiscount + shippingPrice + taxPrice;
+  const finalTotal =
+    itemsPrice - discountAmount - bannerDiscount + shippingPrice + taxPrice;
 
   return (
     <ShippingMethodProvider>
@@ -255,7 +257,13 @@ export default function PlaceOrderContent({
                 </div>
                 {discountAmount > 0 && (
                   <div className='flex justify-between az-body-sm text-green-600'>
-                    <span>Descuento ({appliedDiscount}%)</span>
+                    <span>
+                      Descuento ({appliedPromoCode}
+                      {appliedPaymentMethod
+                        ? ` — ${appliedDiscount}% con ${PAYMENT_LABELS[appliedPaymentMethod] || appliedPaymentMethod}`
+                        : ` — ${appliedDiscount}%`}
+                      )
+                    </span>
                     <span className='az-body-sm-bold tabular-nums'>
                       -{formatCurrency(discountAmount)}
                     </span>
@@ -285,20 +293,22 @@ export default function PlaceOrderContent({
                 <PromoCodeInput
                   appliedCode={appliedPromoCode}
                   appliedDiscount={appliedDiscount}
-                  onPromoApplied={(code, discount) => {
+                  appliedPaymentMethod={appliedPaymentMethod}
+                  onPromoApplied={(code, discount, appliedMethod) => {
                     setAppliedPromoCode(code);
                     setAppliedDiscount(discount);
+                    setAppliedPaymentMethod(appliedMethod);
                   }}
                   onPromoRemoved={() => {
                     setAppliedPromoCode('');
                     setAppliedDiscount(0);
+                    setAppliedPaymentMethod('');
                   }}
                 />
               </div>
 
               <PlaceOrderForm
                 promoCode={appliedPromoCode}
-                appliedDiscount={appliedDiscount}
                 bannerId={activeBanner?.id}
                 bannerDiscount={bannerDiscount > 0 ? bannerDiscount : undefined}
               />

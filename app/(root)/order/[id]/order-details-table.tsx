@@ -16,7 +16,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle } from 'lucide-react';
-import { useTransition, useState } from 'react';
+import { useTransition } from 'react';
 import {
   updateOrderToPaidCOD,
   deliverOrder,
@@ -504,7 +504,15 @@ const OrderDetailsTable = ({
                   </div>
                   {Number(discountPrice || 0) > 0 && (
                     <div className='flex justify-between text-green-600'>
-                      <div className='text-green-700'>Descuento ({promoCode})</div>
+                      <div className='text-green-700'>
+                        Descuento ({promoCode}
+                        {paymentMethod === 'TransferenciaBancaria'
+                          ? ' con Transferencia'
+                          : paymentMethod === 'MercadoPago'
+                            ? ' con MercadoPago'
+                            : ''}
+                        )
+                      </div>
                       <div className='font-medium text-green-600'>
                         -{formatCurrency(discountPrice || '0')}
                       </div>

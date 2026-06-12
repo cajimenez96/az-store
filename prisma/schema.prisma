@@ -9,13 +9,13 @@ datasource db {
 }
 
 model Category {
-  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String
-  slug           String        @unique
-  createdAt      DateTime      @default(now()) @db.Timestamp(6)
-  subCategories  SubCategory[]
-  sizes          Size[]
-  products       Product[]
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  slug          String        @unique
+  createdAt     DateTime      @default(now()) @db.Timestamp(6)
+  subCategories SubCategory[]
+  sizes         Size[]
+  products      Product[]
 }
 
 model SubCategory {
@@ -45,29 +45,29 @@ model Brand {
 }
 
 model Product {
-  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name            String
-  slug            String           @unique(map: "product_slug_idx")
-  categoryId      String           @db.Uuid
-  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  subCategoryId   String?          @db.Uuid
-  subCategory     SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
-  images          String[]
-  brandId         String           @db.Uuid
-  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Restrict)
-  sellerId        String?          @db.Uuid
-  seller          User?            @relation(fields: [sellerId], references: [id], onDelete: SetNull)
-  description     String
-  price           Decimal          @default(0) @db.Decimal(12, 2)
-  rating          Decimal          @default(0) @db.Decimal(3, 2)
-  numReviews      Int              @default(0)
-  isFeatured      Boolean          @default(false)
-  banner          String?
-  createdAt       DateTime         @default(now()) @db.Timestamp(6)
-  OrderItem       OrderItem[]
-  Review          Review[]
-  variants        ProductVariant[]
-  promoBanners    PromoBanner[]
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  slug          String           @unique(map: "product_slug_idx")
+  categoryId    String           @db.Uuid
+  category      Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  subCategoryId String?          @db.Uuid
+  subCategory   SubCategory?     @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
+  images        String[]
+  brandId       String           @db.Uuid
+  brand         Brand            @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  sellerId      String?          @db.Uuid
+  seller        User?            @relation(fields: [sellerId], references: [id], onDelete: SetNull)
+  description   String
+  price         Decimal          @default(0) @db.Decimal(12, 2)
+  rating        Decimal          @default(0) @db.Decimal(3, 2)
+  numReviews    Int              @default(0)
+  isFeatured    Boolean          @default(false)
+  banner        String?
+  createdAt     DateTime         @default(now()) @db.Timestamp(6)
+  OrderItem     OrderItem[]
+  Review        Review[]
+  variants      ProductVariant[]
+  promoBanners  PromoBanner[]
 }
 
 model ProductVariant {
@@ -83,20 +83,20 @@ model ProductVariant {
 }
 
 model User {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String    @default("NO_NAME")
-  email          String    @unique(map: "user_email_idx")
-  emailVerified  DateTime? @db.Timestamp(6)
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String           @default("NO_NAME")
+  email          String           @unique(map: "user_email_idx")
+  emailVerified  DateTime?        @db.Timestamp(6)
   image          String?
   password       String?
-  role           String    @default("user")
-  address        Json?     @db.Json
+  role           String           @default("user")
+  address        Json?            @db.Json
   paymentMethod  String?
-  dni            String?   @unique(map: "user_dni_idx")
+  dni            String?          @unique(map: "user_dni_idx")
   phone          String?
   commissionRate Float?
-  createdAt      DateTime  @default(now()) @db.Timestamp(6)
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime         @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime         @updatedAt
   account        Account[]
   session        Session[]
   Cart           Cart[]
@@ -167,15 +167,14 @@ model Cart {
 }
 
 model CartRecovery {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cartId    String   @db.Uuid
-  email     String
-  token     String   @unique
-  sentAt    DateTime @default(now()) @db.Timestamp(6)
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cartId      String    @db.Uuid
+  email       String
+  token       String    @unique
+  sentAt      DateTime  @default(now()) @db.Timestamp(6)
   recoveredAt DateTime? @db.Timestamp(6)
-  createdAt DateTime @default(now()) @db.Timestamp(6)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
 }
-
 
 model PromoBanner {
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -237,7 +236,7 @@ model OrderItem {
   // the PK should now include size to differentiate same product with different sizes
   // wait, a better way is a surrogate ID or just use uuid. Let's keep a composite but add a unique index if needed.
   // Actually, OrderItem id can just be a UUID to simplify. Let's change the PK to a UUID.
-  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   @@unique([orderId, productId, size], map: "orderitems_order_product_size_idx")
 }
@@ -261,27 +260,27 @@ model Setting {
 }
 
 model PromoCode {
-  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code             String           @unique
-  description      String?
-  discountPercent  Decimal          @db.Decimal(5, 2)
-  isActive         Boolean          @default(true)
-  startsAt         DateTime?        @db.Timestamp(6)
-  endsAt           DateTime?        @db.Timestamp(6)
-  maxUsesPerUser   Int?
-  createdAt        DateTime         @default(now()) @db.Timestamp(6)
-  updatedAt        DateTime         @default(now()) @updatedAt
-  usageHistory     PromoCodeUsage[]
+  id                           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                         String           @unique
+  description                  String?
+  discountPercentMercadoPago   Decimal?         @db.Decimal(5, 2)
+  discountPercentTransferencia Decimal?         @db.Decimal(5, 2)
+  isActive                     Boolean          @default(true)
+  startsAt                     DateTime?        @db.Timestamp(6)
+  endsAt                       DateTime?        @db.Timestamp(6)
+  maxUsesPerUser               Int?
+  createdAt                    DateTime         @default(now()) @db.Timestamp(6)
+  updatedAt                    DateTime         @default(now()) @updatedAt
+  usageHistory                 PromoCodeUsage[]
 }
 
 model PromoCodeUsage {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  promoCodeId String    @db.Uuid
-  userId      String    @db.Uuid
-  orderId     String    @db.Uuid
-  usedAt      DateTime  @default(now()) @db.Timestamp(6)
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  promoCodeId String   @db.Uuid
+  userId      String   @db.Uuid
+  orderId     String   @db.Uuid
+  usedAt      DateTime @default(now()) @db.Timestamp(6)
 
-  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoCode PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-

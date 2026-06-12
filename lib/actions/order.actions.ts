@@ -29,13 +29,11 @@ import { getBankSettings } from './settings.actions';
 export async function createOrder({
   shippingMethod,
   promoCode: promoCodeInput,
-  appliedDiscount = 0,
   bannerId,
   bannerDiscount: clientBannerDiscount = 0,
 }: {
   shippingMethod: 'retiro' | 'envio';
   promoCode?: string;
-  appliedDiscount?: number;
   bannerId?: string;
   bannerDiscount?: number;
 }) {
@@ -130,8 +128,32 @@ export async function createOrder({
       }
 
       promoCodeId = promoCode.id;
+
+      // Pick the discount for the user's selected payment method. POS methods
+      // are blocked entirely; codes without a value for the chosen method are
+      // rejected with a clear message (the API route does the same check, but
+      // we re-validate here because the client cannot be trusted).
+      if (user.paymentMethod.startsWith('PuntoDeVenta')) {
+        return {
+          success: false,
+          message: 'Los cupones no aplican a pagos en punto de venta',
+        };
+      }
+
+      const appliedPercent =
+        user.paymentMethod === 'TransferenciaBancaria'
+          ? Number(promoCode.discountPercentTransferencia)
+          : Number(promoCode.discountPercentMercadoPago);
+
+      if (!appliedPercent || appliedPercent <= 0) {
+        return {
+          success: false,
+          message: 'Este cupón no aplica para el método de pago elegido',
+        };
+      }
+
       discountPrice = Number(
-        Number(cart.itemsPrice) * (Number(promoCode.discountPercent) / 100)
+        (Number(cart.itemsPrice) * (appliedPercent / 100)).toFixed(2)
       );
     }
 
@@ -148,7 +170,11 @@ export async function createOrder({
           OR: [{ startsAt: null }, { startsAt: { lte: now } }],
           AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }],
         },
-        select: { id: true, discountPercent: true, products: { select: { id: true } } },
+        select: {
+          id: true,
+          discountPercent: true,
+          products: { select: { id: true } },
+        },
       });
 
       if (banner?.discountPercent && banner.products.length > 0) {
@@ -165,7 +191,8 @@ export async function createOrder({
 
     // Calculate order prices
     const itemsPrice = Number(cart.itemsPrice);
-    const itemsAfterDiscount = itemsPrice - discountPrice - verifiedBannerDiscount;
+    const itemsAfterDiscount =
+      itemsPrice - discountPrice - verifiedBannerDiscount;
     const totalPrice =
       itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice);
 
@@ -229,7 +256,7 @@ export async function createOrder({
         if (user.paymentMethod === 'TransferenciaBancaria') {
           if (item.size) {
             const variant = await tx.productVariant.findFirst({
-              where: { productId: item.productId, size: { name: item.size } }
+              where: { productId: item.productId, size: { name: item.size } },
             });
             if (variant) {
               await tx.productVariant.update({
@@ -610,20 +637,23 @@ export async function getOrderSummary() {
   }));
 
   // Fetch global config for critical stock threshold
-  const criticalStockThresholdStr = await getSetting('CRITICAL_STOCK_THRESHOLD', '2');
+  const criticalStockThresholdStr = await getSetting(
+    'CRITICAL_STOCK_THRESHOLD',
+    '2'
+  );
   const criticalStockThreshold = parseInt(criticalStockThresholdStr, 10);
 
   // Calculate ERP metrics
   const criticalStockCount = await prisma.productVariant.count({
-    where: { stock: { lte: criticalStockThreshold } }
+    where: { stock: { lte: criticalStockThreshold } },
   });
 
   const pendingPaymentsCount = await prisma.order.count({
-    where: { isPaid: false }
+    where: { isPaid: false },
   });
 
   const pendingDeliveriesCount = await prisma.order.count({
-    where: { isPaid: true, isDelivered: false }
+    where: { isPaid: true, isDelivered: false },
   });
 
   return {
@@ -698,7 +728,7 @@ export async function getAllOrders({
       ...queryFilter,
       ...statusFilter,
       ...paymentMethodFilter,
-    }
+    },
   });
 
   return {
@@ -789,7 +819,11 @@ export async function deliverOrder(orderId: string) {
 }
 
 // Update shipping status
-export async function updateShippingStatus(orderId: string, status: string, notes?: string) {
+export async function updateShippingStatus(
+  orderId: string,
+  status: string,
+  notes?: string
+) {
   try {
     await requireAdminOrSeller();
 
@@ -851,7 +885,11 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
 
     if (!order) throw new Error('Orden no encontrada');
 
-    if (order.userId !== session.user.id && session.user.role !== 'admin' && session.user.role !== 'seller') {
+    if (
+      order.userId !== session.user.id &&
+      session.user.role !== 'admin' &&
+      session.user.role !== 'seller'
+    ) {
       throw new Error('No autorizado');
     }
 
@@ -953,7 +991,7 @@ export async function rejectBankTransfer(orderId: string) {
       for (const item of order.orderitems) {
         if (item.size) {
           const variant = await tx.productVariant.findFirst({
-            where: { productId: item.productId, size: { name: item.size } }
+            where: { productId: item.productId, size: { name: item.size } },
           });
           if (variant) {
             await tx.productVariant.update({
@@ -1012,7 +1050,7 @@ export async function createMercadoPagoOrder(orderId: string) {
 
     const mpClient = await getMercadoPagoClient();
     const preference = new Preference(mpClient);
-    
+
     // Prepare items for Mercado Pago
     const items = order.orderitems.map((item) => ({
       id: item.productId,
@@ -1101,11 +1139,17 @@ export async function createPosOrder(data: {
     // Capture seller identity and commission rate
     const sellerId = session?.user?.id ?? null;
     const sellerData = sellerId
-      ? await prisma.user.findUnique({ where: { id: sellerId }, select: { commissionRate: true } })
+      ? await prisma.user.findUnique({
+          where: { id: sellerId },
+          select: { commissionRate: true },
+        })
       : null;
 
     // 1. Calculate prices
-    const itemsPriceVal = items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
+    const itemsPriceVal = items.reduce(
+      (acc, item) => acc + Number(item.price) * item.qty,
+      0
+    );
     const itemsPrice = round2(itemsPriceVal);
     const shippingPrice = 0;
     const taxPrice = 0;
@@ -1120,24 +1164,38 @@ export async function createPosOrder(data: {
     let customerUser = null;
 
     if (customerId) {
-      customerUser = await prisma.user.findUnique({ where: { id: customerId } });
+      customerUser = await prisma.user.findUnique({
+        where: { id: customerId },
+      });
     }
 
     if (!customerUser && customerDni && customerDni.trim() !== '') {
-      customerUser = await prisma.user.findFirst({ where: { dni: customerDni.trim() } });
+      customerUser = await prisma.user.findFirst({
+        where: { dni: customerDni.trim() },
+      });
     }
 
     if (!customerUser && customerEmail && customerEmail.trim() !== '') {
-      customerUser = await prisma.user.findFirst({ where: { email: customerEmail.trim().toLowerCase() } });
+      customerUser = await prisma.user.findFirst({
+        where: { email: customerEmail.trim().toLowerCase() },
+      });
     }
 
     const defaultEmail = 'consumidorfinal@local.store';
-    const emailToUse = (customerEmail && customerEmail.trim() !== '') ? customerEmail.trim().toLowerCase() : defaultEmail;
-    const nameToUse = (customerName && customerName.trim() !== '') ? customerName.trim() : 'Consumidor Final';
+    const emailToUse =
+      customerEmail && customerEmail.trim() !== ''
+        ? customerEmail.trim().toLowerCase()
+        : defaultEmail;
+    const nameToUse =
+      customerName && customerName.trim() !== ''
+        ? customerName.trim()
+        : 'Consumidor Final';
 
     if (!customerUser) {
       // Look up default email user or create a new one
-      customerUser = await prisma.user.findFirst({ where: { email: emailToUse } });
+      customerUser = await prisma.user.findFirst({
+        where: { email: emailToUse },
+      });
       if (!customerUser) {
         customerUser = await prisma.user.create({
           data: {
@@ -1146,7 +1204,7 @@ export async function createPosOrder(data: {
             phone: customerPhone?.trim() || null,
             dni: customerDni?.trim() || null,
             role: 'user',
-          }
+          },
         });
       }
     }
@@ -1158,7 +1216,9 @@ export async function createPosOrder(data: {
     }
     if (!customerUser.dni && customerDni && customerDni.trim() !== '') {
       // Ensure DNI doesn't conflict
-      const existDni = await prisma.user.findUnique({ where: { dni: customerDni.trim() } });
+      const existDni = await prisma.user.findUnique({
+        where: { dni: customerDni.trim() },
+      });
       if (!existDni) {
         userUpdates.dni = customerDni.trim();
       }
@@ -1172,13 +1232,16 @@ export async function createPosOrder(data: {
 
     const shippingAddress = {
       fullName: customerUser.name,
-      streetAddress: (customerAddress && customerAddress.trim() !== '') ? customerAddress.trim() : 'Venta en Local',
+      streetAddress:
+        customerAddress && customerAddress.trim() !== ''
+          ? customerAddress.trim()
+          : 'Venta en Local',
       city: 'Tucumán',
       province: 'Tucumán',
       postalCode: '4000',
       country: 'Argentina',
       phone: customerUser.phone || customerPhone?.trim() || '00000000',
-      contactEmail: customerUser.email
+      contactEmail: customerUser.email,
     };
 
     // 3. Create the transaction
@@ -1199,8 +1262,9 @@ export async function createPosOrder(data: {
           deliveredAt: new Date(),
           shippingStatus: 'Entregado',
           sellerId: sellerId,
-          commissionAmount: commissionAmount !== null ? commissionAmount : undefined,
-        }
+          commissionAmount:
+            commissionAmount !== null ? commissionAmount : undefined,
+        },
       });
 
       // Create order items and decrement stocks
@@ -1215,7 +1279,7 @@ export async function createPosOrder(data: {
             qty: item.qty,
             price: item.price,
             size: item.size || null,
-          }
+          },
         });
 
         // Decrement stock
@@ -1224,18 +1288,20 @@ export async function createPosOrder(data: {
             where: {
               productId: item.productId,
               size: {
-                name: item.size
-              }
-            }
+                name: item.size,
+              },
+            },
           });
 
           if (!variant || variant.stock < item.qty) {
-            throw new Error(`Stock insuficiente para el producto ${item.name} (${item.size || 'M'})`);
+            throw new Error(
+              `Stock insuficiente para el producto ${item.name} (${item.size || 'M'})`
+            );
           }
 
           await tx.productVariant.update({
             where: { id: variant.id },
-            data: { stock: { decrement: item.qty } }
+            data: { stock: { decrement: item.qty } },
           });
         }
       }
@@ -1243,7 +1309,8 @@ export async function createPosOrder(data: {
       return insertedOrder.id;
     });
 
-    if (!insertedOrderId) throw new Error('No se pudo procesar la venta en local');
+    if (!insertedOrderId)
+      throw new Error('No se pudo procesar la venta en local');
 
     // Send sale notifications to sellers
     await Promise.all(

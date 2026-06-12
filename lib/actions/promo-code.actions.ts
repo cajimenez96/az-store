@@ -5,15 +5,84 @@ import { requireAdmin } from '@/lib/auth-guard';
 import { formatError } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { Decimal } from '@prisma/client/runtime/library';
+import type { PromoCode, PromoCodeUsage } from '@prisma/client';
 
 interface PromoCodeInput {
   code: string;
   description?: string;
-  discountPercent: number;
+  discountPercentMercadoPago?: number | null;
+  discountPercentTransferencia?: number | null;
   isActive: boolean;
   maxUsesPerUser?: number | null;
   startsAt?: Date;
   endsAt?: Date;
+}
+
+interface PromoCodeOutput {
+  id: string;
+  code: string;
+  description: string | null;
+  discountPercentMercadoPago: number | null;
+  discountPercentTransferencia: number | null;
+  isActive: boolean;
+  maxUsesPerUser: number | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  usageHistory?: { id: string; userId: string; usedAt: Date }[];
+}
+
+const MAX_DISCOUNT_PERCENT = 100;
+
+function validateDiscountFields(input: {
+  discountPercentMercadoPago?: number | null;
+  discountPercentTransferencia?: number | null;
+}): void {
+  const mp = input.discountPercentMercadoPago;
+  const tr = input.discountPercentTransferencia;
+
+  const isPositive = (v: number | null | undefined) =>
+    typeof v === 'number' && !Number.isNaN(v) && v > 0;
+  const isValidRange = (v: number | null | undefined) =>
+    v == null || (typeof v === 'number' && v > 0 && v <= MAX_DISCOUNT_PERCENT);
+
+  if (!isPositive(mp) && !isPositive(tr)) {
+    throw new Error(
+      'Debes definir al menos un descuento para algún método de pago'
+    );
+  }
+
+  if (!isValidRange(mp) || !isValidRange(tr)) {
+    throw new Error('El descuento debe ser entre 0 y 100');
+  }
+}
+
+type PromoCodeWithUsage = PromoCode & {
+  usageHistory?: Pick<PromoCodeUsage, 'id' | 'userId' | 'usedAt'>[];
+};
+
+function toOutput(code: PromoCodeWithUsage): PromoCodeOutput {
+  return {
+    id: code.id,
+    code: code.code,
+    description: code.description,
+    discountPercentMercadoPago:
+      code.discountPercentMercadoPago == null
+        ? null
+        : Number(code.discountPercentMercadoPago),
+    discountPercentTransferencia:
+      code.discountPercentTransferencia == null
+        ? null
+        : Number(code.discountPercentTransferencia),
+    isActive: code.isActive,
+    maxUsesPerUser: code.maxUsesPerUser,
+    startsAt: code.startsAt?.toISOString() ?? null,
+    endsAt: code.endsAt?.toISOString() ?? null,
+    createdAt: code.createdAt?.toISOString() ?? null,
+    updatedAt: code.updatedAt?.toISOString() ?? null,
+    usageHistory: code.usageHistory,
+  };
 }
 
 export async function getPromoCodes() {
@@ -29,19 +98,7 @@ export async function getPromoCodes() {
       orderBy: { createdAt: 'desc' },
     });
 
-    return promoCodes.map((code) => ({
-      id: code.id,
-      code: code.code,
-      description: code.description,
-      discountPercent: Number(code.discountPercent),
-      isActive: code.isActive,
-      maxUsesPerUser: code.maxUsesPerUser,
-      startsAt: code.startsAt?.toISOString() ?? null,
-      endsAt: code.endsAt?.toISOString() ?? null,
-      createdAt: code.createdAt?.toISOString() ?? null,
-      updatedAt: code.updatedAt?.toISOString() ?? null,
-      usageHistory: code.usageHistory,
-    }));
+    return promoCodes.map(toOutput);
   } catch (error) {
     throw new Error(formatError(error));
   }
@@ -57,18 +114,7 @@ export async function getPromoCodeById(id: string) {
 
     if (!promoCode) return null;
 
-    return {
-      id: promoCode.id,
-      code: promoCode.code,
-      description: promoCode.description,
-      discountPercent: Number(promoCode.discountPercent),
-      isActive: promoCode.isActive,
-      maxUsesPerUser: promoCode.maxUsesPerUser,
-      startsAt: promoCode.startsAt?.toISOString() ?? null,
-      endsAt: promoCode.endsAt?.toISOString() ?? null,
-      createdAt: promoCode.createdAt?.toISOString() ?? null,
-      updatedAt: promoCode.updatedAt?.toISOString() ?? null,
-    };
+    return toOutput(promoCode);
   } catch (error) {
     throw new Error(formatError(error));
   }
@@ -82,9 +128,7 @@ export async function createPromoCode(data: PromoCodeInput) {
       throw new Error('El código debe tener al menos 3 caracteres');
     }
 
-    if (data.discountPercent <= 0 || data.discountPercent > 100) {
-      throw new Error('El descuento debe ser entre 0 y 100');
-    }
+    validateDiscountFields(data);
 
     const existingCode = await prisma.promoCode.findUnique({
       where: { code: data.code.toUpperCase() },
@@ -98,7 +142,14 @@ export async function createPromoCode(data: PromoCodeInput) {
       data: {
         code: data.code.toUpperCase(),
         description: data.description,
-        discountPercent: new Decimal(data.discountPercent),
+        discountPercentMercadoPago:
+          data.discountPercentMercadoPago == null
+            ? null
+            : new Decimal(data.discountPercentMercadoPago),
+        discountPercentTransferencia:
+          data.discountPercentTransferencia == null
+            ? null
+            : new Decimal(data.discountPercentTransferencia),
         isActive: data.isActive,
         maxUsesPerUser: data.maxUsesPerUser,
         startsAt: data.startsAt,
@@ -110,18 +161,7 @@ export async function createPromoCode(data: PromoCodeInput) {
     return {
       success: true,
       message: 'Código promocional creado exitosamente',
-      data: {
-        id: promoCode.id,
-        code: promoCode.code,
-        description: promoCode.description,
-        discountPercent: Number(promoCode.discountPercent),
-        isActive: promoCode.isActive,
-        maxUsesPerUser: promoCode.maxUsesPerUser,
-        startsAt: promoCode.startsAt?.toISOString() ?? null,
-        endsAt: promoCode.endsAt?.toISOString() ?? null,
-        createdAt: promoCode.createdAt?.toISOString() ?? null,
-        updatedAt: promoCode.updatedAt?.toISOString() ?? null,
-      },
+      data: toOutput(promoCode),
     };
   } catch (error) {
     return {
@@ -131,17 +171,48 @@ export async function createPromoCode(data: PromoCodeInput) {
   }
 }
 
-export async function updatePromoCode(id: string, data: Partial<PromoCodeInput>) {
+export async function updatePromoCode(
+  id: string,
+  data: Partial<PromoCodeInput>
+) {
   try {
     await requireAdmin();
 
-    if (data.discountPercent !== undefined) {
-      if (data.discountPercent <= 0 || data.discountPercent > 100) {
-        throw new Error('El descuento debe ser entre 0 y 100');
-      }
+    // When the caller is touching discount fields, validate the final shape of
+    // the persisted row. We re-read the existing row to merge partial updates
+    // before applying the at-least-one-positive rule.
+    if (
+      data.discountPercentMercadoPago !== undefined ||
+      data.discountPercentTransferencia !== undefined
+    ) {
+      const existing = await prisma.promoCode.findUnique({ where: { id } });
+      if (!existing) throw new Error('Código promocional no encontrado');
+
+      validateDiscountFields({
+        discountPercentMercadoPago:
+          data.discountPercentMercadoPago === undefined
+            ? existing.discountPercentMercadoPago == null
+              ? null
+              : Number(existing.discountPercentMercadoPago)
+            : data.discountPercentMercadoPago,
+        discountPercentTransferencia:
+          data.discountPercentTransferencia === undefined
+            ? existing.discountPercentTransferencia == null
+              ? null
+              : Number(existing.discountPercentTransferencia)
+            : data.discountPercentTransferencia,
+      });
     }
 
-    const updateData: any = {
+    const updateData: {
+      description?: string;
+      isActive?: boolean;
+      maxUsesPerUser?: number | null;
+      startsAt?: Date;
+      endsAt?: Date;
+      discountPercentMercadoPago?: Decimal | null;
+      discountPercentTransferencia?: Decimal | null;
+    } = {
       description: data.description,
       isActive: data.isActive,
       maxUsesPerUser: data.maxUsesPerUser,
@@ -149,8 +220,17 @@ export async function updatePromoCode(id: string, data: Partial<PromoCodeInput>)
       endsAt: data.endsAt,
     };
 
-    if (data.discountPercent !== undefined) {
-      updateData.discountPercent = new Decimal(data.discountPercent);
+    if (data.discountPercentMercadoPago !== undefined) {
+      updateData.discountPercentMercadoPago =
+        data.discountPercentMercadoPago == null
+          ? null
+          : new Decimal(data.discountPercentMercadoPago);
+    }
+    if (data.discountPercentTransferencia !== undefined) {
+      updateData.discountPercentTransferencia =
+        data.discountPercentTransferencia == null
+          ? null
+          : new Decimal(data.discountPercentTransferencia);
     }
 
     const promoCode = await prisma.promoCode.update({
@@ -162,18 +242,7 @@ export async function updatePromoCode(id: string, data: Partial<PromoCodeInput>)
     return {
       success: true,
       message: 'Código promocional actualizado exitosamente',
-      data: {
-        id: promoCode.id,
-        code: promoCode.code,
-        description: promoCode.description,
-        discountPercent: Number(promoCode.discountPercent),
-        isActive: promoCode.isActive,
-        maxUsesPerUser: promoCode.maxUsesPerUser,
-        startsAt: promoCode.startsAt?.toISOString() ?? null,
-        endsAt: promoCode.endsAt?.toISOString() ?? null,
-        createdAt: promoCode.createdAt?.toISOString() ?? null,
-        updatedAt: promoCode.updatedAt?.toISOString() ?? null,
-      },
+      data: toOutput(promoCode),
     };
   } catch (error) {
     return {
@@ -222,79 +291,5 @@ export async function recordPromoCodeUsage(
   } catch (error) {
     console.error('Error recording promo code usage:', error);
     return { success: false };
-  }
-}
-
-export async function validatePromoCode(
-  code: string,
-  userId: string
-): Promise<{
-  valid: boolean;
-  promoCodeId?: string;
-  discountPercent?: number;
-  message: string;
-}> {
-  try {
-    const promoCode = await prisma.promoCode.findUnique({
-      where: { code: code.toUpperCase() },
-    });
-
-    if (!promoCode) {
-      return {
-        valid: false,
-        message: 'Código de promoción no válido',
-      };
-    }
-
-    if (!promoCode.isActive) {
-      return {
-        valid: false,
-        message: 'Este código de promoción no está activo',
-      };
-    }
-
-    const now = new Date();
-    if (promoCode.startsAt && now < promoCode.startsAt) {
-      return {
-        valid: false,
-        message: 'Este código aún no es válido',
-      };
-    }
-
-    if (promoCode.endsAt && now > promoCode.endsAt) {
-      return {
-        valid: false,
-        message: 'Este código ha expirado',
-      };
-    }
-
-    if (promoCode.maxUsesPerUser) {
-      const usageCount = await prisma.promoCodeUsage.count({
-        where: {
-          promoCodeId: promoCode.id,
-          userId,
-        },
-      });
-
-      if (usageCount >= promoCode.maxUsesPerUser) {
-        return {
-          valid: false,
-          message: `Ya has usado este código el máximo de veces permitidas (${promoCode.maxUsesPerUser})`,
-        };
-      }
-    }
-
-    return {
-      valid: true,
-      promoCodeId: promoCode.id,
-      discountPercent: Number(promoCode.discountPercent),
-      message: `¡Código válido! ${promoCode.discountPercent}% de descuento`,
-    };
-  } catch (error) {
-    console.error('Error validating promo code:', error);
-    return {
-      valid: false,
-      message: 'Error al validar el código',
-    };
   }
 }
