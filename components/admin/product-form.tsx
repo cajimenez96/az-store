@@ -266,7 +266,7 @@ const ProductForm = ({
                           <Input
                             placeholder='Ingresá el slug'
                             {...field}
-                            disabled={userRole === 'seller'}
+                            disabled
                           />
                           <Button
                             type='button'
