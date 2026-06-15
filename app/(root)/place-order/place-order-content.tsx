@@ -58,7 +58,7 @@ export default function PlaceOrderContent({
     const bannerProductIds = new Set(activeBanner.products.map((p) => p.id));
     const bannerItemsTotal = cart.items
       .filter((item) => bannerProductIds.has(item.productId))
-      .reduce((sum, item) => sum + Number(item.price) * item.qty, 0);
+      .reduce((sum, item) => sum + Number(item.priceUsed) * item.qty, 0);
     return (bannerItemsTotal * activeBanner.discountPercent) / 100;
   }, [activeBanner, cart]);
 
@@ -215,7 +215,7 @@ export default function PlaceOrderContent({
                           {item.qty}
                         </TableCell>
                         <TableCell className='py-3 text-right az-body-sm-bold text-az-ink-deep tabular-nums pr-0'>
-                          {formatCurrency(item.price)}
+                          {formatCurrency(item.priceUsed)}
                         </TableCell>
                       </TableRow>
                     ))}

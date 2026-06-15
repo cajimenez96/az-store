@@ -23,7 +23,8 @@ interface OrderWithDetails {
     name: string;
     size?: string | null;
     qty: number;
-    price: string | number;
+    // Fase 2: `priceUsed` reemplaza al viejo `price`.
+    priceUsed: string | number;
   }>;
 }
 
@@ -50,7 +51,7 @@ export async function sendPurchaseReceipt({
     name: item.name,
     size: item.size,
     qty: item.qty,
-    price: String(item.price),
+    price: String(item.priceUsed),
   }));
 
   try {

@@ -33,7 +33,11 @@ function QtyButton({
       const res =
         action === 'add'
           ? await addItemToCart(item)
-          : await removeItemFromCart(item.productId, item.size);
+          : await removeItemFromCart(
+              item.productId,
+              item.size,
+              item.productColorId
+            );
 
       if (!res.success) {
         toast({ variant: 'destructive', description: res.message });
@@ -99,7 +103,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
             <TableBody>
               {cart.items.map((item) => (
                 <TableRow
-                  key={`${item.slug}-${item.size || ''}`}
+                  key={`${item.slug}-${item.size || ''}-${item.productColorId || ''}`}
                   className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors duration-150'
                 >
                   <TableCell className='py-5 pl-6'>
@@ -120,9 +124,19 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                         <span className='az-body-md-bold text-az-ink-deep group-hover:underline transition duration-150'>
                           {item.name}
                         </span>
-                        {item.size && (
-                          <span className='az-caption text-az-steel'>Talle: {item.size}</span>
-                        )}
+                        <div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 az-caption text-az-steel'>
+                          {item.size && <span>Talle: {item.size}</span>}
+                          {item.colorName && (
+                            <span className='flex items-center gap-1.5'>
+                              <span
+                                className='inline-block w-3 h-3 rounded-full border border-az-hairline'
+                                style={{ backgroundColor: item.colorHex || '#cccccc' }}
+                                aria-hidden
+                              />
+                              {item.colorName}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </Link>
                   </TableCell>
@@ -136,7 +150,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                     </div>
                   </TableCell>
                   <TableCell className='py-5 text-right az-body-md-bold text-az-ink-deep pr-6 tabular-nums'>
-                    {formatCurrency(item.price)}
+                    {formatCurrency(item.priceUsed)}
                   </TableCell>
                 </TableRow>
               ))}

@@ -20,11 +20,6 @@ function createPrismaClient() {
   return client.$extends({
     result: {
       product: {
-        price: {
-          compute(product) {
-            return product.price.toString();
-          },
-        },
         rating: {
           compute(product) {
             return product.rating.toString();
@@ -89,10 +84,22 @@ function createPrismaClient() {
           },
         },
       },
+      // Fase 2: `priceUsed` (Decimal) -> string para mantener el contrato
+      // que ya usaba el frontend con `OrderItem.price`.
       orderItem: {
-        price: {
-          compute(cart) {
-            return cart.price.toString();
+        priceUsed: {
+          needs: { priceUsed: true },
+          compute(item) {
+            return item.priceUsed.toString();
+          },
+        },
+      },
+      // Fase 2: `Price.value` (Decimal) -> string para no romper `Product.prices`.
+      price: {
+        value: {
+          needs: { value: true },
+          compute(price) {
+            return price.value.toString();
           },
         },
       },

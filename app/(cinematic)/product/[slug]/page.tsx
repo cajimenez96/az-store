@@ -1,12 +1,12 @@
 import { getProductBySlug } from '@/lib/actions/product.actions';
 import { notFound } from 'next/navigation';
-import ProductImages from '@/components/shared/product/product-images';
 import { getMyCart } from '@/lib/actions/cart.actions';
-import ProductAction from '@/components/shared/product/product-action';
+import ProductGalleryAndActions from '@/components/shared/product/product-gallery-and-actions';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { prisma } from '@/db/prisma';
 import { SERVER_URL } from '@/lib/constants';
+import { extractDualPrice } from '@/lib/duo-pricing';
 
 // ISR: regenerate every 1 hour
 export const revalidate = 3600;
@@ -74,13 +74,10 @@ const ProductDetailsPage = async (props: {
   if (!product) notFound();
   const cart = await getMyCart();
 
-  const price = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-  }).format(Number(product.price));
-
-  const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+  const totalStock = (product.variants ?? []).reduce(
+    (sum, v) => sum + v.stock,
+    0
+  );
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -94,7 +91,8 @@ const ProductDetailsPage = async (props: {
     },
     offers: {
       '@type': 'Offer',
-      price: product.price.toString(),
+      // Fase 2: para SEO/Schema.org usamos el precio base (CASH) como referencia
+      price: extractDualPrice(product).priceCash,
       priceCurrency: 'ARS',
       availability:
         totalStock > 0
@@ -132,44 +130,17 @@ const ProductDetailsPage = async (props: {
         </nav>
 
         {/* Product grid: gallery + purchase rail */}
-        <div className='grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-12 items-start'>
-          {/* Gallery */}
-          <ProductImages images={product.images} />
+        <div className='space-y-12'>
+          <ProductGalleryAndActions product={product} cart={cart} />
 
-          {/* Purchase rail — sticky on desktop */}
-          <div className='lg:sticky lg:top-24'>
-            <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft shadow-az-sticky p-8'>
-              {/* Brand + category eyebrow */}
-              <p className='az-caption text-az-steel mb-3'>
-                {product.brand?.name}
-                {product.category?.name ? ` · ${product.category.name}` : ''}
-                {product.subCategory?.name ? ` · ${product.subCategory.name}` : ''}
-              </p>
-
-              {/* Product name */}
-              <h1 className='az-heading-sm text-az-ink-deep mb-6 leading-snug'>
-                {product.name}
-              </h1>
-
-              {/* Price */}
-              <div className='mb-6'>
-                <p className='az-caption text-az-stone mb-1'>Precio</p>
-                <p className='az-display-lg text-az-ink-deep'>{price}</p>
-              </div>
-
-              {/* Size selector + CTA */}
-              <ProductAction product={product} cart={cart} />
-
-              {/* Description */}
-              <div className='border-t border-az-hairline-soft mt-8 pt-6'>
-                <p className='az-caption-bold text-az-steel uppercase tracking-widest mb-3'>
-                  Descripción
-                </p>
-                <p className='az-body-sm text-az-charcoal leading-relaxed'>
-                  {product.description}
-                </p>
-              </div>
-            </div>
+          {/* Description (full width) */}
+          <div className='border-t border-az-hairline-soft pt-6'>
+            <p className='az-caption-bold text-az-steel uppercase tracking-widest mb-3'>
+              Descripción
+            </p>
+            <p className='az-body-sm text-az-charcoal leading-relaxed'>
+              {product.description}
+            </p>
           </div>
         </div>
       </div>

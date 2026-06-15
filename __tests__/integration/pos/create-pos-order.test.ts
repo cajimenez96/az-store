@@ -39,7 +39,8 @@ describe('3.2 · createPosOrder — integration', () => {
       slug: productSlug,
       qty,
       image: '/images/test.jpg',
-      price: '50.00',
+      priceUsed: '50.00',
+      paymentMethod: 'CASH',
       size,
     };
   }

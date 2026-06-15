@@ -48,7 +48,8 @@ PurchaseReceiptEmail.PreviewProps = {
       slug: x.slug,
       qty: x.stock,
       image: x.images[0],
-      price: x.price.toString(),
+      priceUsed: x.price.toString(),
+      paymentMethod: 'CASH' as const,
     })),
     isDelivered: true,
     deliveredAt: new Date(),
@@ -127,7 +128,7 @@ export default function PurchaseReceiptEmail({ order }: OrderInformationProps) {
                     {item.name} x {item.qty}
                   </Column>
                   <Column align='right' className='align-top'>
-                    {formatCurrency(item.price)}
+                    {formatCurrency(item.priceUsed)}
                   </Column>
                 </Row>
               ))}

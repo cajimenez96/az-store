@@ -97,7 +97,6 @@ export default async function globalSetup() {
         name: 'E2E Test Product',
         slug: 'e2e-test-product',
         description: 'Test product for E2E automation',
-        price: '99.99',
         images: ['https://via.placeholder.com/500x500?text=Test+Product'],
         categoryId: category.id,
         brandId: brand.id,
@@ -105,6 +104,17 @@ export default async function globalSetup() {
         rating: 0,
         numReviews: 0,
       },
+    });
+    // Fase 2: crear las dos filas de Price (CASH + MERCADOPAGO)
+    await prisma.price.upsert({
+      where: { productId_paymentMethod: { productId: product.id, paymentMethod: 'CASH' } },
+      update: { value: '99.99' },
+      create: { productId: product.id, paymentMethod: 'CASH', value: '99.99' },
+    });
+    await prisma.price.upsert({
+      where: { productId_paymentMethod: { productId: product.id, paymentMethod: 'MERCADOPAGO' } },
+      update: { value: '109.99' },
+      create: { productId: product.id, paymentMethod: 'MERCADOPAGO', value: '109.99' },
     });
     console.log('✓ Test product created');
 

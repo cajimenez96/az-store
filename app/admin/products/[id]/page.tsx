@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { requireAdminOrSeller } from '@/lib/auth-guard';
 import { getAllCategories } from '@/lib/actions/category.actions';
 import { getAllBrands } from '@/lib/actions/brand.actions';
+import { getMpSurchargePercent } from '@/lib/actions/price.actions';
 
 export const metadata: Metadata = {
   title: 'Actualizar Producto',
@@ -23,6 +24,7 @@ const AdminProductUpdatePage = async (props: {
   const product = await getProductById(id);
   const { data: categories } = await getAllCategories();
   const brands = await getAllBrands();
+  const mpSurchargePercent = await getMpSurchargePercent();
 
   if (!product) return notFound();
 
@@ -30,7 +32,15 @@ const AdminProductUpdatePage = async (props: {
     <div className='space-y-8 max-w-5xl mx-auto'>
       <h1 className='h2-bold'>Actualizar Producto</h1>
 
-      <ProductForm type='Update' product={product} productId={product.id} categories={categories || []} brands={brands || []} userRole={role} />
+      <ProductForm
+        type='Update'
+        product={product}
+        productId={product.id}
+        categories={categories || []}
+        brands={brands || []}
+        userRole={role}
+        mpSurchargePercent={mpSurchargePercent}
+      />
     </div>
   );
 };

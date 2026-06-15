@@ -1,8 +1,19 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import ProductPrice from './product-price';
+import DualPrice from './dual-price';
 
-const ProductCardDark = ({ product }: { product: { slug: string; images: string[]; name: string; brand?: string | { name: string } | null; price: string | number; variants?: { stock: number }[] } }) => {
+const ProductCardDark = ({
+  product,
+}: {
+  product: {
+    slug: string;
+    images: string[];
+    name: string;
+    brand?: string | { name: string } | null;
+    variants?: { stock: number }[];
+    prices?: { paymentMethod: string; value: string }[];
+  };
+}) => {
   const stock = (product.variants as { stock: number }[] | undefined)?.reduce((acc, v) => acc + v.stock, 0) ?? 0;
   const brandName = product.brand
     ? (typeof product.brand === 'string' ? product.brand : product.brand.name)
@@ -38,7 +49,7 @@ const ProductCardDark = ({ product }: { product: { slug: string; images: string[
             {product.name}
           </h3>
           {stock > 0 ? (
-            <ProductPrice value={Number(product.price)} className='az-body-md-bold text-az-ink-deep' />
+            <DualPrice product={product} className='az-body-md-bold text-az-ink-deep' />
           ) : (
             <span className='az-caption text-az-stone'>Sin stock</span>
           )}

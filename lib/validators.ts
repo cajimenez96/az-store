@@ -18,17 +18,41 @@ export const insertProductSchema = z.object({
   brandId: z.string().min(1, 'La marca es requerida'),
   description: z.string().min(3, 'La descripción debe tener al menos 3 caracteres'),
   variants: z.array(z.object({
-    sizeId: z.string(),
-    stock: z.coerce.number()
+    sizeId: z.string().nullable().optional(),
+    colorId: z.string().nullable().optional(),
+    stock: z.coerce.number(),
   })).optional(),
+  // Colores disponibles para este producto (con sus imágenes por color).
+  // colorId referencia a la tabla global `Color`.
+  colors: z.array(z.object({
+    colorId: z.string().min(1, 'Color requerido'),
+    images: z.array(z.string()).min(1, 'Cada color requiere al menos una imagen'),
+  })).optional(),
+  // Opt-in para variantes de color. Si es false, los colors[] se ignoran.
+  hasColorVariants: z.boolean().default(false),
   images: z.array(z.string()).min(1, 'El producto debe tener al menos una imagen'),
   isFeatured: z.boolean(),
   banner: z.string().nullable(),
-  price: currency,
+  // Fase 2: dual pricing. `priceCash` es el precio base
+  // (efectivo/transferencia). `priceMercadoPago` es el precio para MP,
+  // sugerido automáticamente como `priceCash * (1 + MP_SURCHARGE_PERCENT / 100)`
+  // pero siempre editable por el vendedor.
+  priceCash: currency,
+  priceMercadoPago: currency,
 });
 
 // Schema for updating products
 export const updateProductSchema = insertProductSchema.extend({
+  id: z.string().min(1, 'El ID es requerido'),
+});
+
+// Color Schemas
+export const insertColorSchema = z.object({
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Hex inválido (ej: #dc2626)'),
+});
+
+export const updateColorSchema = insertColorSchema.extend({
   id: z.string().min(1, 'El ID es requerido'),
 });
 
@@ -64,8 +88,14 @@ export const cartItemSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido'),
   qty: z.number().int().nonnegative('La cantidad debe ser un número positivo'),
   image: z.string().min(1, 'La imagen es requerida'),
-  price: currency,
+  // Fase 2: precio final + método de pago asociado (snapshoteo en cart)
+  priceUsed: currency,
+  paymentMethod: z.enum(['CASH', 'MERCADOPAGO']),
   size: z.string().optional(),
+  // Fase 1: color seleccionado (ProductColor.id en el form, o nombre+hex en el cart snapshot)
+  productColorId: z.string().optional(),
+  colorName: z.string().optional(),
+  colorHex: z.string().optional(),
 });
 
 export const insertCartSchema = z.object({
@@ -102,6 +132,13 @@ export const paymentMethodSchema = z
   .refine((data) => PAYMENT_METHODS.includes(data.type), {
     path: ['type'],
     message: 'Método de pago inválido',
+  })
+  .transform((data) => {
+    // Fase 2: mapping del método de pago de UI (MercadoPago, TransferenciaBancaria)
+    // al enum interno de dual pricing (MERCADOPAGO, CASH).
+    const internalMethod: 'CASH' | 'MERCADOPAGO' =
+      data.type === 'MercadoPago' ? 'MERCADOPAGO' : 'CASH';
+    return { type: data.type, internalMethod };
   });
 
 // Schema for inserting order
@@ -123,9 +160,15 @@ export const insertOrderItemSchema = z.object({
   slug: z.string(),
   image: z.string(),
   name: z.string(),
-  price: currency,
+  // Fase 2: precio final aplicado al item (según método de pago)
+  priceUsed: currency,
+  paymentMethod: z.enum(['CASH', 'MERCADOPAGO']),
   qty: z.number(),
   size: z.string().nullish().transform((v) => v ?? undefined),
+  // Fase 1: snapshot del color al momento de la compra
+  productColorId: z.string().nullish().transform((v) => v ?? undefined),
+  colorName: z.string().nullish().transform((v) => v ?? undefined),
+  colorHex: z.string().nullish().transform((v) => v ?? undefined),
 });
 
 // Schema for the PayPal paymentResult

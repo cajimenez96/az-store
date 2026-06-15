@@ -478,7 +478,7 @@ const OrderDetailsTable = ({
                           {item.qty}
                         </TableCell>
                         <TableCell className='text-right font-medium text-az-ink-deep'>
-                          ${item.price}
+                          ${item.priceUsed}
                         </TableCell>
                       </TableRow>
                     ))}

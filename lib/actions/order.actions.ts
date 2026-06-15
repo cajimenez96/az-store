@@ -24,6 +24,7 @@ import {
 import { Preference } from 'mercadopago';
 import { getMercadoPagoClient } from '../mercadopago';
 import { getBankSettings } from './settings.actions';
+import { deleteUTFiles } from '../uploadthing-helpers';
 
 // Create order and create the order items
 export async function createOrder({
@@ -181,7 +182,7 @@ export async function createOrder({
         const bannerProductIds = new Set(banner.products.map((p) => p.id));
         const bannerItemsTotal = (cart.items as CartItem[])
           .filter((item) => bannerProductIds.has(item.productId))
-          .reduce((sum, item) => sum + Number(item.price) * item.qty, 0);
+          .reduce((sum, item) => sum + Number(item.priceUsed) * item.qty, 0);
         verifiedBannerDiscount = Number(
           ((bannerItemsTotal * banner.discountPercent) / 100).toFixed(2)
         );
@@ -246,17 +247,31 @@ export async function createOrder({
       for (const item of cart.items as CartItem[]) {
         await tx.orderItem.create({
           data: {
-            ...item,
-            price: item.price,
+            productId: item.productId,
+            name: item.name,
+            slug: item.slug,
+            image: item.image,
+            qty: item.qty,
+            size: item.size ?? null,
+            // Fase 2: snapshoteo priceUsed + paymentMethod
+            priceUsed: item.priceUsed,
+            paymentMethod: item.paymentMethod,
+            productColorId: item.productColorId ?? null,
+            colorName: item.colorName ?? null,
+            colorHex: item.colorHex ?? null,
             orderId: insertedOrder.id,
           },
         });
 
         // Decrement stock immediately if Bank Transfer
         if (user.paymentMethod === 'TransferenciaBancaria') {
-          if (item.size) {
+          if (item.size || item.productColorId) {
             const variant = await tx.productVariant.findFirst({
-              where: { productId: item.productId, size: { name: item.size } },
+              where: {
+                productId: item.productId,
+                size: item.size ? { name: item.size } : undefined,
+                colorId: item.productColorId ?? null,
+              },
             });
             if (variant) {
               await tx.productVariant.update({
@@ -333,7 +348,7 @@ export async function createOrder({
                     sellerName: seller.name || 'Vendedor',
                     productName: item.name,
                     qty: item.qty,
-                    price: item.price.toString(),
+                    price: item.priceUsed,
                   });
                 }
               }
@@ -494,14 +509,18 @@ export async function updateOrderToPaid({
     // Iterate over products and update stock only if it wasn't decremented on creation
     if (order.paymentMethod !== 'TransferenciaBancaria') {
       for (const item of order.orderitems) {
-        if (item.size) {
+        if (item.size || item.productColorId) {
           const variant = await tx.productVariant.findFirst({
-            where: { productId: item.productId, size: { name: item.size } },
+            where: {
+              productId: item.productId,
+              size: item.size ? { name: item.size } : undefined,
+              colorId: item.productColorId ?? null,
+            },
           });
 
           if (!variant) {
             throw new Error(
-              `Variante no encontrada: producto ${item.productId}, talle ${item.size}`
+              `Variante no encontrada: producto ${item.productId}, talle ${item.size ?? '—'}, color ${item.colorName ?? '—'}`
             );
           }
 
@@ -516,7 +535,7 @@ export async function updateOrderToPaid({
 
           if (affected === 0) {
             throw new Error(
-              `Stock insuficiente para el talle ${item.size}. No se puede confirmar el pago.`
+              `Stock insuficiente para el talle ${item.size ?? '—'} / color ${item.colorName ?? '—'}. No se puede confirmar el pago.`
             );
           }
         }
@@ -546,6 +565,9 @@ export async function updateOrderToPaid({
 
   if (!updatedOrder) throw new Error('Orden no encontrada');
 
+  // Fase 2: el shape de `orderData` (que va a las funciones de email) ahora
+  // tiene `priceUsed` en `orderitems` (Decimal → string ya aplicado por el
+  // `client.$extends` de `db/prisma.ts`).
   const orderData = {
     ...updatedOrder,
     shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
@@ -553,10 +575,10 @@ export async function updateOrderToPaid({
   };
 
   sendPurchaseReceipt({
-    order: orderData,
+    order: orderData as any,
   });
   sendNewSaleNotification({
-    order: orderData,
+    order: orderData as any,
   });
 }
 
@@ -805,7 +827,7 @@ export async function deliverOrder(orderId: string) {
           ...updatedOrder,
           shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
           paymentResult: updatedOrder.paymentResult as PaymentResult,
-        },
+        } as any,
       });
     }
 
@@ -860,7 +882,7 @@ export async function updateShippingStatus(
           ...updatedOrder,
           shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
           paymentResult: updatedOrder.paymentResult as PaymentResult,
-        },
+        } as any,
       });
     }
 
@@ -897,6 +919,12 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
       where: { id: orderId },
       data: { receiptUrl },
     });
+
+    // Si el usuario reemplazó un comprobante anterior, liberamos el asset viejo
+    // en UploadThing para no acumular archivos huérfanos.
+    if (order.receiptUrl && order.receiptUrl !== receiptUrl) {
+      await deleteUTFiles([order.receiptUrl]);
+    }
 
     revalidatePath(`/order/${orderId}`);
 
@@ -986,12 +1014,20 @@ export async function rejectBankTransfer(orderId: string) {
       throw new Error('El método de pago no es transferencia bancaria');
     }
 
+    // Capturamos la URL del comprobante antes de nulificarla, para poder
+    // liberar el asset en UploadThing después de commit.
+    const previousReceiptUrl = order.receiptUrl;
+
     await prisma.$transaction(async (tx) => {
       // Restore product stock
       for (const item of order.orderitems) {
-        if (item.size) {
+        if (item.size || item.productColorId) {
           const variant = await tx.productVariant.findFirst({
-            where: { productId: item.productId, size: { name: item.size } },
+            where: {
+              productId: item.productId,
+              size: item.size ? { name: item.size } : undefined,
+              colorId: item.productColorId ?? null,
+            },
           });
           if (variant) {
             await tx.productVariant.update({
@@ -1011,6 +1047,11 @@ export async function rejectBankTransfer(orderId: string) {
         },
       });
     });
+
+    // Liberar el comprobante rechazado de UploadThing (si existía).
+    if (previousReceiptUrl) {
+      await deleteUTFiles([previousReceiptUrl]);
+    }
 
     revalidatePath(`/order/${orderId}`);
     revalidatePath('/admin/orders');
@@ -1056,7 +1097,7 @@ export async function createMercadoPagoOrder(orderId: string) {
       id: item.productId,
       title: item.name,
       quantity: item.qty,
-      unit_price: Number(item.price),
+      unit_price: Number(item.priceUsed),
       currency_id: 'ARS',
     }));
 
@@ -1147,7 +1188,7 @@ export async function createPosOrder(data: {
 
     // 1. Calculate prices
     const itemsPriceVal = items.reduce(
-      (acc, item) => acc + Number(item.price) * item.qty,
+      (acc, item) => acc + Number(item.priceUsed) * item.qty,
       0
     );
     const itemsPrice = round2(itemsPriceVal);
@@ -1277,25 +1318,29 @@ export async function createPosOrder(data: {
             slug: item.slug,
             image: item.image,
             qty: item.qty,
-            price: item.price,
+            // Fase 2: snapshoteo priceUsed + paymentMethod
+            priceUsed: item.priceUsed,
+            paymentMethod: item.paymentMethod,
             size: item.size || null,
+            productColorId: item.productColorId || null,
+            colorName: item.colorName || null,
+            colorHex: item.colorHex || null,
           },
         });
 
         // Decrement stock
-        if (item.size) {
+        if (item.size || item.productColorId) {
           const variant = await tx.productVariant.findFirst({
             where: {
               productId: item.productId,
-              size: {
-                name: item.size,
-              },
+              size: item.size ? { name: item.size } : undefined,
+              colorId: item.productColorId ?? null,
             },
           });
 
           if (!variant || variant.stock < item.qty) {
             throw new Error(
-              `Stock insuficiente para el producto ${item.name} (${item.size || 'M'})`
+              `Stock insuficiente para el producto ${item.name} (talle ${item.size || '—'} / color ${item.colorName || '—'})`
             );
           }
 
@@ -1332,7 +1377,7 @@ export async function createPosOrder(data: {
               sellerName: seller.name || 'Vendedor',
               productName: item.name,
               qty: item.qty,
-              price: item.price.toString(),
+              price: item.priceUsed,
             });
           }
         }

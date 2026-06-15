@@ -74,7 +74,9 @@ const AdminProductsPage = async (props: {
               <TableCell>{formatId(product.id)}</TableCell>
               <TableCell>{product.name}</TableCell>
               <TableCell className='text-right'>
-                {formatCurrency(product.price)}
+                {formatCurrency(
+                  product.prices?.find((p) => p.paymentMethod === 'CASH')?.value ?? '0',
+                )}
               </TableCell>
               <TableCell>{product.category?.name}</TableCell>
               <TableCell>{product.variants?.reduce((acc: number, v: { stock: number }) => acc + v.stock, 0) || 0}</TableCell>

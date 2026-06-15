@@ -45,7 +45,11 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
   // Handle remove from cart
   const handleRemoveFromCart = async () => {
     startTransition(async () => {
-      const res = await removeItemFromCart(item.productId, item.size);
+      const res = await removeItemFromCart(
+        item.productId,
+        item.size,
+        item.productColorId
+      );
 
       toast({
         variant: res.success ? 'default' : 'destructive',
@@ -59,7 +63,13 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
 
   // Check if item is in cart
   const existItem =
-    cart && cart.items.find((x) => x.productId === item.productId && x.size === item.size);
+    cart &&
+    cart.items.find(
+      (x) =>
+        x.productId === item.productId &&
+        x.size === item.size &&
+        x.productColorId === item.productColorId
+    );
 
   return existItem ? (
     <div className='flex items-center gap-2'>
