@@ -44,3 +44,4 @@ next-env.d.ts
 # Local Pi runtime state
 .atl/
 .pi
+logs/
