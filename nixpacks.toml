@@ -1,10 +1,6 @@
 # Nixpacks configuration for Coolify deployments.
-# Installs Bun (the package manager used by this repo) on top of the
-# default Ubuntu image, since the base Nixpacks node image ships without it.
-
-[phases.setup]
-nixPkgs = ["nodejs-22_x"]
-nixOverlays = ["https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz"]
+# The base Nixpacks node image already provides Node.js, so we only need
+# to install Bun (the project's package manager) before running install.
 
 [phases.install]
 cmds = ["curl -fsSL https://bun.sh/install | bash", "bun install --frozen-lockfile"]
