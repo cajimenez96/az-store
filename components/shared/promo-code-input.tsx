@@ -7,10 +7,15 @@ import { Check, X, Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PromoCodeInputProps {
-  onPromoApplied?: (code: string, discountPercent: number) => void;
+  onPromoApplied?: (
+    code: string,
+    discountPercent: number,
+    appliedPaymentMethod: 'MercadoPago' | 'TransferenciaBancaria'
+  ) => void;
   onPromoRemoved?: () => void;
   appliedCode?: string;
   appliedDiscount?: number;
+  appliedPaymentMethod?: string;
 }
 
 export function PromoCodeInput({
@@ -18,6 +23,7 @@ export function PromoCodeInput({
   onPromoRemoved,
   appliedCode,
   appliedDiscount,
+  appliedPaymentMethod,
 }: PromoCodeInputProps) {
   const [code, setCode] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -35,17 +41,23 @@ export function PromoCodeInput({
 
     startTransition(async () => {
       try {
-        const response = await fetch(`/api/validate-promo?code=${encodeURIComponent(code)}`);
+        const response = await fetch(
+          `/api/validate-promo?code=${encodeURIComponent(code)}`
+        );
         const data = await response.json();
 
         if (data.valid) {
           setSuccess(data.message);
           setCode('');
-          onPromoApplied?.(code.toUpperCase(), data.discountPercent);
+          onPromoApplied?.(
+            code.toUpperCase(),
+            data.discountPercent,
+            data.appliedPaymentMethod
+          );
         } else {
           setError(data.message);
         }
-      } catch (err) {
+      } catch {
         setError('Error al validar el código');
       }
     });
@@ -81,7 +93,12 @@ export function PromoCodeInput({
         </div>
         {appliedDiscount && (
           <div className='az-body-sm text-green-700'>
-            <p>Descuento: <strong>{appliedDiscount}%</strong></p>
+            <p>
+              Descuento:{' '}
+              <strong>
+                {appliedDiscount}% con {appliedPaymentMethod}
+              </strong>
+            </p>
           </div>
         )}
       </div>
@@ -90,7 +107,9 @@ export function PromoCodeInput({
 
   return (
     <div className='space-y-3'>
-      <label className='az-body-sm-bold text-az-ink-deep'>Código Promocional (opcional)</label>
+      <label className='az-body-sm-bold text-az-ink-deep'>
+        Código Promocional (opcional)
+      </label>
       <div className='flex gap-2'>
         <Input
           type='text'
@@ -101,7 +120,7 @@ export function PromoCodeInput({
             setError('');
             setSuccess('');
           }}
-          onKeyPress={(e) => {
+          onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleApplyCode();
             }

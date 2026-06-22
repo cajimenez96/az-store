@@ -24,18 +24,17 @@ import {
 import { Preference } from 'mercadopago';
 import { getMercadoPagoClient } from '../mercadopago';
 import { getBankSettings } from './settings.actions';
+import { deleteUTFiles } from '../uploadthing-helpers';
 
 // Create order and create the order items
 export async function createOrder({
   shippingMethod,
   promoCode: promoCodeInput,
-  appliedDiscount = 0,
   bannerId,
   bannerDiscount: clientBannerDiscount = 0,
 }: {
   shippingMethod: 'retiro' | 'envio';
   promoCode?: string;
-  appliedDiscount?: number;
   bannerId?: string;
   bannerDiscount?: number;
 }) {
@@ -130,8 +129,32 @@ export async function createOrder({
       }
 
       promoCodeId = promoCode.id;
+
+      // Pick the discount for the user's selected payment method. POS methods
+      // are blocked entirely; codes without a value for the chosen method are
+      // rejected with a clear message (the API route does the same check, but
+      // we re-validate here because the client cannot be trusted).
+      if (user.paymentMethod.startsWith('PuntoDeVenta')) {
+        return {
+          success: false,
+          message: 'Los cupones no aplican a pagos en punto de venta',
+        };
+      }
+
+      const appliedPercent =
+        user.paymentMethod === 'TransferenciaBancaria'
+          ? Number(promoCode.discountPercentTransferencia)
+          : Number(promoCode.discountPercentMercadoPago);
+
+      if (!appliedPercent || appliedPercent <= 0) {
+        return {
+          success: false,
+          message: 'Este cupón no aplica para el método de pago elegido',
+        };
+      }
+
       discountPrice = Number(
-        Number(cart.itemsPrice) * (Number(promoCode.discountPercent) / 100)
+        (Number(cart.itemsPrice) * (appliedPercent / 100)).toFixed(2)
       );
     }
 
@@ -148,14 +171,18 @@ export async function createOrder({
           OR: [{ startsAt: null }, { startsAt: { lte: now } }],
           AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }],
         },
-        select: { id: true, discountPercent: true, products: { select: { id: true } } },
+        select: {
+          id: true,
+          discountPercent: true,
+          products: { select: { id: true } },
+        },
       });
 
       if (banner?.discountPercent && banner.products.length > 0) {
         const bannerProductIds = new Set(banner.products.map((p) => p.id));
         const bannerItemsTotal = (cart.items as CartItem[])
           .filter((item) => bannerProductIds.has(item.productId))
-          .reduce((sum, item) => sum + Number(item.price) * item.qty, 0);
+          .reduce((sum, item) => sum + Number(item.priceUsed) * item.qty, 0);
         verifiedBannerDiscount = Number(
           ((bannerItemsTotal * banner.discountPercent) / 100).toFixed(2)
         );
@@ -165,7 +192,8 @@ export async function createOrder({
 
     // Calculate order prices
     const itemsPrice = Number(cart.itemsPrice);
-    const itemsAfterDiscount = itemsPrice - discountPrice - verifiedBannerDiscount;
+    const itemsAfterDiscount =
+      itemsPrice - discountPrice - verifiedBannerDiscount;
     const totalPrice =
       itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice);
 
@@ -219,17 +247,31 @@ export async function createOrder({
       for (const item of cart.items as CartItem[]) {
         await tx.orderItem.create({
           data: {
-            ...item,
-            price: item.price,
+            productId: item.productId,
+            name: item.name,
+            slug: item.slug,
+            image: item.image,
+            qty: item.qty,
+            size: item.size ?? null,
+            // Fase 2: snapshoteo priceUsed + paymentMethod
+            priceUsed: item.priceUsed,
+            paymentMethod: item.paymentMethod,
+            productColorId: item.productColorId ?? null,
+            colorName: item.colorName ?? null,
+            colorHex: item.colorHex ?? null,
             orderId: insertedOrder.id,
           },
         });
 
         // Decrement stock immediately if Bank Transfer
         if (user.paymentMethod === 'TransferenciaBancaria') {
-          if (item.size) {
+          if (item.size || item.productColorId) {
             const variant = await tx.productVariant.findFirst({
-              where: { productId: item.productId, size: { name: item.size } }
+              where: {
+                productId: item.productId,
+                size: item.size ? { name: item.size } : undefined,
+                colorId: item.productColorId ?? null,
+              },
             });
             if (variant) {
               await tx.productVariant.update({
@@ -306,7 +348,7 @@ export async function createOrder({
                     sellerName: seller.name || 'Vendedor',
                     productName: item.name,
                     qty: item.qty,
-                    price: item.price.toString(),
+                    price: item.priceUsed,
                   });
                 }
               }
@@ -467,14 +509,18 @@ export async function updateOrderToPaid({
     // Iterate over products and update stock only if it wasn't decremented on creation
     if (order.paymentMethod !== 'TransferenciaBancaria') {
       for (const item of order.orderitems) {
-        if (item.size) {
+        if (item.size || item.productColorId) {
           const variant = await tx.productVariant.findFirst({
-            where: { productId: item.productId, size: { name: item.size } },
+            where: {
+              productId: item.productId,
+              size: item.size ? { name: item.size } : undefined,
+              colorId: item.productColorId ?? null,
+            },
           });
 
           if (!variant) {
             throw new Error(
-              `Variante no encontrada: producto ${item.productId}, talle ${item.size}`
+              `Variante no encontrada: producto ${item.productId}, talle ${item.size ?? '—'}, color ${item.colorName ?? '—'}`
             );
           }
 
@@ -489,7 +535,7 @@ export async function updateOrderToPaid({
 
           if (affected === 0) {
             throw new Error(
-              `Stock insuficiente para el talle ${item.size}. No se puede confirmar el pago.`
+              `Stock insuficiente para el talle ${item.size ?? '—'} / color ${item.colorName ?? '—'}. No se puede confirmar el pago.`
             );
           }
         }
@@ -519,6 +565,9 @@ export async function updateOrderToPaid({
 
   if (!updatedOrder) throw new Error('Orden no encontrada');
 
+  // Fase 2: el shape de `orderData` (que va a las funciones de email) ahora
+  // tiene `priceUsed` en `orderitems` (Decimal → string ya aplicado por el
+  // `client.$extends` de `db/prisma.ts`).
   const orderData = {
     ...updatedOrder,
     shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
@@ -526,10 +575,10 @@ export async function updateOrderToPaid({
   };
 
   sendPurchaseReceipt({
-    order: orderData,
+    order: orderData as any,
   });
   sendNewSaleNotification({
-    order: orderData,
+    order: orderData as any,
   });
 }
 
@@ -610,20 +659,23 @@ export async function getOrderSummary() {
   }));
 
   // Fetch global config for critical stock threshold
-  const criticalStockThresholdStr = await getSetting('CRITICAL_STOCK_THRESHOLD', '2');
+  const criticalStockThresholdStr = await getSetting(
+    'CRITICAL_STOCK_THRESHOLD',
+    '2'
+  );
   const criticalStockThreshold = parseInt(criticalStockThresholdStr, 10);
 
   // Calculate ERP metrics
   const criticalStockCount = await prisma.productVariant.count({
-    where: { stock: { lte: criticalStockThreshold } }
+    where: { stock: { lte: criticalStockThreshold } },
   });
 
   const pendingPaymentsCount = await prisma.order.count({
-    where: { isPaid: false }
+    where: { isPaid: false },
   });
 
   const pendingDeliveriesCount = await prisma.order.count({
-    where: { isPaid: true, isDelivered: false }
+    where: { isPaid: true, isDelivered: false },
   });
 
   return {
@@ -698,7 +750,7 @@ export async function getAllOrders({
       ...queryFilter,
       ...statusFilter,
       ...paymentMethodFilter,
-    }
+    },
   });
 
   return {
@@ -775,7 +827,7 @@ export async function deliverOrder(orderId: string) {
           ...updatedOrder,
           shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
           paymentResult: updatedOrder.paymentResult as PaymentResult,
-        },
+        } as any,
       });
     }
 
@@ -789,7 +841,11 @@ export async function deliverOrder(orderId: string) {
 }
 
 // Update shipping status
-export async function updateShippingStatus(orderId: string, status: string, notes?: string) {
+export async function updateShippingStatus(
+  orderId: string,
+  status: string,
+  notes?: string
+) {
   try {
     await requireAdminOrSeller();
 
@@ -826,7 +882,7 @@ export async function updateShippingStatus(orderId: string, status: string, note
           ...updatedOrder,
           shippingAddress: updatedOrder.shippingAddress as ShippingAddress,
           paymentResult: updatedOrder.paymentResult as PaymentResult,
-        },
+        } as any,
       });
     }
 
@@ -851,7 +907,11 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
 
     if (!order) throw new Error('Orden no encontrada');
 
-    if (order.userId !== session.user.id && session.user.role !== 'admin' && session.user.role !== 'seller') {
+    if (
+      order.userId !== session.user.id &&
+      session.user.role !== 'admin' &&
+      session.user.role !== 'seller'
+    ) {
       throw new Error('No autorizado');
     }
 
@@ -859,6 +919,12 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
       where: { id: orderId },
       data: { receiptUrl },
     });
+
+    // Si el usuario reemplazó un comprobante anterior, liberamos el asset viejo
+    // en UploadThing para no acumular archivos huérfanos.
+    if (order.receiptUrl && order.receiptUrl !== receiptUrl) {
+      await deleteUTFiles([order.receiptUrl]);
+    }
 
     revalidatePath(`/order/${orderId}`);
 
@@ -948,12 +1014,20 @@ export async function rejectBankTransfer(orderId: string) {
       throw new Error('El método de pago no es transferencia bancaria');
     }
 
+    // Capturamos la URL del comprobante antes de nulificarla, para poder
+    // liberar el asset en UploadThing después de commit.
+    const previousReceiptUrl = order.receiptUrl;
+
     await prisma.$transaction(async (tx) => {
       // Restore product stock
       for (const item of order.orderitems) {
-        if (item.size) {
+        if (item.size || item.productColorId) {
           const variant = await tx.productVariant.findFirst({
-            where: { productId: item.productId, size: { name: item.size } }
+            where: {
+              productId: item.productId,
+              size: item.size ? { name: item.size } : undefined,
+              colorId: item.productColorId ?? null,
+            },
           });
           if (variant) {
             await tx.productVariant.update({
@@ -973,6 +1047,11 @@ export async function rejectBankTransfer(orderId: string) {
         },
       });
     });
+
+    // Liberar el comprobante rechazado de UploadThing (si existía).
+    if (previousReceiptUrl) {
+      await deleteUTFiles([previousReceiptUrl]);
+    }
 
     revalidatePath(`/order/${orderId}`);
     revalidatePath('/admin/orders');
@@ -1012,13 +1091,13 @@ export async function createMercadoPagoOrder(orderId: string) {
 
     const mpClient = await getMercadoPagoClient();
     const preference = new Preference(mpClient);
-    
+
     // Prepare items for Mercado Pago
     const items = order.orderitems.map((item) => ({
       id: item.productId,
       title: item.name,
       quantity: item.qty,
-      unit_price: Number(item.price),
+      unit_price: Number(item.priceUsed),
       currency_id: 'ARS',
     }));
 
@@ -1101,11 +1180,17 @@ export async function createPosOrder(data: {
     // Capture seller identity and commission rate
     const sellerId = session?.user?.id ?? null;
     const sellerData = sellerId
-      ? await prisma.user.findUnique({ where: { id: sellerId }, select: { commissionRate: true } })
+      ? await prisma.user.findUnique({
+          where: { id: sellerId },
+          select: { commissionRate: true },
+        })
       : null;
 
     // 1. Calculate prices
-    const itemsPriceVal = items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
+    const itemsPriceVal = items.reduce(
+      (acc, item) => acc + Number(item.priceUsed) * item.qty,
+      0
+    );
     const itemsPrice = round2(itemsPriceVal);
     const shippingPrice = 0;
     const taxPrice = 0;
@@ -1120,24 +1205,38 @@ export async function createPosOrder(data: {
     let customerUser = null;
 
     if (customerId) {
-      customerUser = await prisma.user.findUnique({ where: { id: customerId } });
+      customerUser = await prisma.user.findUnique({
+        where: { id: customerId },
+      });
     }
 
     if (!customerUser && customerDni && customerDni.trim() !== '') {
-      customerUser = await prisma.user.findFirst({ where: { dni: customerDni.trim() } });
+      customerUser = await prisma.user.findFirst({
+        where: { dni: customerDni.trim() },
+      });
     }
 
     if (!customerUser && customerEmail && customerEmail.trim() !== '') {
-      customerUser = await prisma.user.findFirst({ where: { email: customerEmail.trim().toLowerCase() } });
+      customerUser = await prisma.user.findFirst({
+        where: { email: customerEmail.trim().toLowerCase() },
+      });
     }
 
     const defaultEmail = 'consumidorfinal@local.store';
-    const emailToUse = (customerEmail && customerEmail.trim() !== '') ? customerEmail.trim().toLowerCase() : defaultEmail;
-    const nameToUse = (customerName && customerName.trim() !== '') ? customerName.trim() : 'Consumidor Final';
+    const emailToUse =
+      customerEmail && customerEmail.trim() !== ''
+        ? customerEmail.trim().toLowerCase()
+        : defaultEmail;
+    const nameToUse =
+      customerName && customerName.trim() !== ''
+        ? customerName.trim()
+        : 'Consumidor Final';
 
     if (!customerUser) {
       // Look up default email user or create a new one
-      customerUser = await prisma.user.findFirst({ where: { email: emailToUse } });
+      customerUser = await prisma.user.findFirst({
+        where: { email: emailToUse },
+      });
       if (!customerUser) {
         customerUser = await prisma.user.create({
           data: {
@@ -1146,7 +1245,7 @@ export async function createPosOrder(data: {
             phone: customerPhone?.trim() || null,
             dni: customerDni?.trim() || null,
             role: 'user',
-          }
+          },
         });
       }
     }
@@ -1158,7 +1257,9 @@ export async function createPosOrder(data: {
     }
     if (!customerUser.dni && customerDni && customerDni.trim() !== '') {
       // Ensure DNI doesn't conflict
-      const existDni = await prisma.user.findUnique({ where: { dni: customerDni.trim() } });
+      const existDni = await prisma.user.findUnique({
+        where: { dni: customerDni.trim() },
+      });
       if (!existDni) {
         userUpdates.dni = customerDni.trim();
       }
@@ -1172,13 +1273,16 @@ export async function createPosOrder(data: {
 
     const shippingAddress = {
       fullName: customerUser.name,
-      streetAddress: (customerAddress && customerAddress.trim() !== '') ? customerAddress.trim() : 'Venta en Local',
+      streetAddress:
+        customerAddress && customerAddress.trim() !== ''
+          ? customerAddress.trim()
+          : 'Venta en Local',
       city: 'Tucumán',
       province: 'Tucumán',
       postalCode: '4000',
       country: 'Argentina',
       phone: customerUser.phone || customerPhone?.trim() || '00000000',
-      contactEmail: customerUser.email
+      contactEmail: customerUser.email,
     };
 
     // 3. Create the transaction
@@ -1199,8 +1303,9 @@ export async function createPosOrder(data: {
           deliveredAt: new Date(),
           shippingStatus: 'Entregado',
           sellerId: sellerId,
-          commissionAmount: commissionAmount !== null ? commissionAmount : undefined,
-        }
+          commissionAmount:
+            commissionAmount !== null ? commissionAmount : undefined,
+        },
       });
 
       // Create order items and decrement stocks
@@ -1213,29 +1318,35 @@ export async function createPosOrder(data: {
             slug: item.slug,
             image: item.image,
             qty: item.qty,
-            price: item.price,
+            // Fase 2: snapshoteo priceUsed + paymentMethod
+            priceUsed: item.priceUsed,
+            paymentMethod: item.paymentMethod,
             size: item.size || null,
-          }
+            productColorId: item.productColorId || null,
+            colorName: item.colorName || null,
+            colorHex: item.colorHex || null,
+          },
         });
 
         // Decrement stock
-        if (item.size) {
+        if (item.size || item.productColorId) {
           const variant = await tx.productVariant.findFirst({
             where: {
               productId: item.productId,
-              size: {
-                name: item.size
-              }
-            }
+              size: item.size ? { name: item.size } : undefined,
+              colorId: item.productColorId ?? null,
+            },
           });
 
           if (!variant || variant.stock < item.qty) {
-            throw new Error(`Stock insuficiente para el producto ${item.name} (${item.size || 'M'})`);
+            throw new Error(
+              `Stock insuficiente para el producto ${item.name} (talle ${item.size || '—'} / color ${item.colorName || '—'})`
+            );
           }
 
           await tx.productVariant.update({
             where: { id: variant.id },
-            data: { stock: { decrement: item.qty } }
+            data: { stock: { decrement: item.qty } },
           });
         }
       }
@@ -1243,7 +1354,8 @@ export async function createPosOrder(data: {
       return insertedOrder.id;
     });
 
-    if (!insertedOrderId) throw new Error('No se pudo procesar la venta en local');
+    if (!insertedOrderId)
+      throw new Error('No se pudo procesar la venta en local');
 
     // Send sale notifications to sellers
     await Promise.all(
@@ -1265,7 +1377,7 @@ export async function createPosOrder(data: {
               sellerName: seller.name || 'Vendedor',
               productName: item.name,
               qty: item.qty,
-              price: item.price.toString(),
+              price: item.priceUsed,
             });
           }
         }

@@ -2,14 +2,55 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/db/prisma';
 import { auth } from '@/auth';
 
+type OnlinePaymentMethod = 'MercadoPago' | 'TransferenciaBancaria';
+
+const PAYMENT_METHOD_LABELS: Record<OnlinePaymentMethod, string> = {
+  MercadoPago: 'Mercado Pago',
+  TransferenciaBancaria: 'Transferencia Bancaria',
+};
+
+function resolveDiscountPercent(
+  promoCode: {
+    discountPercentMercadoPago: { toNumber(): number } | number | null;
+    discountPercentTransferencia: { toNumber(): number } | number | null;
+  },
+  paymentMethod: string
+): { percent: number | null; appliedMethod: OnlinePaymentMethod | null } {
+  const toNumber = (
+    v: { toNumber(): number } | number | null | undefined
+  ): number | null => {
+    if (v == null) return null;
+    if (typeof v === 'number') return v;
+    return v.toNumber();
+  };
+  if (paymentMethod === 'TransferenciaBancaria') {
+    return {
+      percent: toNumber(promoCode.discountPercentTransferencia),
+      appliedMethod: 'TransferenciaBancaria',
+    };
+  }
+
+  // Default to MercadoPago for any non-Transferencia method (POS won't get here
+  // because we reject POS upstream).
+  return {
+    percent: toNumber(promoCode.discountPercentMercadoPago),
+    appliedMethod: 'MercadoPago',
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code')?.toUpperCase();
+    const queryPaymentMethod = searchParams.get('paymentMethod');
 
     if (!code) {
       return NextResponse.json(
-        { valid: false, message: 'Código no proporcionado', discountPercent: 0 },
+        {
+          valid: false,
+          message: 'Código no proporcionado',
+          discountPercent: 0,
+        },
         { status: 400 }
       );
     }
@@ -42,7 +83,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check dates
     const now = new Date();
     if (promoCode.startsAt && promoCode.startsAt > now) {
       return NextResponse.json({
@@ -59,7 +99,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check usage limit
     if (promoCode.maxUsesPerUser) {
       const usageCount = await prisma.promoCodeUsage.count({
         where: {
@@ -77,11 +116,57 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Resolve the user's payment method. Prefer the query string (lets the
+    // client re-validate after switching the method) and fall back to the
+    // session's stored value.
+    let paymentMethod: string | null = queryPaymentMethod ?? null;
+
+    if (!paymentMethod) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { paymentMethod: true },
+      });
+      paymentMethod = dbUser?.paymentMethod ?? null;
+    }
+
+    if (paymentMethod && paymentMethod.startsWith('PuntoDeVenta')) {
+      return NextResponse.json({
+        valid: false,
+        message: 'Los cupones no aplican a pagos en punto de venta',
+        discountPercent: 0,
+      });
+    }
+
+    if (!paymentMethod) {
+      return NextResponse.json({
+        valid: false,
+        message: 'Seleccioná un método de pago antes de aplicar un cupón',
+        discountPercent: 0,
+      });
+    }
+
+    const { percent, appliedMethod } = resolveDiscountPercent(
+      promoCode,
+      paymentMethod
+    );
+
+    if (!percent || percent <= 0 || !appliedMethod) {
+      const label =
+        PAYMENT_METHOD_LABELS[paymentMethod as OnlinePaymentMethod] ??
+        paymentMethod;
+      return NextResponse.json({
+        valid: false,
+        message: `Este cupón no aplica para ${label}. Cambiá el método de pago para usarlo.`,
+        discountPercent: 0,
+      });
+    }
+
     return NextResponse.json({
       valid: true,
-      message: `¡Código válido! ${promoCode.discountPercent}% de descuento`,
-      discountPercent: Number(promoCode.discountPercent),
+      message: `¡Código válido! ${percent}% de descuento con ${PAYMENT_METHOD_LABELS[appliedMethod]}`,
+      discountPercent: percent,
       promoCodeId: promoCode.id,
+      appliedPaymentMethod: appliedMethod,
     });
   } catch (error) {
     console.error('Error validating promo code:', error);

@@ -178,11 +178,19 @@ const config: Config = {
   // testRunner: "jest-circus/runner",
 
   // A map from regular expressions to paths to transformers
-  // transform: undefined,
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        useESM: false,
+        tsconfig: { module: 'commonjs', target: 'es2019' },
+      },
+    ],
+  },
 
   // query-string v9+ and its deps are ESM-only — must be transformed by ts-jest
   transformIgnorePatterns: [
-    '/node_modules/(?!(query-string|decode-uri-component|filter-obj|split-on-first)/)',
+    '/node_modules/(?!(query-string|decode-uri-component|filter-obj|split-on-first|uuid)/)',
   ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them

@@ -11,6 +11,7 @@ export const ADMIN_NAV_LINKS: NavLink[] = [
   { title: 'Productos', href: '/admin/products' },
   { title: 'Categorías', href: '/admin/categories' },
   { title: 'Marcas', href: '/admin/brands' },
+  { title: 'Colores', href: '/admin/colors' },
   { title: 'Inventario', href: '/admin/inventory' },
   { title: 'Pedidos', href: '/admin/orders' },
   { title: 'Banners', href: '/admin/promotions/banners', visibility: 'admin-only' },

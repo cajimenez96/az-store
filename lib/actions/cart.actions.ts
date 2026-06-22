@@ -17,7 +17,7 @@ const calcPrice = async (items: CartItem[]) => {
   const taxRate = parseFloat(process.env.TAX_RATE ?? '0');
 
   const itemsPrice = round2(
-      items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0)
+      items.reduce((acc, item) => acc + Number(item.priceUsed) * item.qty, 0)
     ),
     shippingPrice = 0, // Always 0 in cart, adjusted during checkout
     taxPrice = round2(taxRate * itemsPrice),
@@ -66,14 +66,22 @@ export async function addItemToCart(data: CartItem) {
     // Find product in database
     const product = await prisma.product.findFirst({
       where: { id: item.productId },
-      include: { variants: { include: { size: true } } },
+      include: { variants: { include: { size: true, productColor: { include: { color: true } } } } },
     });
     if (!product) throw new Error('Producto no encontrado');
 
     let maxStock = 0;
     if (item.size && product.variants && product.variants.length > 0) {
-      const variant = product.variants.find((v) => v.size.name === item.size);
-      if (!variant) throw new Error('Talle no encontrado');
+      const variant = product.variants.find((v) => {
+        const sizeMatches = v.size?.name === item.size;
+        // Si el producto tiene variantes de color y el cart trae productColorId,
+        // exigimos match por color también. Si no, matchear por size solamente.
+        if (product.hasColorVariants && item.productColorId) {
+          return sizeMatches && v.colorId === item.productColorId;
+        }
+        return sizeMatches;
+      });
+      if (!variant) throw new Error('Variante (talle/color) no encontrada');
       maxStock = variant.stock;
     } else {
       // If no variants, maybe just fallback to a generic stock or assume 0
@@ -105,9 +113,12 @@ export async function addItemToCart(data: CartItem) {
         message: `${product.name} agregado al carrito`,
       };
     } else {
-      // Check if item is already in cart
+      // Check if item is already in cart (match por size + color)
       const existItem = (cart.items as CartItem[]).find(
-        (x) => x.productId === item.productId && x.size === item.size
+        (x) =>
+          x.productId === item.productId &&
+          x.size === item.size &&
+          x.productColorId === item.productColorId
       );
 
       if (existItem) {
@@ -118,7 +129,10 @@ export async function addItemToCart(data: CartItem) {
 
         // Increase the quantity
         (cart.items as CartItem[]).find(
-          (x) => x.productId === item.productId && x.size === item.size
+          (x) =>
+            x.productId === item.productId &&
+            x.size === item.size &&
+            x.productColorId === item.productColorId
         )!.qty = existItem.qty + 1;
       } else {
         // If item does not exist in cart
@@ -191,7 +205,11 @@ export async function getMyCart() {
   });
 }
 
-export async function removeItemFromCart(productId: string, size?: string) {
+export async function removeItemFromCart(
+  productId: string,
+  size?: string,
+  productColorId?: string
+) {
   try {
     // Get Product
     const product = await prisma.product.findFirst({
@@ -208,9 +226,12 @@ export async function removeItemFromCart(productId: string, size?: string) {
       };
     }
 
-    // Check for item
+    // Check for item (match por size + color)
     const exist = (cart.items as CartItem[]).find(
-      (x) => x.productId === productId && x.size === size
+      (x) =>
+        x.productId === productId &&
+        x.size === size &&
+        x.productColorId === productColorId
     );
     if (!exist) throw new Error('Artículo no encontrado');
 
@@ -218,12 +239,20 @@ export async function removeItemFromCart(productId: string, size?: string) {
     if (exist.qty === 1) {
       // Remove from cart
       cart.items = (cart.items as CartItem[]).filter(
-        (x) => !(x.productId === exist.productId && x.size === exist.size)
+        (x) =>
+          !(
+            x.productId === exist.productId &&
+            x.size === exist.size &&
+            x.productColorId === exist.productColorId
+          )
       );
     } else {
       // Decrease qty
       (cart.items as CartItem[]).find(
-        (x) => x.productId === productId && x.size === size
+        (x) =>
+          x.productId === productId &&
+          x.size === size &&
+          x.productColorId === productColorId
       )!.qty = exist.qty - 1;
     }
 
@@ -274,17 +303,24 @@ export async function mergeCart(userId: string, sessionCartId: string) {
       const sessionItems = sessionCart.items as CartItem[];
 
       for (const sessionItem of sessionItems) {
-        const existItem = userItems.find((x) => x.productId === sessionItem.productId && x.size === sessionItem.size);
+        const existItem = userItems.find(
+          (x) =>
+            x.productId === sessionItem.productId &&
+            x.size === sessionItem.size &&
+            x.productColorId === sessionItem.productColorId
+        );
 
         // Fetch product to verify stock
         const product = await prisma.product.findFirst({
           where: { id: sessionItem.productId },
-          include: { variants: { include: { size: true } } }
+          include: { variants: { include: { size: true, productColor: { include: { color: true } } } } }
         });
 
         let maxStock = 0;
         if (sessionItem.size && product?.variants && product.variants.length > 0) {
-          const variant = product.variants.find((v) => v.size.name === sessionItem.size);
+          const variant = product.variants.find(
+            (v) => v.size?.name === sessionItem.size
+          );
           if (variant) {
             maxStock = variant.stock;
           }

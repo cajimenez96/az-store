@@ -44,18 +44,25 @@ export async function createTestProduct(
   overrides: Record<string, unknown> = {}
 ) {
   const suffix = Date.now() + Math.random().toString(36).slice(2, 7);
-  return prisma.product.create({
+  const product = await prisma.product.create({
     data: {
       name: `Test Product ${suffix}`,
       slug: `test-product-${suffix}`,
       categoryId,
       brandId,
       description: 'Test product description',
-      price: new Prisma.Decimal(100),
       images: [],
       ...overrides,
     },
   });
+  // Fase 2: crear las dos filas de Price (CASH + MERCADOPAGO) por defecto
+  await prisma.price.createMany({
+    data: [
+      { productId: product.id, paymentMethod: 'CASH', value: new Prisma.Decimal(100) },
+      { productId: product.id, paymentMethod: 'MERCADOPAGO', value: new Prisma.Decimal(110) },
+    ],
+  });
+  return product;
 }
 
 export async function createTestVariant(

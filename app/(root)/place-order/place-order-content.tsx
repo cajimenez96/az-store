@@ -51,13 +51,14 @@ export default function PlaceOrderContent({
 }: PlaceOrderContentProps) {
   const [appliedPromoCode, setAppliedPromoCode] = useState<string>('');
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
+  const [appliedPaymentMethod, setAppliedPaymentMethod] = useState<string>('');
 
   const bannerDiscount = useMemo(() => {
     if (!activeBanner?.discountPercent || !cart?.items) return 0;
     const bannerProductIds = new Set(activeBanner.products.map((p) => p.id));
     const bannerItemsTotal = cart.items
       .filter((item) => bannerProductIds.has(item.productId))
-      .reduce((sum, item) => sum + Number(item.price) * item.qty, 0);
+      .reduce((sum, item) => sum + Number(item.priceUsed) * item.qty, 0);
     return (bannerItemsTotal * activeBanner.discountPercent) / 100;
   }, [activeBanner, cart]);
 
@@ -65,7 +66,8 @@ export default function PlaceOrderContent({
   const discountAmount = (itemsPrice * appliedDiscount) / 100;
   const shippingPrice = Number(cart.shippingPrice);
   const taxPrice = Number(cart.taxPrice);
-  const finalTotal = itemsPrice - discountAmount - bannerDiscount + shippingPrice + taxPrice;
+  const finalTotal =
+    itemsPrice - discountAmount - bannerDiscount + shippingPrice + taxPrice;
 
   return (
     <ShippingMethodProvider>
@@ -213,7 +215,7 @@ export default function PlaceOrderContent({
                           {item.qty}
                         </TableCell>
                         <TableCell className='py-3 text-right az-body-sm-bold text-az-ink-deep tabular-nums pr-0'>
-                          {formatCurrency(item.price)}
+                          {formatCurrency(item.priceUsed)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -255,7 +257,13 @@ export default function PlaceOrderContent({
                 </div>
                 {discountAmount > 0 && (
                   <div className='flex justify-between az-body-sm text-green-600'>
-                    <span>Descuento ({appliedDiscount}%)</span>
+                    <span>
+                      Descuento ({appliedPromoCode}
+                      {appliedPaymentMethod
+                        ? ` — ${appliedDiscount}% con ${PAYMENT_LABELS[appliedPaymentMethod] || appliedPaymentMethod}`
+                        : ` — ${appliedDiscount}%`}
+                      )
+                    </span>
                     <span className='az-body-sm-bold tabular-nums'>
                       -{formatCurrency(discountAmount)}
                     </span>
@@ -285,20 +293,22 @@ export default function PlaceOrderContent({
                 <PromoCodeInput
                   appliedCode={appliedPromoCode}
                   appliedDiscount={appliedDiscount}
-                  onPromoApplied={(code, discount) => {
+                  appliedPaymentMethod={appliedPaymentMethod}
+                  onPromoApplied={(code, discount, appliedMethod) => {
                     setAppliedPromoCode(code);
                     setAppliedDiscount(discount);
+                    setAppliedPaymentMethod(appliedMethod);
                   }}
                   onPromoRemoved={() => {
                     setAppliedPromoCode('');
                     setAppliedDiscount(0);
+                    setAppliedPaymentMethod('');
                   }}
                 />
               </div>
 
               <PlaceOrderForm
                 promoCode={appliedPromoCode}
-                appliedDiscount={appliedDiscount}
                 bannerId={activeBanner?.id}
                 bannerDiscount={bannerDiscount > 0 ? bannerDiscount : undefined}
               />

@@ -39,8 +39,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# docs (may contain env references or credentials)
-/docs
 # Local Pi runtime state
 .atl/
 .pi
+
+# Subagent / progress logs
+/logs/

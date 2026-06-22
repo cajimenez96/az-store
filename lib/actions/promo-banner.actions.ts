@@ -4,6 +4,7 @@ import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
 import { revalidatePath } from 'next/cache';
 import { insertPromoBannerSchema, updatePromoBannerSchema } from '../validators';
+import { deleteUTFiles } from '../uploadthing-helpers';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth-guard';
 
@@ -65,7 +66,7 @@ export async function getPromoBannerWithProductsPublic(id: string) {
           name: true,
           slug: true,
           images: true,
-          price: true,
+          prices: { where: { paymentMethod: 'CASH' }, select: { value: true } },
           brand: { select: { name: true } },
           category: { select: { name: true, slug: true } },
         },
@@ -133,6 +134,11 @@ export async function updatePromoBanner(data: z.infer<typeof updatePromoBannerSc
       },
     });
 
+    // Si el admin reemplazó la imagen, liberamos el asset anterior.
+    if (exists.image && exists.image !== rest.image) {
+      await deleteUTFiles([exists.image]);
+    }
+
     revalidatePath('/admin/promotions/banners');
     revalidatePath('/');
 
@@ -150,6 +156,11 @@ export async function deletePromoBanner(id: string) {
     if (!exists) throw new Error('Banner no encontrado');
 
     await prisma.promoBanner.delete({ where: { id } });
+
+    // Liberar el asset de UploadThing después de commit.
+    if (exists.image) {
+      await deleteUTFiles([exists.image]);
+    }
 
     revalidatePath('/admin/promotions/banners');
     revalidatePath('/');

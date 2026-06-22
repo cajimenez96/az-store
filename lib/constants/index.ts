@@ -33,6 +33,22 @@ export const PAYMENT_METHODS = process.env.PAYMENT_METHODS
 export const DEFAULT_PAYMENT_METHOD =
   process.env.DEFAULT_PAYMENT_METHOD || 'MercadoPago';
 
+// Fase 2: enum interno para dual pricing. El string del enum coincide con
+// el enum Prisma `PaymentMethod` y se persiste en Price.paymentMethod y
+// OrderItem.paymentMethod.
+export const PaymentMethod = {
+  CASH: 'CASH',
+  MERCADOPAGO: 'MERCADOPAGO',
+} as const;
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  CASH: 'Efectivo / Transferencia',
+  MERCADOPAGO: 'MercadoPago',
+};
+
+export const MP_SURCHARGE_PERCENT_DEFAULT = 10;
+
 export const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 12;
 
 export const productDefaultValues = {
@@ -42,7 +58,11 @@ export const productDefaultValues = {
   images: [],
   brand: '',
   description: '',
-  price: '0',
+  // Fase 2: dual pricing. El form va a tener dos inputs:
+  //   - priceCash (precio efectivo/transferencia)
+  //   - priceMercadoPago (precio MP, sugerido desde priceCash + recargo)
+  priceCash: '0',
+  priceMercadoPago: '0',
   stock: 0,
   rating: '0',
   numReviews: '0',
