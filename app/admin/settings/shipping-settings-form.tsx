@@ -1,21 +1,99 @@
 'use client';
 
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { updateShippingSettings } from '@/lib/actions/settings.actions';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2 } from 'lucide-react';
+import { Check, ChevronsUpDown, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import provincias from '@/lib/data/argentina.json';
 
 interface ShippingValues {
   freeShippingThreshold: number;
   freeShippingCities: { city: string }[];
 }
 
+const TUCUMAN_CITIES =
+  provincias.provinces.find((p) => p.name === 'Tucumán')?.cities ?? [];
+
 const inputClass =
   'bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0';
 const labelClass = 'az-body-sm-bold text-az-ink-deep';
+
+interface CityComboboxFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+function CityComboboxField({ value, onChange }: CityComboboxFieldProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant='outline'
+          role='combobox'
+          aria-expanded={open}
+          className={cn(
+            'w-full justify-between bg-az-canvas border-az-hairline text-az-ink hover:bg-az-surface-soft',
+            !value && 'text-az-stone'
+          )}
+        >
+          {value || 'Seleccionar localidad...'}
+          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft'
+        align='start'
+      >
+        <Command className='bg-transparent'>
+          <CommandInput
+            placeholder='Buscar localidad...'
+            className='border-none outline-none ring-0'
+          />
+          <CommandList>
+            <CommandEmpty>No se encontró la localidad.</CommandEmpty>
+            <CommandGroup>
+              {TUCUMAN_CITIES.map((city) => (
+                <CommandItem
+                  value={city}
+                  key={city}
+                  onSelect={() => {
+                    onChange(city);
+                    setOpen(false);
+                  }}
+                  className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4 text-az-primary',
+                      city === value ? 'opacity-100' : 'opacity-0'
+                    )}
+                  />
+                  {city}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function ShippingSettingsForm({
   initialValues,
@@ -27,8 +105,8 @@ export default function ShippingSettingsForm({
 }) {
   const {
     register,
-    handleSubmit,
     control,
+    handleSubmit,
     formState: { isSubmitting },
   } = useForm<ShippingValues>({
     defaultValues: {
@@ -70,14 +148,19 @@ export default function ShippingSettingsForm({
 
       {/* Free Shipping Cities */}
       <div className='space-y-3'>
-        <Label className={labelClass}>Localidades con envío gratis (Retiro)</Label>
+        <Label className={labelClass}>Localidades con envío gratis (Tucumán)</Label>
         <div className='space-y-2'>
           {fields.map((field, index) => (
             <div key={field.id} className='flex items-end gap-2'>
-              <Input
-                {...register(`freeShippingCities.${index}.city`)}
-                placeholder='Ej: San Miguel de Tucumán'
-                className={inputClass}
+              <Controller
+                control={control}
+                name={`freeShippingCities.${index}.city`}
+                render={({ field: cityField }) => (
+                  <CityComboboxField
+                    value={cityField.value}
+                    onChange={cityField.onChange}
+                  />
+                )}
               />
               <Button
                 type='button'
@@ -100,7 +183,7 @@ export default function ShippingSettingsForm({
           + Agregar localidad
         </Button>
         <p className='az-caption text-az-stone mt-1'>
-          Estas localidades tendrán envío gratis (retiro en local)
+          Estas localidades de Tucumán tendrán envío gratis (retiro en local)
         </p>
       </div>
 

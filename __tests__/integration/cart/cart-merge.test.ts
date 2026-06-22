@@ -44,7 +44,8 @@ describe('3.6 · Cart merge on login — integration', () => {
       slug: productSlug,
       qty,
       image: '/images/test.jpg',
-      price: '50.00',
+      priceUsed: '50.00',
+      paymentMethod: 'CASH',
       size: 'M',
     };
   }
@@ -89,7 +90,8 @@ describe('3.6 · Cart merge on login — integration', () => {
       slug: product2.slug,
       qty: 2,
       image: '/images/p2.jpg',
-      price: '80.00',
+      priceUsed: '80.00',
+      paymentMethod: 'CASH',
       size: 'L',
     };
     await prisma.cart.update({

@@ -27,7 +27,9 @@ export default async function PromoCodesPage() {
     <div className='space-y-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='az-heading-sm text-az-ink-deep'>Códigos de Descuento</h1>
+          <h1 className='az-heading-sm text-az-ink-deep'>
+            Códigos de Descuento
+          </h1>
           <p className='az-body-sm text-az-steel mt-1'>
             Administra códigos promocionales y sus descuentos
           </p>
@@ -42,7 +44,9 @@ export default async function PromoCodesPage() {
 
       {promoCodes.length === 0 ? (
         <div className='text-center py-12 bg-az-canvas rounded-az-xxxl border border-az-hairline-soft'>
-          <p className='az-body-sm text-az-steel'>No hay códigos de descuento creados</p>
+          <p className='az-body-sm text-az-steel'>
+            No hay códigos de descuento creados
+          </p>
           <Link href='/admin/promotions/discount-codes/create' className='mt-4'>
             <Button variant='outline'>Crear el primer código</Button>
           </Link>
@@ -53,17 +57,34 @@ export default async function PromoCodesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className='az-body-sm-bold text-az-ink'>Código</TableHead>
-                  <TableHead className='az-body-sm-bold text-az-ink'>Descripción</TableHead>
-                  <TableHead className='az-body-sm-bold text-az-ink text-center'>Descuento</TableHead>
-                  <TableHead className='az-body-sm-bold text-az-ink text-center'>Estado</TableHead>
-                  <TableHead className='az-body-sm-bold text-az-ink'>Vigencia</TableHead>
-                  <TableHead className='az-body-sm-bold text-az-ink text-center'>Usos</TableHead>
-                  <TableHead className='az-body-sm-bold text-az-ink text-right'>Acciones</TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink'>
+                    Código
+                  </TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink'>
+                    Descripción
+                  </TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink text-center'>
+                    Descuento MP
+                  </TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink text-center'>
+                    Descuento Transf.
+                  </TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink text-center'>
+                    Estado
+                  </TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink'>
+                    Vigencia
+                  </TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink text-center'>
+                    Usos
+                  </TableHead>
+                  <TableHead className='az-body-sm-bold text-az-ink text-right'>
+                    Acciones
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {promoCodes.map((code: any) => (
+                {promoCodes.map((code) => (
                   <TableRow
                     key={code.id}
                     className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
@@ -75,7 +96,14 @@ export default async function PromoCodesPage() {
                       {code.description || '—'}
                     </TableCell>
                     <TableCell className='az-body-sm-bold text-az-ink-deep text-center py-4'>
-                      {code.discountPercent}%
+                      {code.discountPercentMercadoPago != null
+                        ? `${code.discountPercentMercadoPago}%`
+                        : '—'}
+                    </TableCell>
+                    <TableCell className='az-body-sm-bold text-az-ink-deep text-center py-4'>
+                      {code.discountPercentTransferencia != null
+                        ? `${code.discountPercentTransferencia}%`
+                        : '—'}
                     </TableCell>
                     <TableCell className='py-4 text-center'>
                       <span
@@ -91,8 +119,18 @@ export default async function PromoCodesPage() {
                     <TableCell className='az-body-sm text-az-charcoal py-4'>
                       {code.startsAt || code.endsAt ? (
                         <div className='space-y-1'>
-                          {code.startsAt && <div>Desde: {formatDateTime(new Date(code.startsAt)).dateTime}</div>}
-                          {code.endsAt && <div>Hasta: {formatDateTime(new Date(code.endsAt)).dateTime}</div>}
+                          {code.startsAt && (
+                            <div>
+                              Desde:{' '}
+                              {formatDateTime(new Date(code.startsAt)).dateTime}
+                            </div>
+                          )}
+                          {code.endsAt && (
+                            <div>
+                              Hasta:{' '}
+                              {formatDateTime(new Date(code.endsAt)).dateTime}
+                            </div>
+                          )}
                         </div>
                       ) : (
                         '—'
@@ -104,7 +142,9 @@ export default async function PromoCodesPage() {
                     </TableCell>
                     <TableCell className='py-4 text-right'>
                       <div className='flex items-center justify-end gap-2'>
-                        <Link href={`/admin/promotions/discount-codes/${code.id}`}>
+                        <Link
+                          href={`/admin/promotions/discount-codes/${code.id}`}
+                        >
                           <Button
                             variant='ghost'
                             size='sm'
@@ -113,7 +153,10 @@ export default async function PromoCodesPage() {
                             <Edit className='w-4 h-4' />
                           </Button>
                         </Link>
-                        <PromoCodeDeleteButton codeId={code.id} codeName={code.code} />
+                        <PromoCodeDeleteButton
+                          codeId={code.id}
+                          codeName={code.code}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>

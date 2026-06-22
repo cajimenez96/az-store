@@ -8,7 +8,8 @@ import {
   CreditCard,
   Package,
   FolderOpen,
-  Palette,
+  Paintbrush,
+  Tag,
   TrendingUp,
   ShoppingBag,
   Gift,
@@ -41,7 +42,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   '/admin/pos': CreditCard,
   '/admin/products': Package,
   '/admin/categories': FolderOpen,
-  '/admin/brands': Palette,
+  '/admin/brands': Tag,
+  '/admin/colors': Paintbrush,
   '/admin/inventory': TrendingUp,
   '/admin/orders': ShoppingBag,
   '/admin/promotions/banners': Gift,
@@ -80,7 +82,7 @@ function SidebarLogo() {
           alt='AZ Marketing'
           width={300}
           height={60}
-          className='object-contain'
+          className='object-contain dark:invert'
         />
       )}
     </Link>

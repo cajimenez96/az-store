@@ -13,7 +13,7 @@ export default async function PosPage() {
   const session = await requireAdminOrSeller();
   const sellerName = session?.user?.name || 'Vendedor Local';
 
-  // Fetch all products with their variants and brand
+  // Fetch all products with their variants, brand and prices
   const products = await prisma.product.findMany({
     include: {
       brand: {
@@ -30,6 +30,7 @@ export default async function PosPage() {
           },
         },
       },
+      prices: true,
     },
     orderBy: {
       name: 'asc',
@@ -49,15 +50,23 @@ export default async function PosPage() {
     name: product.name,
     slug: product.slug,
     images: product.images,
-    price: product.price.toString(),
+    // Fase 2: serializamos priceCash (precio base) como string para el POS.
+    // El vendedor puede elegir el método de pago en el checkout del POS.
+    price: product.prices.find((p) => p.paymentMethod === 'CASH')?.value.toString() ?? '0.00',
+    prices: product.prices.map((p) => ({
+      paymentMethod: p.paymentMethod,
+      value: p.value.toString(),
+    })),
     brand: product.brand,
     categoryId: product.categoryId,
     variants: product.variants.map((v) => ({
       id: v.id,
       stock: v.stock,
-      size: {
-        name: v.size.name,
-      },
+      size: v.size
+        ? {
+            name: v.size.name,
+          }
+        : null,
     })),
   }));
 

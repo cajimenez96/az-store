@@ -22,7 +22,7 @@ interface PosVariant {
   stock: number;
   size: {
     name: string;
-  };
+  } | null;
 }
 
 interface PosProduct {
@@ -168,7 +168,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
   // Totals calculations
   const totals = useMemo(() => {
-    const subtotal = cart.reduce((acc, item) => acc + Number(item.price) * item.qty, 0);
+    const subtotal = cart.reduce((acc, item) => acc + Number(item.priceUsed) * item.qty, 0);
     const total = subtotal;
     return {
       subtotal,
@@ -179,6 +179,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
   // Add item to local cart
   const handleAddToCart = (product: PosProduct, variant: PosVariant) => {
+    if (!variant.size) return;
     const sizeName = variant.size.name;
     const existingIndex = cart.findIndex((item) => item.productId === product.id && item.size === sizeName);
 
@@ -206,7 +207,9 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
         productId: product.id,
         name: product.name,
         slug: product.slug,
-        price: product.price,
+        // Fase 2: el POS arranca con CASH (se puede cambiar en checkout)
+        priceUsed: product.price,
+        paymentMethod: 'CASH' as const,
         qty: 1,
         image: product.images[0] || '/placeholder.png',
         size: sizeName,
@@ -226,7 +229,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
     const item = cart[index];
     const product = products.find((p) => p.id === productId);
-    const variant = product?.variants.find((v) => v.size.name === size);
+    const variant = product?.variants.find((v) => v.size?.name === size);
 
     if (!variant) return;
 
@@ -462,7 +465,8 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     </span>
                     <div className='flex flex-wrap gap-1.5'>
                       {product.variants.map((v) => {
-                        const inCartQty = cart.find((item) => item.productId === product.id && item.size === v.size.name)?.qty || 0;
+                        if (!v.size) return null;
+                        const inCartQty = cart.find((item) => item.productId === product.id && item.size === v.size!.name)?.qty || 0;
                         const remainingStock = v.stock - inCartQty;
                         const isOutOfStock = remainingStock <= 0;
 
@@ -478,7 +482,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                                 : 'bg-az-surface-soft hover:bg-az-ink-deep hover:text-white text-az-ink border border-az-hairline-soft'
                             }`}
                           >
-                            <span>{v.size.name}</span>
+                            <span>{v.size!.name}</span>
                             <span className='opacity-60 font-normal'>({remainingStock})</span>
                           </button>
                         );
@@ -530,7 +534,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   <div className='min-w-0 flex-1 space-y-0.5'>
                     <h4 className='az-body-sm-bold text-az-ink-deep truncate'>{item.name}</h4>
                     <p className='az-caption text-az-steel'>
-                      Talle: <span className='font-semibold text-az-charcoal'>{item.size}</span> · {formatCurrency(item.price)} c/u
+                      Talle: <span className='font-semibold text-az-charcoal'>{item.size}</span> · {formatCurrency(item.priceUsed)} c/u
                     </p>
                   </div>
                   <div className='flex items-center gap-2.5'>

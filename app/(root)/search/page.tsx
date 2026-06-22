@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { getAllProducts } from '@/lib/actions/product.actions';
 import { getProductsByBanner } from '@/lib/actions/product.actions';
 import { getAllCategories } from '@/lib/actions/category.actions';
+import { getAllColors } from '@/lib/actions/color.actions';
 import Link from 'next/link';
 import { SlidersHorizontal, X, Tag } from 'lucide-react';
 import { Metadata } from 'next';
@@ -32,6 +33,7 @@ export async function generateMetadata(props: {
     category: string;
     subCategory: string;
     price: string;
+    color: string;
     page: string;
     banner: string;
   }>;
@@ -40,17 +42,20 @@ export async function generateMetadata(props: {
     q = 'all',
     category = 'all',
     price = 'all',
+    color = 'all',
     page = '1',
   } = await props.searchParams;
 
   const parts: string[] = [];
   if (q && q !== 'all') parts.push(q);
   if (category && category !== 'all') parts.push(category);
+  if (color && color !== 'all') parts.push(color);
   if (price && price !== 'all') parts.push(`Precio ${price}`);
 
   const isFiltered =
     (q !== 'all' && q !== '') ||
     (category !== 'all' && category !== '') ||
+    (color !== 'all' && color !== '') ||
     (price !== 'all' && price !== '') ||
     Number(page) > 1;
 
@@ -68,6 +73,7 @@ const SearchPage = async (props: {
     category?: string;
     subCategory?: string;
     price?: string;
+    color?: string;
     sort?: string;
     page?: string;
     banner?: string;
@@ -78,22 +84,24 @@ const SearchPage = async (props: {
     category = 'all',
     subCategory = 'all',
     price = 'all',
+    color = 'all',
     sort = 'newest',
     page = '1',
     banner = '',
   } = await props.searchParams;
 
   const getFilterUrl = ({
-    c, sc, p, s, pg,
+    c, sc, p, col, s, pg,
   }: {
-    c?: string; sc?: string; p?: string; s?: string; pg?: string;
+    c?: string; sc?: string; p?: string; col?: string; s?: string; pg?: string;
   }) => {
-    const params: Record<string, string> = { q, category, subCategory, price, sort, page };
+    const params: Record<string, string> = { q, category, subCategory, price, color, sort, page };
     if (banner) params.banner = banner;
     if (c) params.category = c;
     if (c && c !== category && !sc) params.subCategory = 'all';
     else if (sc) params.subCategory = sc;
     if (p) params.price = p;
+    if (col) params.color = col;
     if (s) params.sort = s;
     if (pg) params.page = pg;
     return `/search?${new URLSearchParams(params).toString()}`;
@@ -119,15 +127,18 @@ const SearchPage = async (props: {
       price,
       sort,
       page: Number(page),
+      color,
     });
   }
 
   const { data: categories = [] } = await getAllCategories();
+  const colors = await getAllColors();
 
   const hasActiveFilters =
     (q !== 'all' && q !== '') ||
     (category !== 'all' && category !== '') ||
     (subCategory !== 'all' && subCategory !== '') ||
+    (color !== 'all' && color !== '') ||
     price !== 'all' ||
     !!banner;
 
@@ -135,6 +146,7 @@ const SearchPage = async (props: {
     q !== 'all' && q !== '' && `"${q}"`,
     category !== 'all' && category !== '' && category,
     subCategory !== 'all' && subCategory !== '' && subCategory,
+    color !== 'all' && color !== '' && color,
     price !== 'all' && price,
     banner && bannerData?.title && `Oferta: ${bannerData.title}`,
   ]
@@ -220,6 +232,50 @@ const SearchPage = async (props: {
                     </Link>
                   </li>
                 ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Color filter */}
+          {colors.length > 0 && (
+            <div className='space-y-3'>
+              <p className='az-caption-bold text-az-steel uppercase tracking-widest'>Color</p>
+              <ul className='space-y-1.5'>
+                <li>
+                  <Link
+                    href={getFilterUrl({ col: 'all' })}
+                    className={`az-body-sm block px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
+                      color === 'all'
+                        ? 'bg-az-primary text-white font-semibold'
+                        : 'text-az-charcoal hover:bg-az-surface-soft'
+                    }`}
+                  >
+                    Todos
+                  </Link>
+                </li>
+                {colors.map((co: { id: string; name: string; hex: string }) => {
+                  const slug = co.name.toLowerCase().replace(/\s+/g, '-');
+                  const isActive = color === slug;
+                  return (
+                    <li key={co.id}>
+                      <Link
+                        href={getFilterUrl({ col: slug })}
+                        className={`az-body-sm flex items-center gap-2 px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
+                          isActive
+                            ? 'bg-az-primary text-white font-semibold'
+                            : 'text-az-charcoal hover:bg-az-surface-soft'
+                        }`}
+                      >
+                        <span
+                          className='inline-block w-4 h-4 rounded-full border border-az-hairline'
+                          style={{ backgroundColor: co.hex }}
+                          aria-hidden
+                        />
+                        {co.name}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}

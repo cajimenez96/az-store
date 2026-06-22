@@ -9,12 +9,15 @@ import { useShippingMethod } from '@/hooks/use-shipping-method';
 
 interface PlaceOrderFormProps {
   promoCode?: string;
-  appliedDiscount?: number;
   bannerId?: string;
   bannerDiscount?: number;
 }
 
-const PlaceOrderForm = ({ promoCode, appliedDiscount, bannerId, bannerDiscount }: PlaceOrderFormProps) => {
+const PlaceOrderForm = ({
+  promoCode,
+  bannerId,
+  bannerDiscount,
+}: PlaceOrderFormProps) => {
   const router = useRouter();
   const { shippingMethod } = useShippingMethod();
 
@@ -30,7 +33,6 @@ const PlaceOrderForm = ({ promoCode, appliedDiscount, bannerId, bannerDiscount }
       const res = await createOrder({
         shippingMethod,
         promoCode,
-        appliedDiscount,
         bannerId,
         bannerDiscount,
       });
@@ -40,7 +42,7 @@ const PlaceOrderForm = ({ promoCode, appliedDiscount, bannerId, bannerDiscount }
       } else if (res.success === false) {
         setError(res.message);
       }
-    } catch (err) {
+    } catch {
       setError('Ocurrió un error al procesar tu pedido. Intenta de nuevo.');
     } finally {
       setPending(false);
@@ -56,7 +58,13 @@ const PlaceOrderForm = ({ promoCode, appliedDiscount, bannerId, bannerDiscount }
         </div>
       )}
       <form onSubmit={handleSubmit} className='w-full'>
-        <Button disabled={pending} className='w-full' variant='buyCta' size='lg' data-testid='place-order-submit'>
+        <Button
+          disabled={pending}
+          className='w-full'
+          variant='buyCta'
+          size='lg'
+          data-testid='place-order-submit'
+        >
           {pending ? (
             <Loader className='w-4 h-4 animate-spin mr-2' />
           ) : (
