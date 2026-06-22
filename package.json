@@ -2,6 +2,7 @@
   "name": "az store",
   "version": "2.1.0",
   "private": true,
+  "packageManager": "bun@1.2.21",
   "scripts": {
     "dev": "next dev",
     "dev:qa": "dotenv -e .env.qa -- next dev",
