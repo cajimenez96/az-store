@@ -26,25 +26,28 @@ export default async function BannersPage() {
   const banners = await getAllPromoBanners();
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="h2-bold">Banners Promocionales</h1>
-        <Button asChild variant="default">
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e5e5]">
+        <div>
+          <h1 className="text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display">Banners Promocionales</h1>
+          <p className="text-xs text-[#707072] uppercase tracking-wider font-semibold mt-1">Banners cinematográficos y campañas destacadas</p>
+        </div>
+        <Button asChild className="rounded-full bg-[#111111] text-white hover:bg-black text-xs font-semibold uppercase tracking-wider px-6 h-10">
           <Link href="/admin/promotions/banners/create">+ Banner</Link>
         </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-none overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>IMAGEN</TableHead>
-              <TableHead>TÍTULO</TableHead>
-              <TableHead>ORDEN</TableHead>
-              <TableHead>ESTADO</TableHead>
-              <TableHead>INICIO</TableHead>
-              <TableHead>FIN</TableHead>
-              <TableHead className="w-[180px]">ACCIONES</TableHead>
+            <TableRow className="border-b border-[#e5e5e5] hover:bg-transparent">
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">IMAGEN</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">TÍTULO</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">ORDEN</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">ESTADO</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">INICIO</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">FIN</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right">ACCIONES</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -54,9 +57,9 @@ export default async function BannersPage() {
               const hasEnded = banner.endsAt && banner.endsAt < now;
 
               return (
-                <TableRow key={banner.id} className="bg-az-surface-soft border-b border-az-hairline-soft">
-                  <TableCell>
-                    <div className="relative w-16 h-10 rounded overflow-hidden bg-az-surface">
+                <TableRow key={banner.id} className="border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors">
+                  <TableCell className="py-4">
+                    <div className="relative w-16 h-10 rounded-lg overflow-hidden bg-[#f5f5f5] border border-[#e5e5e5]">
                       <Image
                         src={banner.image}
                         alt={banner.title}
@@ -66,28 +69,28 @@ export default async function BannersPage() {
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium text-az-ink-deep">{banner.title}</TableCell>
-                  <TableCell className="text-az-steel">{banner.order}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-semibold text-sm text-[#111111] py-4">{banner.title}</TableCell>
+                  <TableCell className="text-sm text-[#707072] py-4 tabular-nums">{banner.order}</TableCell>
+                  <TableCell className="py-4">
                     {!banner.isActive ? (
-                      <Badge variant="outline">Inactivo</Badge>
+                      <Badge variant="outline" className="rounded-full text-[11px] font-semibold text-[#707072] border-[#e5e5e5]">Inactivo</Badge>
                     ) : hasEnded ? (
-                      <Badge variant="destructive">Expirado</Badge>
+                      <Badge variant="destructive" className="rounded-full text-[11px] font-semibold bg-[#fee2e2] text-[#d30005] hover:bg-[#fee2e2] border-0">Expirado</Badge>
                     ) : !hasStarted ? (
-                      <Badge variant="secondary">Pendiente</Badge>
+                      <Badge variant="secondary" className="rounded-full text-[11px] font-semibold bg-[#fef3c7] text-[#d97706] hover:bg-[#fef3c7] border-0">Pendiente</Badge>
                     ) : (
-                      <Badge variant="default">Activo</Badge>
+                      <Badge variant="default" className="rounded-full text-[11px] font-semibold bg-[#111111] text-white hover:bg-black">Activo</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm text-az-steel">
+                  <TableCell className="text-xs text-[#707072] py-4 tabular-nums">
                     {banner.startsAt ? formatDateTime(banner.startsAt).dateTime : '—'}
                   </TableCell>
-                  <TableCell className="text-sm text-az-steel">
+                  <TableCell className="text-xs text-[#707072] py-4 tabular-nums">
                     {banner.endsAt ? formatDateTime(banner.endsAt).dateTime : '—'}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center gap-2">
-                      <Button asChild variant="outline" size="sm">
+                  <TableCell className="py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button asChild variant="outline" size="sm" className="h-8 px-4 text-xs font-semibold uppercase tracking-wider rounded-full border border-[#e5e5e5] text-[#111111] hover:bg-[#111111] hover:text-white transition-colors">
                         <Link href={`/admin/promotions/banners/${banner.id}`}>Editar</Link>
                       </Button>
                       <DeleteDialog id={banner.id} action={deletePromoBanner} />
@@ -98,7 +101,7 @@ export default async function BannersPage() {
             })}
             {banners.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4 text-az-stone">
+                <TableCell colSpan={7} className="text-center py-6 text-xs font-semibold text-[#707072]">
                   No hay banners registrados.
                 </TableCell>
               </TableRow>

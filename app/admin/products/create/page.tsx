@@ -16,9 +16,16 @@ const CreateProductPage = async () => {
   const mpSurchargePercent = await getMpSurchargePercent();
 
   return (
-    <>
-      <h2 className='h2-bold'>Crear Producto</h2>
-      <div className='my-8'>
+    <div className='space-y-8 max-w-5xl mx-auto'>
+      <div className='pb-4 border-b border-[#e5e5e5]'>
+        <h1 className='text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display'>
+          Crear Producto
+        </h1>
+        <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-1'>
+          Nuevo artículo para catálogo online y POS
+        </p>
+      </div>
+      <div>
         <ProductForm
           type='Create'
           categories={categories || []}
@@ -26,7 +33,7 @@ const CreateProductPage = async () => {
           mpSurchargePercent={mpSurchargePercent}
         />
       </div>
-    </>
+    </div>
   );
 };
 

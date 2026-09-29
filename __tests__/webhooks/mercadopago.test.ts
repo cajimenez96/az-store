@@ -2,7 +2,10 @@ import { createHmac } from 'crypto';
 import { NextRequest } from 'next/server';
 
 jest.mock('query-string', () => ({ stringifyUrl: jest.fn(), parse: jest.fn() }));
-jest.mock('@/lib/mercadopago', () => ({ mpClient: {} }));
+jest.mock('@/lib/mercadopago', () => ({
+  mpClient: {},
+  getMercadoPagoClient: jest.fn().mockResolvedValue({}),
+}));
 jest.mock('mercadopago', () => ({
   Payment: jest.fn().mockImplementation(() => ({
     get: jest.fn(),

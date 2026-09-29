@@ -6,24 +6,17 @@ import Search from './search';
 
 const Header = () => {
   return (
-    <header className='sticky top-0 z-50 bg-az-canvas border-b border-az-hairline-soft'>
-      <div className='az-wrapper flex items-center justify-between h-16 gap-4 lg:gap-8'>
+    <header className='sticky top-0 z-50 bg-white/95 dark:bg-nike-ink/95 backdrop-blur-md border-b border-nike-hairline-soft dark:border-nike-ash/20 transition-colors'>
+      <div className='max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 gap-4'>
         {/* Logo */}
-        <Link href='/' className='flex items-center gap-3 shrink-0'>
-          {/* <Image
-            src='/images/logo-m-negro.png'
-            alt={`${APP_NAME} logo`}
-            height={50}
-            width={50}
-            priority
-          /> */}
-          <span className='hidden lg:block font-serif font-bold text-az-ink-deep uppercase tracking-[0.1em] text-xl leading-none'>
+        <Link href='/' className='flex items-center gap-2 shrink-0 group'>
+          <span className='font-nike-display font-bold text-nike-ink dark:text-white uppercase tracking-wider text-2xl md:text-3xl leading-none group-hover:opacity-80 transition-opacity'>
             {APP_NAME}
           </span>
         </Link>
 
         {/* Global Search */}
-        <div className='hidden md:block flex-1 max-w-2xl mx-auto'>
+        <div className='hidden md:block flex-1 max-w-lg mx-auto'>
           <Search />
         </div>
 
@@ -31,7 +24,7 @@ const Header = () => {
         <Menu />
       </div>
 
-      {/* Mobile Search (visible only on mobile, below the main header bar) */}
+      {/* Mobile Search */}
       <div className='md:hidden px-4 pb-3'>
         <Search />
       </div>

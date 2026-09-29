@@ -30,7 +30,14 @@ const AdminProductUpdatePage = async (props: {
 
   return (
     <div className='space-y-8 max-w-5xl mx-auto'>
-      <h1 className='h2-bold'>Actualizar Producto</h1>
+      <div className='pb-4 border-b border-[#e5e5e5]'>
+        <h1 className='text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display'>
+          Actualizar Producto
+        </h1>
+        <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-1'>
+          Modificación de datos, precios y variantes
+        </p>
+      </div>
 
       <ProductForm
         type='Update'

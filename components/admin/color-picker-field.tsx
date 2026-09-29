@@ -48,29 +48,29 @@ export function ColorPickerField({
           type='button'
           aria-label='Seleccionar color'
           className={cn(
-            'flex items-center gap-2 h-10 px-3 rounded-md border border-az-hairline',
-            'bg-az-canvas hover:bg-az-surface-soft transition-colors',
+            'flex items-center gap-2.5 h-11 px-3.5 rounded-xl border border-[#e5e5e5]',
+            'bg-white hover:bg-[#f5f5f5] transition-colors',
             'min-w-[180px]'
           )}
         >
           <span
-            className='inline-block w-6 h-6 rounded-md border border-az-hairline flex-shrink-0'
+            className='inline-block w-6 h-6 rounded-lg border border-[#e5e5e5] flex-shrink-0 shadow-xs'
             style={{ backgroundColor: safeValue }}
             aria-hidden
           />
-          <span className='font-mono az-body-sm flex-1 text-left'>
+          <span className='font-mono text-sm font-semibold flex-1 text-left text-[#111111]'>
             {safeValue.toUpperCase()}
           </span>
-          <ChevronDown className='w-4 h-4 text-az-stone flex-shrink-0' />
+          <ChevronDown className='w-4 h-4 text-[#707072] flex-shrink-0' />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align='start'
-        className='w-[280px] p-3 z-[9999] bg-az-canvas border-az-hairline-soft'
+        className='w-[290px] p-4 z-[9999] bg-white border-[#e5e5e5] rounded-2xl shadow-xl'
       >
         {/* Presets grid */}
-        <div className='space-y-2'>
-          <p className='az-caption-bold text-az-stone uppercase tracking-wider'>
+        <div className='space-y-2.5'>
+          <p className='text-xs font-bold uppercase tracking-wider text-[#111111]'>
             Paleta
           </p>
           <div className='grid grid-cols-10 gap-1.5'>
@@ -83,10 +83,10 @@ export function ColorPickerField({
                   setOpen(false);
                 }}
                 className={cn(
-                  'w-6 h-6 rounded border transition-transform hover:scale-110',
+                  'w-5 h-5 rounded-md border transition-transform hover:scale-110',
                   isPreset && safeValue === preset
-                    ? 'border-az-ink-deep ring-2 ring-az-primary/40'
-                    : 'border-az-hairline'
+                    ? 'border-[#111111] ring-2 ring-black/40 scale-105'
+                    : 'border-[#e5e5e5]'
                 )}
                 style={{ backgroundColor: preset }}
                 aria-label={`Color ${preset}`}
@@ -97,13 +97,13 @@ export function ColorPickerField({
         </div>
 
         {/* Custom hex */}
-        <div className='mt-3 pt-3 border-t border-az-hairline-soft space-y-2'>
-          <p className='az-caption-bold text-az-stone uppercase tracking-wider'>
+        <div className='mt-3.5 pt-3.5 border-t border-[#e5e5e5] space-y-2'>
+          <p className='text-xs font-bold uppercase tracking-wider text-[#111111]'>
             Hex personalizado
           </p>
           <div className='flex items-center gap-2'>
             <span
-              className='inline-block w-8 h-8 rounded border border-az-hairline flex-shrink-0'
+              className='inline-block w-8 h-8 rounded-lg border border-[#e5e5e5] flex-shrink-0 shadow-xs'
               style={{ backgroundColor: safeValue }}
               aria-hidden
             />
@@ -112,16 +112,16 @@ export function ColorPickerField({
               onChange={(e) => onChange(e.target.value)}
               placeholder='#dc2626'
               maxLength={7}
-              className='font-mono flex-1'
+              className='font-mono flex-1 bg-white border-[#e5e5e5] rounded-xl text-[#111111] h-10'
               autoComplete='off'
               spellCheck={false}
             />
             {isValidHex(safeValue) && (
-              <Check className='w-4 h-4 text-az-success flex-shrink-0' />
+              <Check className='w-4 h-4 text-emerald-600 flex-shrink-0' />
             )}
           </div>
           {value && !isValidHex(value) && (
-            <p className='az-caption text-az-critical'>
+            <p className='text-xs text-red-600 font-medium'>
               Formato inválido. Usá #RRGGBB (ej: #dc2626).
             </p>
           )}

@@ -72,32 +72,49 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
     );
 
   return existItem ? (
-    <div className='flex items-center gap-2'>
-      <Button type='button' variant='outlineLight' onClick={handleRemoveFromCart}>
+    <div className='flex items-center justify-between w-full bg-nike-soft-cloud rounded-full p-1.5 border border-nike-hairline-soft'>
+      <button
+        type='button'
+        onClick={handleRemoveFromCart}
+        disabled={isPending}
+        className='w-9 h-9 rounded-full bg-white hover:bg-nike-soft-cloud text-nike-ink flex items-center justify-center shadow-xs transition-transform active:scale-90 disabled:opacity-50'
+        aria-label='Reducir cantidad'
+      >
         {isPending ? (
           <Loader className='w-4 h-4 animate-spin' />
         ) : (
           <Minus className='w-4 h-4' />
         )}
-      </Button>
-      <span className='px-4 text-az-ink-deep font-medium'>{existItem.qty}</span>
-      <Button type='button' variant='outlineLight' onClick={handleAddToCart}>
+      </button>
+      <span className='font-sans text-sm font-semibold text-nike-ink px-3'>{existItem.qty} en carrito</span>
+      <button
+        type='button'
+        onClick={handleAddToCart}
+        disabled={isPending}
+        className='w-9 h-9 rounded-full bg-nike-ink hover:bg-black text-white flex items-center justify-center shadow-xs transition-transform active:scale-90 disabled:opacity-50'
+        aria-label='Aumentar cantidad'
+      >
         {isPending ? (
           <Loader className='w-4 h-4 animate-spin' />
         ) : (
           <Plus className='w-4 h-4' />
         )}
-      </Button>
+      </button>
     </div>
   ) : (
-    <Button className='w-full' variant='buyCta' type='button' onClick={handleAddToCart}>
+    <button
+      className='w-full inline-flex items-center justify-center gap-2 bg-nike-ink hover:bg-black text-white py-3.5 sm:py-4 px-8 rounded-full font-sans text-sm sm:text-base font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50'
+      type='button'
+      disabled={isPending}
+      onClick={handleAddToCart}
+    >
       {isPending ? (
         <Loader className='w-4 h-4 animate-spin' />
       ) : (
         <Plus className='w-4 h-4' />
-      )}{' '}
+      )}
       Agregar al Carrito
-    </Button>
+    </button>
   );
 };
 

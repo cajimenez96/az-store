@@ -107,47 +107,59 @@ const ProductDetailsPage = async (props: {
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className='bg-az-canvas min-h-screen'>
-      <div className='az-wrapper py-8 md:py-12'>
-        {/* Breadcrumb */}
-        <nav className='flex items-center gap-2 az-body-sm text-az-stone mb-8'>
-          <Link href='/' className='hover:text-az-ink transition-colors duration-150'>
-            Inicio
-          </Link>
-          <span>›</span>
-          <Link href='/search' className='hover:text-az-ink transition-colors duration-150'>
-            Productos
-          </Link>
-          <span>›</span>
-          <Link
-            href={`/search?category=${product.category.slug}`}
-            className='hover:text-az-ink transition-colors duration-150'
-          >
-            {product.category.name}
-          </Link>
-          <span>›</span>
-          <span className='text-az-ink az-body-sm'>{product.name}</span>
-        </nav>
+      <div className='bg-white min-h-screen'>
+        <div className='max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10'>
+          {/* Breadcrumb */}
+          <nav className='flex items-center gap-2 font-sans text-xs sm:text-sm text-nike-mute mb-8'>
+            <Link href='/' className='hover:text-nike-ink transition-colors'>
+              Inicio
+            </Link>
+            <span>/</span>
+            <Link href='/search' className='hover:text-nike-ink transition-colors'>
+              Productos
+            </Link>
+            <span>/</span>
+            <Link
+              href={`/search?category=${product.category.slug}`}
+              className='hover:text-nike-ink transition-colors'
+            >
+              {product.category.name}
+            </Link>
+            <span>/</span>
+            <span className='text-nike-ink font-medium truncate max-w-[200px] sm:max-w-none'>
+              {product.name}
+            </span>
+          </nav>
 
-        {/* Product grid: gallery + purchase rail */}
-        <div className='space-y-12'>
-          <ProductGalleryAndActions product={product} cart={cart} />
+          {/* Product grid: gallery + purchase rail */}
+          <div className='space-y-12'>
+            <ProductGalleryAndActions product={product} cart={cart} />
 
-          {/* Description (full width) */}
-          <div className='border-t border-az-hairline-soft pt-6'>
-            <p className='az-caption-bold text-az-steel uppercase tracking-widest mb-3'>
-              Descripción
-            </p>
-            <p className='az-body-sm text-az-charcoal leading-relaxed'>
-              {product.description}
-            </p>
+            {/* Description & Specs Section */}
+            <div className='border-t border-nike-hairline-soft pt-8 grid grid-cols-1 md:grid-cols-2 gap-8'>
+              <div>
+                <h3 className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest mb-3'>
+                  Detalles del Producto
+                </h3>
+                <p className='font-sans text-sm sm:text-base text-nike-charcoal leading-relaxed'>
+                  {product.description}
+                </p>
+              </div>
+              <div className='bg-nike-soft-cloud p-6 rounded-none flex flex-col justify-center'>
+                <h4 className='font-sans text-sm font-semibold text-nike-ink mb-2'>
+                  Envíos y Devoluciones
+                </h4>
+                <p className='font-sans text-xs sm:text-sm text-nike-mute leading-relaxed'>
+                  Despachamos a todo el país. Pagos 100% seguros con Mercado Pago y transferencia bancaria.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom padding on mobile to account for sticky bar */}
-      <div className='h-20 md:hidden' />
-    </div>
+        {/* Bottom padding on mobile to account for sticky bar */}
+        <div className='h-24 md:hidden' />
+      </div>
     </>
   );
 };

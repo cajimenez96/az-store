@@ -16,28 +16,28 @@ const Menu = async () => {
     : null;
 
   return (
-    <div className='flex justify-end gap-2 shrink-0'>
+    <div className='flex items-center justify-end gap-1 sm:gap-2 shrink-0'>
       {/* Desktop nav */}
-      <nav className='hidden md:flex items-center gap-2'>
+      <nav className='hidden md:flex items-center gap-1.5'>
         <Button
           asChild
           variant='ghost'
-          className='relative h-9 w-9 rounded-az-full text-az-ink hover:text-az-ink-deep hover:bg-az-surface-soft transition-colors'
+          className='relative h-10 w-10 rounded-full text-nike-ink hover:text-black hover:bg-nike-soft-cloud transition-colors'
         >
           <Link href='/cart' aria-label='Ver carrito'>
-            <ShoppingCart className='h-4 w-4' />
+            <ShoppingCart className='h-5 w-5' />
             {cartItemsCount > 0 && (
-              <span className='absolute -top-1 -right-1 bg-az-primary text-white w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-bold leading-none'>
+              <span className='absolute top-1 right-1 bg-nike-ink text-white w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-bold leading-none'>
                 {cartItemsCount}
               </span>
             )}
           </Link>
         </Button>
 
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
       </nav>
 
-      {/* User button — always visible on desktop, desktop style */}
+      {/* User button — always visible on desktop */}
       <div className='hidden md:block'>
         <UserButton />
       </div>

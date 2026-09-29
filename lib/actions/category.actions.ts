@@ -3,7 +3,7 @@
 import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
 import { revalidatePath, unstable_cache } from 'next/cache';
-import { requireAdmin } from '@/lib/auth-guard';
+import { assertAdmin } from '@/lib/auth-guard';
 import { DEFAULT_CATEGORY_ID } from '../constants';
 
 // ─── CATEGORIES ─────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ export async function getCategoryById(id: string) {
 
 export async function createCategory(data: { name: string; slug: string }) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const category = await prisma.$transaction(async (tx) => {
       const newCategory = await tx.category.create({ data });
       await tx.size.create({
@@ -59,7 +59,7 @@ export async function createCategory(data: { name: string; slug: string }) {
 
 export async function updateCategory(id: string, data: { name: string; slug: string }) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const category = await prisma.category.update({ where: { id }, data });
     revalidatePath('/admin/categories');
     return { success: true, message: 'Categoría actualizada exitosamente', data: category };
@@ -70,7 +70,7 @@ export async function updateCategory(id: string, data: { name: string; slug: str
 
 export async function deleteCategory(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     if (id === DEFAULT_CATEGORY_ID) {
       return { success: false, message: 'No se puede eliminar la categoría predeterminada del sistema' };
@@ -130,7 +130,7 @@ export async function createSubCategory(data: {
   categoryId: string;
 }) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const subCategory = await prisma.subCategory.create({ data });
     revalidatePath('/admin/categories');
     return { success: true, message: 'Sub-categoría creada exitosamente', data: subCategory };
@@ -144,7 +144,7 @@ export async function updateSubCategory(
   data: { name: string; slug: string; categoryId: string }
 ) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const subCategory = await prisma.subCategory.update({ where: { id }, data });
     revalidatePath('/admin/categories');
     return {
@@ -159,7 +159,7 @@ export async function updateSubCategory(
 
 export async function deleteSubCategory(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     await prisma.subCategory.delete({ where: { id } });
     revalidatePath('/admin/categories');
     return { success: true, message: 'Sub-categoría eliminada exitosamente' };

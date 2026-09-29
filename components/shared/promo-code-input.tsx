@@ -72,13 +72,13 @@ export function PromoCodeInput({
 
   if (appliedCode) {
     return (
-      <div className='bg-green-50 border border-green-200 rounded-az-lg p-4 space-y-3'>
+      <div className='bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl p-4 space-y-2'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
-            <Check className='w-5 h-5 text-green-600' />
+            <Check className='w-4 h-4 text-nike-ink' />
             <div>
-              <p className='az-body-sm-bold text-green-900'>Código aplicado</p>
-              <p className='az-caption text-green-700'>{appliedCode}</p>
+              <p className='text-xs uppercase font-semibold text-[#757575]'>Código aplicado</p>
+              <p className='text-sm font-bold text-nike-ink tracking-wider'>{appliedCode}</p>
             </div>
           </div>
           <Button
@@ -86,16 +86,16 @@ export function PromoCodeInput({
             variant='ghost'
             size='sm'
             onClick={handleRemoveCode}
-            className='text-green-600 hover:text-green-700'
+            className='text-[#757575] hover:text-nike-ink h-8 w-8 p-0 rounded-full'
           >
             <X className='w-4 h-4' />
           </Button>
         </div>
         {appliedDiscount && (
-          <div className='az-body-sm text-green-700'>
+          <div className='text-xs text-nike-ink font-medium'>
             <p>
               Descuento:{' '}
-              <strong>
+              <strong className='font-semibold'>
                 {appliedDiscount}% con {appliedPaymentMethod}
               </strong>
             </p>
@@ -106,14 +106,14 @@ export function PromoCodeInput({
   }
 
   return (
-    <div className='space-y-3'>
-      <label className='az-body-sm-bold text-az-ink-deep'>
+    <div className='space-y-2.5'>
+      <label className='text-xs font-semibold uppercase tracking-wider text-nike-ink/80 block'>
         Código Promocional (opcional)
       </label>
       <div className='flex gap-2'>
         <Input
           type='text'
-          placeholder='Ingresa tu código'
+          placeholder='Ingresá tu código'
           value={code}
           onChange={(e) => {
             setCode(e.target.value.toUpperCase());
@@ -126,7 +126,7 @@ export function PromoCodeInput({
             }
           }}
           className={cn(
-            'bg-az-canvas border-az-hairline-soft rounded-az-lg text-az-ink h-11',
+            'bg-white border-[#cacacb] rounded-full text-nike-ink h-11 px-4 text-sm focus-visible:ring-1 focus-visible:ring-nike-ink uppercase tracking-wider',
             error && 'border-red-400 focus-visible:ring-red-200'
           )}
         />
@@ -134,24 +134,23 @@ export function PromoCodeInput({
           type='button'
           onClick={handleApplyCode}
           disabled={isPending || !code.trim()}
-          variant='outline'
-          className='h-11'
+          className='h-11 px-6 rounded-full bg-nike-ink text-white hover:bg-black text-sm font-medium transition-colors'
         >
           {isPending ? <Loader className='w-4 h-4 animate-spin' /> : 'Aplicar'}
         </Button>
       </div>
 
       {error && (
-        <div className='flex items-start gap-2 bg-red-50 p-3 rounded-az-lg'>
+        <div className='flex items-start gap-2 bg-red-50 p-3 rounded-xl border border-red-200/50'>
           <X className='w-4 h-4 text-red-600 mt-0.5 flex-shrink-0' />
-          <p className='az-caption text-red-700'>{error}</p>
+          <p className='text-xs text-red-700'>{error}</p>
         </div>
       )}
 
       {success && (
-        <div className='flex items-start gap-2 bg-green-50 p-3 rounded-az-lg'>
+        <div className='flex items-start gap-2 bg-green-50 p-3 rounded-xl border border-green-200/50'>
           <Check className='w-4 h-4 text-green-600 mt-0.5 flex-shrink-0' />
-          <p className='az-caption text-green-700'>{success}</p>
+          <p className='text-xs text-green-700'>{success}</p>
         </div>
       )}
     </div>

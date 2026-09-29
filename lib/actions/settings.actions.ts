@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/db/prisma';
-import { requireAdmin } from '@/lib/auth-guard';
+import { assertAdmin } from '@/lib/auth-guard';
 import { revalidatePath } from 'next/cache';
 import { encryptToken, decryptToken } from '@/lib/encrypt';
 
@@ -30,7 +30,7 @@ export async function updateBankSettings(data: {
   alias: string;
   cuit: string;
 }) {
-  await requireAdmin();
+  await assertAdmin();
 
   const entries: [string, string][] = [
     ['BANK_NAME', data.bank],
@@ -87,7 +87,7 @@ export async function updateMercadoPagoSettings(data: {
   accessToken: string;
   publicKey: string;
 }) {
-  await requireAdmin();
+  await assertAdmin();
 
   try {
     const encryptedAccessToken = await encryptToken(data.accessToken);
@@ -134,7 +134,7 @@ export async function updateShippingSettings(data: {
   freeShippingThreshold: number;
   freeShippingCities: string[];
 }) {
-  await requireAdmin();
+  await assertAdmin();
 
   const entries: [string, string][] = [
     ['FREE_SHIPPING_THRESHOLD', data.freeShippingThreshold.toString()],

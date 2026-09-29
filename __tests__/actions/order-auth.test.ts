@@ -31,8 +31,8 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { approveBankTransfer, rejectBankTransfer } from '../../lib/actions/order.actions';
 
-const mockAuth = auth as jest.Mock;
-const mockRedirect = redirect as jest.Mock;
+const mockAuth = auth as unknown as jest.Mock;
+const mockRedirect = redirect as unknown as jest.Mock;
 
 function mockSession(role: string) {
   mockAuth.mockResolvedValue({
@@ -52,58 +52,59 @@ describe('AZ-003 · Autorización admin en Server Actions', () => {
   });
 
   describe('approveBankTransfer', () => {
-    it('llama a redirect(/unauthorized) cuando role es "user"', async () => {
+    it('retorna error de autorización cuando role es "user"', async () => {
       mockSession('user');
       const result = await approveBankTransfer('order-1');
-      expectRedirectToUnauthorized();
       expect(result.success).toBe(false);
+      expect(result.message).toMatch(/permisos/i);
     });
 
-    it('llama a redirect(/unauthorized) cuando no hay sesión', async () => {
+    it('retorna error de autorización cuando no hay sesión', async () => {
       mockAuth.mockResolvedValue(null);
       const result = await approveBankTransfer('order-1');
-      expectRedirectToUnauthorized();
       expect(result.success).toBe(false);
+      expect(result.message).toMatch(/permisos/i);
     });
 
-    it('no llama a redirect cuando role es "admin"', async () => {
+    it('permite continuar cuando role es "admin"', async () => {
       mockSession('admin');
-      await approveBankTransfer('order-1');
-      expect(mockRedirect).not.toHaveBeenCalled();
+      const result = await approveBankTransfer('order-1');
+      // No falla por auth (falla por orden no encontrada en db mock)
+      expect(result.message).not.toMatch(/permisos/i);
     });
 
-    it('no llama a redirect cuando role es "seller"', async () => {
+    it('permite continuar cuando role es "seller"', async () => {
       mockSession('seller');
-      await approveBankTransfer('order-1');
-      expect(mockRedirect).not.toHaveBeenCalled();
+      const result = await approveBankTransfer('order-1');
+      expect(result.message).not.toMatch(/permisos/i);
     });
   });
 
   describe('rejectBankTransfer', () => {
-    it('llama a redirect(/unauthorized) cuando role es "user"', async () => {
+    it('retorna error de autorización cuando role es "user"', async () => {
       mockSession('user');
       const result = await rejectBankTransfer('order-1');
-      expectRedirectToUnauthorized();
       expect(result.success).toBe(false);
+      expect(result.message).toMatch(/permisos/i);
     });
 
-    it('llama a redirect(/unauthorized) cuando no hay sesión', async () => {
+    it('retorna error de autorización cuando no hay sesión', async () => {
       mockAuth.mockResolvedValue(null);
       const result = await rejectBankTransfer('order-1');
-      expectRedirectToUnauthorized();
       expect(result.success).toBe(false);
+      expect(result.message).toMatch(/permisos/i);
     });
 
-    it('no llama a redirect cuando role es "admin"', async () => {
+    it('permite continuar cuando role es "admin"', async () => {
       mockSession('admin');
-      await rejectBankTransfer('order-1');
-      expect(mockRedirect).not.toHaveBeenCalled();
+      const result = await rejectBankTransfer('order-1');
+      expect(result.message).not.toMatch(/permisos/i);
     });
 
-    it('no llama a redirect cuando role es "seller"', async () => {
+    it('permite continuar cuando role es "seller"', async () => {
       mockSession('seller');
-      await rejectBankTransfer('order-1');
-      expect(mockRedirect).not.toHaveBeenCalled();
+      const result = await rejectBankTransfer('order-1');
+      expect(result.message).not.toMatch(/permisos/i);
     });
   });
 });

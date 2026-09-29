@@ -7,8 +7,13 @@ jest.mock('query-string', () => ({ stringifyUrl: jest.fn(), parse: jest.fn() }))
 jest.mock('@/lib/auth-guard', () => ({
   requireAdmin: jest.fn().mockResolvedValue(undefined),
   requireAdminOrSeller: jest.fn().mockResolvedValue(undefined),
+  assertAdmin: jest.fn().mockResolvedValue(undefined),
+  assertAdminOrSeller: jest.fn().mockResolvedValue(undefined),
 }));
-jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
+jest.mock('next/cache', () => ({
+  revalidatePath: jest.fn(),
+  unstable_cache: (fn: any) => fn,
+}));
 jest.mock('@/db/prisma', () => ({
   prisma: {
     brand: { findFirst: jest.fn() },

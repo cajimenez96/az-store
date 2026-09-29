@@ -5,7 +5,7 @@ import { formatError } from '../utils';
 import { revalidatePath } from 'next/cache';
 import { insertBrandSchema, updateBrandSchema } from '../validators';
 import { z } from 'zod';
-import { requireAdminOrSeller } from '@/lib/auth-guard';
+import { assertAdminOrSeller } from '@/lib/auth-guard';
 import { DEFAULT_BRAND_ID } from '../constants';
 
 // Get all brands
@@ -28,7 +28,7 @@ export async function getBrandById(brandId: string) {
 // Create a brand
 export async function createBrand(data: z.infer<typeof insertBrandSchema>) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
     const brandData = insertBrandSchema.parse(data);
 
     // Check if brand already exists by slug
@@ -58,7 +58,7 @@ export async function createBrand(data: z.infer<typeof insertBrandSchema>) {
 // Update a brand
 export async function updateBrand(data: z.infer<typeof updateBrandSchema>) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
     const brandData = updateBrandSchema.parse(data);
 
     const brandExists = await prisma.brand.findFirst({
@@ -98,7 +98,7 @@ export async function updateBrand(data: z.infer<typeof updateBrandSchema>) {
 // Delete a brand (reassigns products to default sentinel before deleting)
 export async function deleteBrand(id: string) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
 
     if (id === DEFAULT_BRAND_ID) {
       return { success: false, message: 'No se puede eliminar la marca predeterminada del sistema' };

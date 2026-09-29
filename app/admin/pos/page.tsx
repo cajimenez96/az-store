@@ -76,11 +76,13 @@ export default async function PosPage() {
   }));
 
   return (
-    <div className='space-y-6'>
-      <div className='flex flex-col gap-1 pb-4 border-b border-az-hairline-soft'>
-        <h1 className='az-heading-lg text-az-ink-deep'>Punto de Venta (POS)</h1>
-        <p className='az-body-sm text-az-steel'>
-          Registrá ventas en efectivo, transferencias y pagos locales de forma rápida.
+    <div className='space-y-8 max-w-7xl mx-auto'>
+      <div className='flex flex-col gap-1 pb-4 border-b border-[#e5e5e5]'>
+        <h1 className='text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display'>
+          Punto de Venta (POS)
+        </h1>
+        <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold'>
+          Registrá ventas en el local, transferencias y pagos directos
         </p>
       </div>
 

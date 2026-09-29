@@ -363,3 +363,51 @@ export function saleNotificationTemplate(
     ${emailFooter()}
   `;
 }
+
+export function abandonedCartTemplate(
+  customerName: string,
+  recoveryLink: string,
+  items: Array<{ name: string; qty: number; price: string }>
+): string {
+  const itemsRows = items
+    .map(
+      (item) => `
+      <tr>
+        <td>${item.name}</td>
+        <td style="text-align: center;">${item.qty}</td>
+        <td style="text-align: right;">$${parseFloat(item.price).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      </tr>
+    `
+    )
+    .join('');
+
+  return `
+    ${emailHeader()}
+    <div class="content">
+      <h1>¿Olvidaste algo en tu carrito?</h1>
+      <p>Hola ${customerName},</p>
+      <p>Notamos que dejaste artículos seleccionados en tu carrito. Guardamos tus productos para que puedas finalizar tu compra cuando quieras.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th style="text-align: center;">Cantidad</th>
+            <th style="text-align: right;">Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsRows}
+        </tbody>
+      </table>
+
+      <div style="text-align: center;">
+        <a href="${recoveryLink}" class="button" style="background-color: #111111; color: #ffffff; border-radius: 9999px; padding: 14px 36px; text-decoration: none; font-weight: 600; display: inline-block;">Recuperar mi carrito</a>
+      </div>
+
+      <p style="font-size: 13px; color: #6b7280; text-align: center;">El stock es limitado y los productos no quedan reservados hasta confirmar el pago.</p>
+    </div>
+    ${emailFooter()}
+  `;
+}
+

@@ -1,7 +1,7 @@
 'use server';
 
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
-import { requireAdmin, requireAdminOrSeller } from '../auth-guard';
+import { assertAdmin, assertAdminOrSeller, requireAdmin, requireAdminOrSeller } from '../auth-guard';
 import { convertToPlainObject, formatError, round2 } from '../utils';
 import { auth } from '@/auth';
 import { getMyCart } from './cart.actions';
@@ -762,7 +762,7 @@ export async function getAllOrders({
 // Delete an order
 export async function deleteOrder(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     await prisma.order.delete({ where: { id } });
 
     revalidatePath('/admin/orders');
@@ -779,7 +779,7 @@ export async function deleteOrder(id: string) {
 // Update COD order to paid
 export async function updateOrderToPaidCOD(orderId: string) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
     await updateOrderToPaid({ orderId });
 
     revalidatePath(`/order/${orderId}`);
@@ -793,7 +793,7 @@ export async function updateOrderToPaidCOD(orderId: string) {
 // Update COD order to delivered
 export async function deliverOrder(orderId: string) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
@@ -847,7 +847,7 @@ export async function updateShippingStatus(
   notes?: string
 ) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
 
     // Validate input
     const validated = updateShippingStatusSchema.parse({ status, notes });
@@ -954,7 +954,7 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
 // Approve bank transfer (admin)
 export async function approveBankTransfer(orderId: string) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
 
     const order = await prisma.order.findFirst({
       where: { id: orderId },
@@ -1001,7 +1001,7 @@ export async function approveBankTransfer(orderId: string) {
 // Reject bank transfer (admin)
 export async function rejectBankTransfer(orderId: string) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
 
     const order = await prisma.order.findFirst({
       where: { id: orderId },
@@ -1159,7 +1159,7 @@ export async function createPosOrder(data: {
   customerAddress?: string;
 }) {
   try {
-    const session = await requireAdminOrSeller();
+    const session = await assertAdminOrSeller();
     if (!session) throw new Error('Usuario no autorizado');
 
     const {
@@ -1398,7 +1398,7 @@ export async function createPosOrder(data: {
 // Get abandoned cart metrics for admin dashboard
 export async function getAbandonedCartMetrics() {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);

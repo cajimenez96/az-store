@@ -57,44 +57,51 @@ function MetricCard({
 }) {
   const accentMap = {
     default: {
-      icon: 'text-az-steel',
-      value: 'text-az-ink-deep',
+      icon: 'text-[#111111]',
+      bg: 'bg-[#f5f5f5]',
+      value: 'text-[#111111]',
     },
     primary: {
-      icon: 'text-az-primary',
-      value: 'text-az-primary',
+      icon: 'text-[#111111]',
+      bg: 'bg-[#f5f5f5]',
+      value: 'text-[#111111]',
     },
     warning: {
-      icon: 'text-az-attention',
-      value: 'text-az-attention',
+      icon: 'text-[#d97706]',
+      bg: 'bg-[#fef3c7]',
+      value: 'text-[#111111]',
     },
     critical: {
-      icon: 'text-az-critical',
-      value: 'text-az-critical',
+      icon: 'text-[#d30005]',
+      bg: 'bg-[#fee2e2]',
+      value: 'text-[#d30005]',
     },
   };
 
   const colors = accentMap[accent ?? 'default'];
 
   return (
-    <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 flex flex-col gap-3'>
+    <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 flex flex-col justify-between gap-4 shadow-none'>
       <div className='flex items-center justify-between'>
-        <p className='az-caption-bold text-az-steel uppercase tracking-wider'>
+        <p className='text-xs font-semibold uppercase tracking-wider text-[#707072]'>
           {label}
         </p>
         <div
           className={cn(
-            'w-8 h-8 rounded-az-lg bg-az-surface-soft flex items-center justify-center',
+            'w-9 h-9 rounded-full flex items-center justify-center',
+            colors.bg,
             colors.icon
           )}
         >
           <Icon className='w-4 h-4' />
         </div>
       </div>
-      <div className={cn('az-heading-sm tabular-nums', colors.value)}>
-        {value}
+      <div>
+        <div className={cn('text-3xl font-medium tracking-tight font-marder-display tabular-nums', colors.value)}>
+          {value}
+        </div>
+        {sublabel && <p className='text-xs text-[#707072] mt-1'>{sublabel}</p>}
       </div>
-      {sublabel && <p className='az-caption text-az-stone'>{sublabel}</p>}
     </div>
   );
 }
@@ -114,8 +121,17 @@ const AdminOverviewPage = async () => {
   const abandonedCartMetrics = isAdmin ? await getAbandonedCartMetrics() : null;
 
   return (
-    <div className='space-y-6'>
-      <h1 className='az-heading-lg text-az-ink-deep'>Panel de Control</h1>
+    <div className='space-y-8 max-w-7xl mx-auto'>
+      <div className='flex items-center justify-between'>
+        <div>
+          <h1 className='text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display'>
+            Panel de Control
+          </h1>
+          <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-1'>
+            Métricas clave y estado de operaciones
+          </p>
+        </div>
+      </div>
 
       {/* KPI row */}
       <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
@@ -196,60 +212,65 @@ const AdminOverviewPage = async () => {
 
       {/* Commission section */}
       {isAdmin && commissionSummary !== null && (
-        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5'>
-          <p className='az-body-md-bold text-az-ink-deep mb-4'>
-            Comisiones de Vendedores
-          </p>
+        <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-none'>
+          <div className='mb-4'>
+            <h2 className='text-xl font-medium tracking-tight text-[#111111] font-marder-display'>
+              Comisiones de Vendedores
+            </h2>
+            <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-0.5'>
+              Liquidación y seguimiento por vendedor
+            </p>
+          </div>
           {commissionSummary.length === 0 ? (
-            <p className='az-body-sm text-az-stone py-4 text-center'>
+            <p className='text-xs text-[#707072] py-6 text-center font-medium'>
               No hay vendedores registrados.
             </p>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                <TableRow className='border-b border-[#e5e5e5] hover:bg-transparent'>
+                  <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>
                     Vendedor
                   </TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                  <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>
                     Email
                   </TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                  <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>
                     Comisión
                   </TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                  <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>
                     Total vendido
                   </TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                  <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>
                     Comisión ganada
                   </TableHead>
-                  <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'></TableHead>
+                  <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {commissionSummary.map((seller) => (
                   <TableRow
                     key={seller.id}
-                    className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
+                    className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors'
                   >
-                    <TableCell className='az-body-sm-bold text-az-ink py-3'>
+                    <TableCell className='text-sm font-semibold text-[#111111] py-4'>
                       {seller.name}
                     </TableCell>
-                    <TableCell className='az-body-sm text-az-charcoal py-3'>
+                    <TableCell className='text-sm text-[#707072] py-4'>
                       {seller.email}
                     </TableCell>
-                    <TableCell className='az-body-sm text-az-ink-deep py-3 text-right tabular-nums'>
+                    <TableCell className='text-sm text-[#111111] py-4 text-right tabular-nums'>
                       {seller.commissionRate != null
                         ? `${Math.round(seller.commissionRate * 100)}%`
                         : '—'}
                     </TableCell>
-                    <TableCell className='az-body-sm text-az-ink-deep py-3 text-right tabular-nums'>
+                    <TableCell className='text-sm text-[#111111] py-4 text-right tabular-nums'>
                       {formatCurrency(seller.totalSales)}
                     </TableCell>
-                    <TableCell className='az-body-sm-bold text-az-ink-deep py-3 text-right tabular-nums'>
+                    <TableCell className='text-sm font-semibold text-[#111111] py-4 text-right tabular-nums'>
                       {formatCurrency(seller.totalCommission)}
                     </TableCell>
-                    <TableCell className='py-3 text-right'>
+                    <TableCell className='py-4 text-right'>
                       <CommissionEditor
                         sellerId={seller.id}
                         sellerName={seller.name}
@@ -265,15 +286,15 @@ const AdminOverviewPage = async () => {
       )}
 
       {!isAdmin && sellerOwnRate !== undefined && (
-        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 flex items-center gap-3'>
-          <div className='w-9 h-9 rounded-az-lg bg-az-surface-soft flex items-center justify-center text-az-primary'>
-            <Percent className='w-4 h-4' />
+        <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 flex items-center gap-4 shadow-none'>
+          <div className='w-10 h-10 rounded-full bg-[#f5f5f5] flex items-center justify-center text-[#111111]'>
+            <Percent className='w-5 h-5' />
           </div>
           <div>
-            <p className='az-caption-bold text-az-stone uppercase tracking-wider'>
+            <p className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>
               Tu comisión por ventas POS
             </p>
-            <p className='az-heading-sm text-az-ink-deep mt-0.5'>
+            <p className='text-2xl font-medium tracking-tight text-[#111111] font-marder-display mt-0.5'>
               {sellerOwnRate != null
                 ? `${Math.round(sellerOwnRate * 100)}%`
                 : 'Sin comisión asignada'}
@@ -283,52 +304,64 @@ const AdminOverviewPage = async () => {
       )}
 
       {/* Charts + recent sales */}
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7'>
-        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-4'>
-          <p className='az-body-md-bold text-az-ink-deep mb-4'>Resumen</p>
+      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-7'>
+        <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 col-span-4 shadow-none'>
+          <div className='mb-6'>
+            <h2 className='text-xl font-medium tracking-tight text-[#111111] font-marder-display'>
+              Resumen de Ventas
+            </h2>
+            <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-0.5'>
+              Facturación mensual acumulada
+            </p>
+          </div>
           <Charts data={{ salesData: summary.salesData }} />
         </div>
 
-        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-3'>
-          <p className='az-body-md-bold text-az-ink-deep mb-4'>
-            Ventas Recientes
-          </p>
+        <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 col-span-3 shadow-none'>
+          <div className='mb-6'>
+            <h2 className='text-xl font-medium tracking-tight text-[#111111] font-marder-display'>
+              Ventas Recientes
+            </h2>
+            <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-0.5'>
+              Últimas transacciones registradas
+            </p>
+          </div>
           <Table>
             <TableHeader>
-              <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+              <TableRow className='border-b border-[#e5e5e5] hover:bg-transparent'>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>
                   Comprador
                 </TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>
                   Fecha
                 </TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>
                   Total
                 </TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'></TableHead>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {summary.latestSales.map((order) => (
                 <TableRow
                   key={order.id}
-                  className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
+                  className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors'
                 >
-                  <TableCell className='az-body-sm text-az-ink py-3'>
+                  <TableCell className='text-sm text-[#111111] py-3.5'>
                     {order?.user?.name ?? 'Usuario Eliminado'}
                   </TableCell>
-                  <TableCell className='az-body-sm text-az-charcoal py-3 tabular-nums'>
+                  <TableCell className='text-sm text-[#707072] py-3.5 tabular-nums'>
                     {formatDateTime(order.createdAt).dateOnly}
                   </TableCell>
-                  <TableCell className='az-body-sm-bold text-az-ink-deep py-3 tabular-nums'>
+                  <TableCell className='text-sm font-semibold text-[#111111] py-3.5 tabular-nums'>
                     {formatCurrency(order.totalPrice)}
                   </TableCell>
-                  <TableCell className='py-3'>
+                  <TableCell className='py-3.5'>
                     <Link href={`/order/${order.id}`}>
                       <Button
                         variant='outline'
                         size='sm'
-                        className='h-7 az-caption-bold rounded-az-full border-az-hairline-soft text-az-ink hover:bg-az-ink-deep hover:text-white hover:border-az-ink-deep transition-colors'
+                        className='h-8 px-4 text-xs font-semibold uppercase tracking-wider rounded-full border border-[#e5e5e5] text-[#111111] hover:bg-[#111111] hover:text-white transition-colors'
                       >
                         Ver
                       </Button>
@@ -342,7 +375,7 @@ const AdminOverviewPage = async () => {
       </div>
 
       {/* Config + revenue by method */}
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-7'>
+      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-7'>
         <div className='col-span-3'>
           <SettingForm
             settingKey='CRITICAL_STOCK_THRESHOLD'
@@ -352,17 +385,22 @@ const AdminOverviewPage = async () => {
           />
         </div>
 
-        <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 col-span-4'>
-          <p className='az-body-md-bold text-az-ink-deep mb-4'>
-            Ingresos por Método de Pago
-          </p>
+        <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 col-span-4 shadow-none'>
+          <div className='mb-6'>
+            <h2 className='text-xl font-medium tracking-tight text-[#111111] font-marder-display'>
+              Ingresos por Método de Pago
+            </h2>
+            <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-0.5'>
+              Distribución de pagos procesados
+            </p>
+          </div>
           <Table>
             <TableHeader>
-              <TableRow className='border-b border-az-hairline-soft hover:bg-transparent'>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9'>
+              <TableRow className='border-b border-[#e5e5e5] hover:bg-transparent'>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>
                   Método de Pago
                 </TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-9 text-right'>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>
                   Ingresos
                 </TableHead>
               </TableRow>
@@ -372,7 +410,7 @@ const AdminOverviewPage = async () => {
                 <TableRow>
                   <TableCell
                     colSpan={2}
-                    className='text-center az-body-sm text-az-stone py-8'
+                    className='text-center text-xs font-semibold text-[#707072] py-8'
                   >
                     No hay datos de ingresos
                   </TableCell>
@@ -389,12 +427,12 @@ const AdminOverviewPage = async () => {
                   return (
                     <TableRow
                       key={item.paymentMethod}
-                      className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
+                      className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors'
                     >
-                      <TableCell className='az-body-sm-bold text-az-ink py-3'>
+                      <TableCell className='text-sm font-semibold text-[#111111] py-3.5'>
                         {displayName}
                       </TableCell>
-                      <TableCell className='az-body-sm-bold text-az-ink-deep py-3 text-right tabular-nums'>
+                      <TableCell className='text-sm font-semibold text-[#111111] py-3.5 text-right tabular-nums'>
                         {formatCurrency(item.totalSales)}
                       </TableCell>
                     </TableRow>

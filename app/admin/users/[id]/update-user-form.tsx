@@ -70,7 +70,7 @@ const UpdateUserForm = ({
 
   return (
     <Form {...form}>
-      <form method='POST' onSubmit={form.handleSubmit(onSubmit)}>
+      <form method='POST' onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         {/* Email */}
         <div>
           <FormField
@@ -85,11 +85,12 @@ const UpdateUserForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Email</FormLabel>
                 <FormControl>
                   <Input
                     disabled={true}
                     placeholder='Ingresá el correo electrónico'
+                    className='bg-[#f5f5f5] border-[#e5e5e5] rounded-xl text-[#707072] cursor-not-allowed h-11'
                     {...field}
                   />
                 </FormControl>
@@ -112,9 +113,13 @@ const UpdateUserForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Nombre</FormLabel>
+                <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Nombre</FormLabel>
                 <FormControl>
-                  <Input placeholder='Ingresá el nombre' {...field} />
+                  <Input
+                    placeholder='Ingresá el nombre'
+                    className='bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11'
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -135,27 +140,27 @@ const UpdateUserForm = ({
               >;
             }) => (
               <FormItem className='w-full'>
-                <FormLabel>Rol</FormLabel>
+                <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Rol</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value.toString()}
                   disabled={user.id === currentUserId}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className='bg-white border-[#e5e5e5] rounded-xl text-[#111111] h-11'>
                       <SelectValue placeholder='Seleccioná un rol' />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className='bg-white border-[#e5e5e5] rounded-xl shadow-xl'>
                     {USER_ROLES.map((role) => (
-                      <SelectItem key={role} value={role}>
+                      <SelectItem key={role} value={role} className='cursor-pointer hover:bg-[#f5f5f5]'>
                         {role === 'user' ? 'Usuario' : role === 'admin' ? 'Administrador' : role === 'seller' ? 'Vendedor' : role}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {user.id === currentUserId && (
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-xs text-[#707072] mt-2">
                     No puedes cambiar tu propio rol por razones de seguridad.
                   </p>
                 )}
@@ -164,10 +169,10 @@ const UpdateUserForm = ({
             )}
           />
         </div>
-        <div className='flex-between mt-6'>
+        <div className='pt-2'>
           <Button
             type='submit'
-            className='w-full'
+            className='w-full bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-3 h-auto'
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting ? 'Guardando...' : 'Actualizar Usuario'}

@@ -59,7 +59,7 @@ export default function ColorForm({
       <div>
         <label
           htmlFor='color-name'
-          className='text-sm font-medium leading-none mb-2 block'
+          className='text-xs font-bold uppercase tracking-wider text-[#111111] mb-2 block'
         >
           Nombre del color
         </label>
@@ -69,25 +69,25 @@ export default function ColorForm({
           placeholder='Ej: Azul marino'
           value={name}
           onChange={(e) => setName(e.target.value)}
+          className='bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11'
           required
         />
       </div>
 
       <div>
-        <label className='text-sm font-medium leading-none mb-2 block'>
+        <label className='text-xs font-bold uppercase tracking-wider text-[#111111] mb-2 block'>
           Valor hex
         </label>
         <ColorPickerField value={hex} onChange={setHex} />
-        <p className='az-caption text-az-stone mt-2'>
+        <p className='text-xs text-[#707072] mt-2'>
           Elegí un color de la paleta o ingresá el hex manualmente (formato #RRGGBB).
         </p>
       </div>
 
       <Button
         type='submit'
-        size='lg'
         disabled={isPending}
-        className='w-full sm:w-auto'
+        className='w-full sm:w-auto bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-2.5 h-auto'
       >
         {isPending
           ? 'Guardando...'

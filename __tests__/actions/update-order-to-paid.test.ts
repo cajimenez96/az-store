@@ -11,7 +11,7 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
-jest.mock('@/email', () => ({
+jest.mock('@/lib/email', () => ({
   sendPurchaseReceipt: jest.fn(),
   sendNewSaleNotification: jest.fn(),
   sendShippingUpdate: jest.fn(),
@@ -63,6 +63,7 @@ function buildMockTx(executeRawReturn: number) {
       update: jest.fn().mockResolvedValue(updatedOrder),
     },
     $executeRaw: jest.fn().mockResolvedValue(executeRawReturn),
+    $executeRawUnsafe: jest.fn().mockResolvedValue(executeRawReturn),
   };
 }
 
@@ -88,7 +89,7 @@ describe('AZ-005 · Guard atómico de stock en updateOrderToPaid', () => {
 
       await updateOrderToPaid({ orderId: ORDER_ID });
 
-      expect(mockTx.$executeRaw).toHaveBeenCalledTimes(1);
+      expect(mockTx.$executeRawUnsafe).toHaveBeenCalledTimes(1);
       expect(mockTx.order.update).toHaveBeenCalledWith(
         expect.objectContaining({ where: { id: ORDER_ID }, data: expect.objectContaining({ isPaid: true }) })
       );

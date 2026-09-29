@@ -13,8 +13,8 @@ interface MercadoPagoValues {
 }
 
 const inputClass =
-  'bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0';
-const labelClass = 'az-body-sm-bold text-az-ink-deep';
+  'bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111]';
+const labelClass = 'text-xs font-bold uppercase tracking-wider text-[#111111]';
 
 export default function MercadoPagoSettingsForm({
   initialValues,
@@ -35,8 +35,8 @@ export default function MercadoPagoSettingsForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-      <div className='bg-az-surface-soft border border-az-hairline-soft rounded-az-lg p-3 mb-4'>
-        <p className='az-caption text-az-stone'>
+      <div className='bg-[#f9f9f9] border border-[#e5e5e5] rounded-xl p-3.5 mb-4'>
+        <p className='text-xs text-[#707072]'>
           ℹ️ El Access Token se encripta antes de guardarse. La clave pública es visible.
         </p>
       </div>
@@ -50,7 +50,7 @@ export default function MercadoPagoSettingsForm({
             type='password'
             className={inputClass}
           />
-          <p className='az-caption text-az-stone mt-1'>
+          <p className='text-xs text-[#707072] mt-1'>
             Token de acceso secreto. Se encripta automáticamente.
           </p>
         </div>
@@ -62,12 +62,16 @@ export default function MercadoPagoSettingsForm({
             placeholder='TEST-...'
             className={inputClass}
           />
-          <p className='az-caption text-az-stone mt-1'>Clave pública para el cliente.</p>
+          <p className='text-xs text-[#707072] mt-1'>Clave pública para el cliente.</p>
         </div>
       </div>
 
       <div className='flex justify-end pt-2'>
-        <Button type='submit' variant='buyCta' disabled={isSubmitting}>
+        <Button
+          type='submit'
+          disabled={isSubmitting}
+          className='bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-2.5 h-auto'
+        >
           {isSubmitting ? 'Guardando...' : 'Guardar credenciales'}
         </Button>
       </div>

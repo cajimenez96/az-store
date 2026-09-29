@@ -166,6 +166,7 @@ const config: Config = {
     '/node_modules/',
     '/__tests__/factories/',
     '/__tests__/integration/',
+    '/tests/',
   ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files

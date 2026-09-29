@@ -32,22 +32,25 @@ export default async function AdminBrandsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="h2-bold">Marcas</h1>
-        <Button asChild variant="default">
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e5e5]">
+        <div>
+          <h1 className="text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display">Marcas</h1>
+          <p className="text-xs text-[#707072] uppercase tracking-wider font-semibold mt-1">Fabricantes y marcas del catálogo</p>
+        </div>
+        <Button asChild className="rounded-full bg-[#111111] text-white hover:bg-black text-xs font-semibold uppercase tracking-wider px-6 h-10">
           <Link href="/admin/brands/create">+ Marca</Link>
         </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-none overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>MARCA</TableHead>
-              <TableHead>SLUG</TableHead>
-              <TableHead>PRODUCTOS</TableHead>
-              <TableHead className="w-[180px]">ACCIONES</TableHead>
+            <TableRow className="border-b border-[#e5e5e5] hover:bg-transparent">
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">MARCA</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">SLUG</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">PRODUCTOS</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right">ACCIONES</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -60,17 +63,17 @@ export default async function AdminBrandsPage() {
                   : undefined;
 
               return (
-                <TableRow key={brand.id} className="bg-az-surface-soft border-b border-az-hairline-soft">
-                  <TableCell className="font-medium text-az-ink-deep">{brand.name}</TableCell>
-                  <TableCell className="text-sm text-az-steel">{brand.slug}</TableCell>
-                  <TableCell className="text-sm text-az-steel">{productCount}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center gap-2">
+                <TableRow key={brand.id} className="border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors">
+                  <TableCell className="font-semibold text-sm text-[#111111] py-4">{brand.name}</TableCell>
+                  <TableCell className="text-xs text-[#707072] font-mono py-4">{brand.slug}</TableCell>
+                  <TableCell className="text-sm font-semibold text-[#111111] py-4 tabular-nums">{productCount}</TableCell>
+                  <TableCell className="py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
                       {isDefault ? (
-                        <Badge variant="secondary">Predeterminada</Badge>
+                        <Badge variant="secondary" className="rounded-full text-xs">Predeterminada</Badge>
                       ) : (
                         <>
-                          <Button asChild variant="outline" size="sm">
+                          <Button asChild variant="outline" size="sm" className="h-8 px-4 text-xs font-semibold uppercase tracking-wider rounded-full border border-[#e5e5e5] text-[#111111] hover:bg-[#111111] hover:text-white transition-colors">
                             <Link href={`/admin/brands/${brand.id}`}>Editar</Link>
                           </Button>
                           <DeleteDialog
@@ -87,7 +90,7 @@ export default async function AdminBrandsPage() {
             })}
             {brands.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-4 text-az-stone">
+                <TableCell colSpan={4} className="text-center py-6 text-xs font-semibold text-[#707072]">
                   No hay marcas registradas.
                 </TableCell>
               </TableRow>

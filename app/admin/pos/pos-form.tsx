@@ -362,17 +362,17 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
       {/* Product Catalog Column */}
       <div className='lg:col-span-7 space-y-6'>
         {/* Search Header and Category Filter */}
-        <div className='bg-az-canvas border border-az-hairline-soft rounded-az-xl p-5 space-y-4'>
+        <div className='bg-white border border-[#e5e5e5] rounded-2xl p-5 space-y-4 shadow-none'>
           <div className='flex gap-3 items-center'>
             <div className='relative flex-1'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-az-stone h-4 w-4' />
-              <Input
-                    data-testid='pos-customer-search'
+              <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 text-[#707072] h-4 w-4' />
+              <input
+                data-testid='pos-customer-search'
                 type='text'
                 placeholder='Buscar producto por nombre, marca o slug...'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className='pl-10 h-11 border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                className='w-full pl-10 pr-4 h-11 text-xs font-medium text-[#111111] bg-[#f5f5f5] placeholder:text-[#707072] rounded-full border border-transparent focus:border-[#111111] focus:bg-white focus:outline-none transition-all'
                 autoFocus
               />
             </div>
@@ -380,7 +380,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <Button
                 variant='ghost'
                 onClick={() => setSearchQuery('')}
-                className='text-xs h-11 px-4 hover:bg-az-surface-soft rounded-az-lg az-caption-bold text-az-steel'
+                className='text-xs h-11 px-4 hover:bg-[#f5f5f5] rounded-full font-semibold uppercase tracking-wider text-[#707072]'
               >
                 Limpiar
               </Button>
@@ -389,15 +389,15 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
           {/* Categories Quick Filter */}
           <div className='flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none'>
-            <span className='az-caption-bold text-az-stone flex items-center gap-1 mr-1 flex-shrink-0 uppercase tracking-wider'>
+            <span className='text-xs font-semibold text-[#707072] flex items-center gap-1 mr-1 flex-shrink-0 uppercase tracking-wider'>
               <Filter className='h-3 w-3' /> Categoría:
             </span>
             <button
               onClick={() => setSelectedCategoryId('all')}
-              className={`px-3 py-1.5 rounded-az-full az-caption-bold transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
                 selectedCategoryId === 'all'
-                  ? 'bg-az-ink-deep text-white'
-                  : 'bg-az-surface-soft hover:bg-az-hairline-soft text-az-charcoal'
+                  ? 'bg-[#111111] text-white shadow-sm'
+                  : 'bg-[#f5f5f5] hover:bg-[#e5e5e5] text-[#111111]'
               }`}
             >
               Todos
@@ -406,10 +406,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategoryId(cat.id)}
-                className={`px-3 py-1.5 rounded-az-full az-caption-bold transition-all flex-shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all flex-shrink-0 ${
                   selectedCategoryId === cat.id
-                    ? 'bg-az-ink-deep text-white'
-                    : 'bg-az-surface-soft hover:bg-az-hairline-soft text-az-charcoal'
+                    ? 'bg-[#111111] text-white shadow-sm'
+                    : 'bg-[#f5f5f5] hover:bg-[#e5e5e5] text-[#111111]'
                 }`}
               >
                 {cat.name}
@@ -421,7 +421,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
         {/* Product Catalog Grid */}
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[62vh] overflow-y-auto pr-2'>
           {filteredProducts.length === 0 ? (
-            <div className='col-span-2 py-12 text-center az-body-sm text-az-stone bg-az-surface-soft border border-dashed border-az-hairline rounded-az-xl'>
+            <div className='col-span-2 py-12 text-center text-xs font-semibold text-[#707072] bg-[#f9f9f9] border border-dashed border-[#e5e5e5] rounded-2xl'>
               No se encontraron productos con los filtros seleccionados.
             </div>
           ) : (
@@ -430,10 +430,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               return (
                 <div
                   key={product.id}
-                  className='bg-az-canvas border border-az-hairline-soft rounded-az-xl p-4 flex flex-col justify-between hover:shadow-sm transition-all duration-200 group'
+                  className='bg-white border border-[#e5e5e5] rounded-2xl p-4 flex flex-col justify-between hover:border-[#111111] transition-all duration-200 group shadow-none'
                 >
                   <div className='flex gap-4'>
-                    <div className='relative h-20 w-20 rounded-az-xl overflow-hidden bg-az-surface-soft border border-az-hairline-soft flex-shrink-0'>
+                    <div className='relative h-20 w-20 rounded-xl overflow-hidden bg-[#f5f5f5] border border-[#e5e5e5] flex-shrink-0'>
                       <Image
                         src={product.images[0] || '/placeholder.png'}
                         alt={product.name}
@@ -443,24 +443,24 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                       />
                     </div>
                     <div className='space-y-1 min-w-0'>
-                      <span className='az-caption-bold text-az-stone uppercase tracking-wider block'>
+                      <span className='text-[10px] font-semibold text-[#707072] uppercase tracking-wider block'>
                         {product.brand?.name || 'Genérica'}
                       </span>
-                      <h3 className='az-body-sm-bold text-az-ink-deep truncate' title={product.name}>
+                      <h3 className='text-sm font-semibold text-[#111111] truncate' title={product.name}>
                         {product.name}
                       </h3>
-                      <p className='az-body-md-bold text-az-ink-deep tabular-nums'>
+                      <p className='text-sm font-semibold text-[#111111] tabular-nums'>
                         {formatCurrency(product.price)}
                       </p>
-                      <p className='az-caption text-az-steel'>
-                        Stock: <span className={totalStock > 2 ? 'text-az-success font-semibold' : 'text-az-attention font-semibold'}>{totalStock} u.</span>
+                      <p className='text-xs text-[#707072]'>
+                        Stock: <span className={totalStock > 2 ? 'text-[#007d48] font-semibold' : 'text-[#d97706] font-semibold'}>{totalStock} u.</span>
                       </p>
                     </div>
                   </div>
 
                   {/* Size Selector */}
-                  <div className='mt-4 pt-3 border-t border-az-hairline-soft space-y-1.5'>
-                    <span className='az-caption-bold text-az-stone uppercase tracking-wider block'>
+                  <div className='mt-4 pt-3 border-t border-[#e5e5e5] space-y-1.5'>
+                    <span className='text-[10px] font-semibold text-[#707072] uppercase tracking-wider block'>
                       Talle → Agregar:
                     </span>
                     <div className='flex flex-wrap gap-1.5'>
@@ -476,10 +476,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                             type='button'
                             disabled={isOutOfStock}
                             onClick={() => handleAddToCart(product, v)}
-                            className={`px-3 py-1.5 rounded-az-full az-caption-bold flex items-center gap-1 transition-all duration-150 ${
+                            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition-all duration-150 ${
                               isOutOfStock
-                                ? 'bg-az-surface-soft text-az-stone border border-az-hairline-soft line-through cursor-not-allowed'
-                                : 'bg-az-surface-soft hover:bg-az-ink-deep hover:text-white text-az-ink border border-az-hairline-soft'
+                                ? 'bg-[#f5f5f5] text-[#707072] border border-[#e5e5e5] line-through cursor-not-allowed'
+                                : 'bg-[#f5f5f5] hover:bg-[#111111] hover:text-white text-[#111111] border border-[#e5e5e5]'
                             }`}
                           >
                             <span>{v.size!.name}</span>
@@ -498,21 +498,21 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
       {/* POS Cart Summary Column */}
       <div className='lg:col-span-5 space-y-6'>
-        <div className='bg-az-canvas border border-az-hairline-soft rounded-az-xl shadow-[rgba(20,22,26,0.3)_0px_1px_4px_0px] p-6 space-y-6'>
+        <div className='bg-white border border-[#e5e5e5] rounded-2xl p-6 space-y-6 shadow-none'>
           {/* Header */}
-          <div className='flex items-center justify-between border-b border-az-hairline-soft pb-4'>
+          <div className='flex items-center justify-between border-b border-[#e5e5e5] pb-4'>
             <div className='flex items-center gap-2'>
-              <Store className='h-5 w-5 text-az-steel' />
+              <Store className='h-5 w-5 text-[#111111]' />
               <div>
-                <h2 className='az-body-md-bold text-az-ink-deep'>Venta Actual</h2>
-                <p className='az-caption text-az-steel'>Vendedor: {sellerName}</p>
+                <h2 className='text-lg font-medium tracking-tight text-[#111111] font-marder-display'>Venta Actual</h2>
+                <p className='text-xs text-[#707072]'>Vendedor: {sellerName}</p>
               </div>
             </div>
             {cart.length > 0 && (
               <Button
                 variant='ghost'
                 onClick={() => setCart([])}
-                className='az-caption-bold text-az-critical hover:text-az-critical hover:bg-red-50 px-2.5 h-8 rounded-az-full'
+                className='text-xs font-semibold uppercase tracking-wider text-[#d30005] hover:text-[#d30005] hover:bg-red-50 px-3 h-8 rounded-full'
               >
                 Vaciar
               </Button>
@@ -522,38 +522,38 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
           {/* Cart List */}
           <div className='max-h-[22vh] overflow-y-auto space-y-3 pr-1'>
             {cart.length === 0 ? (
-              <div className='py-6 text-center az-body-sm text-az-stone'>
+              <div className='py-6 text-center text-xs font-semibold text-[#707072]'>
                 El carrito está vacío. Agregá talles de productos a la izquierda.
               </div>
             ) : (
               cart.map((item) => (
                 <div
                   key={`${item.productId}-${item.size}`}
-                  className='flex items-center justify-between gap-3 p-3 bg-az-surface-soft/50 border border-az-hairline-soft rounded-az-xl hover:bg-az-surface-soft transition-all duration-150'
+                  className='flex items-center justify-between gap-3 p-3.5 bg-[#f9f9f9] border border-[#e5e5e5] rounded-xl hover:bg-[#f5f5f5] transition-all duration-150'
                 >
                   <div className='min-w-0 flex-1 space-y-0.5'>
-                    <h4 className='az-body-sm-bold text-az-ink-deep truncate'>{item.name}</h4>
-                    <p className='az-caption text-az-steel'>
-                      Talle: <span className='font-semibold text-az-charcoal'>{item.size}</span> · {formatCurrency(item.priceUsed)} c/u
+                    <h4 className='text-sm font-semibold text-[#111111] truncate'>{item.name}</h4>
+                    <p className='text-xs text-[#707072]'>
+                      Talle: <span className='font-semibold text-[#111111]'>{item.size}</span> · {formatCurrency(item.priceUsed)} c/u
                     </p>
                   </div>
                   <div className='flex items-center gap-2.5'>
-                    <div className='flex items-center border border-az-hairline-soft rounded-az-full bg-az-canvas overflow-hidden h-7'>
+                    <div className='flex items-center border border-[#e5e5e5] rounded-full bg-white overflow-hidden h-7'>
                       <button
                         type='button'
                         data-testid="pos-item-dec"
                         onClick={() => handleUpdateQty(item.productId, item.size, -1)}
-                        className='px-2 hover:bg-az-surface-soft text-az-charcoal h-full flex items-center justify-center border-r border-az-hairline-soft'
+                        className='px-2 hover:bg-[#f5f5f5] text-[#111111] h-full flex items-center justify-center border-r border-[#e5e5e5]'
                       >
                         <Minus className='h-3 w-3' />
                       </button>
-                      <span className='px-3 az-caption-bold text-az-ink-deep min-w-[24px] text-center tabular-nums'>
+                      <span className='px-3 text-xs font-semibold text-[#111111] min-w-[24px] text-center tabular-nums'>
                         {item.qty}
                       </span>
                       <button
                         type='button'
                         onClick={() => handleUpdateQty(item.productId, item.size, 1)}
-                        className='px-2 hover:bg-az-surface-soft text-az-charcoal h-full flex items-center justify-center border-l border-az-hairline-soft'
+                        className='px-2 hover:bg-[#f5f5f5] text-[#111111] h-full flex items-center justify-center border-l border-[#e5e5e5]'
                       >
                         <Plus className='h-3 w-3' />
                       </button>
@@ -561,7 +561,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     <button
                       type='button'
                       onClick={() => handleRemoveItem(item.productId, item.size)}
-                      className='text-az-stone hover:text-az-critical p-1 transition-colors'
+                      className='text-[#707072] hover:text-[#d30005] p-1 transition-colors'
                       title='Eliminar item'
                     >
                       <Trash2 className='h-4 w-4' />
@@ -573,16 +573,16 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
           </div>
 
           {/* Customer Selection & Search */}
-          <div className='pt-4 border-t border-az-hairline-soft space-y-3.5'>
+          <div className='pt-4 border-t border-[#e5e5e5] space-y-3.5'>
             <div className='flex justify-between items-center'>
-              <h3 className='az-caption-bold text-az-stone uppercase tracking-wider'>
+              <h3 className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>
                 Cliente de la Venta
               </h3>
               <Button
                 type='button'
                 variant='ghost'
                 onClick={() => setIsCreateModalOpen(true)}
-                className='az-caption-bold text-az-ink-deep hover:bg-az-surface-soft h-7 px-3 rounded-az-full flex items-center gap-1.5'
+                className='text-xs font-semibold uppercase tracking-wider text-[#111111] hover:bg-[#f5f5f5] h-8 px-3 rounded-full flex items-center gap-1.5'
               >
                 <UserPlus className='h-3.5 w-3.5' />
                 Nuevo Cliente
@@ -593,7 +593,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
             {!selectedCustomer ? (
               <div className='relative'>
                 <div className='relative'>
-                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-az-stone h-3.5 w-3.5' />
+                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-[#707072] h-3.5 w-3.5' />
                   <Input
                     data-testid="pos-customer-search"
                     type="text"
@@ -602,20 +602,21 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                       setShowSearchResults(true);
                     }}
                     onFocus={() => setShowSearchResults(true)}
-                    className='pl-9 h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='pl-9 h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    placeholder='Buscar por nombre, DNI o email...'
                   />
                 </div>
 
                 {/* Dropdown search results */}
                 {showSearchResults && customerSearchQuery.trim() !== '' && (
-                  <div className='absolute z-20 top-full left-0 right-0 mt-1 bg-az-canvas border border-az-hairline-soft rounded-az-xl shadow-lg max-h-56 overflow-y-auto p-1.5 space-y-1'>
+                  <div className='absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-[#e5e5e5] rounded-2xl shadow-xl max-h-56 overflow-y-auto p-2 space-y-1'>
                     {isSearchingCustomers ? (
-                      <div className='py-4 text-center az-caption text-az-stone flex items-center justify-center gap-2'>
-                        <Loader2 className='h-3.5 w-3.5 animate-spin text-az-steel' />
+                      <div className='py-4 text-center text-xs text-[#707072] flex items-center justify-center gap-2'>
+                        <Loader2 className='h-3.5 w-3.5 animate-spin text-[#111111]' />
                         Buscando en la base de datos...
                       </div>
                     ) : searchResults.length === 0 ? (
-                      <div className='py-4 text-center az-caption text-az-stone'>
+                      <div className='py-4 text-center text-xs text-[#707072]'>
                         No se encontraron clientes. ¿Deseas registrar uno nuevo?
                       </div>
                     ) : (
@@ -628,10 +629,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                             setShowSearchResults(false);
                             setCustomerSearchQuery('');
                           }}
-                          className='w-full text-left p-2.5 hover:bg-az-surface-soft rounded-az-lg flex flex-col gap-0.5 transition-colors border border-transparent hover:border-az-hairline-soft'
+                          className='w-full text-left p-2.5 hover:bg-[#f5f5f5] rounded-xl flex flex-col gap-0.5 transition-colors'
                         >
-                          <span className='az-body-sm-bold text-az-ink-deep'>{cust.name}</span>
-                          <span className='az-caption text-az-steel'>
+                          <span className='text-xs font-semibold text-[#111111]'>{cust.name}</span>
+                          <span className='text-[11px] text-[#707072]'>
                             {cust.dni ? `DNI: ${cust.dni}` : 'Sin DNI'} | {cust.email} {cust.phone ? `| Tel: ${cust.phone}` : ''}
                           </span>
                         </button>
@@ -641,14 +642,14 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 )}
               </div>
             ) : (
-              <div className='bg-az-surface-soft border border-az-hairline-soft rounded-az-xl p-3.5 flex items-center justify-between gap-3 animate-in fade-in duration-200'>
+              <div className='bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl p-3.5 flex items-center justify-between gap-3 animate-in fade-in duration-200'>
                 <div className='flex items-center gap-2 min-w-0'>
-                  <div className='bg-az-canvas h-7 w-7 rounded-az-full flex items-center justify-center border border-az-hairline-soft text-az-primary flex-shrink-0'>
+                  <div className='bg-white h-8 w-8 rounded-full flex items-center justify-center border border-[#e5e5e5] text-[#111111] flex-shrink-0'>
                     <UserCheck className='h-4 w-4' />
                   </div>
                   <div className='min-w-0'>
-                    <p className='az-body-sm-bold text-az-ink-deep truncate'>{selectedCustomer.name}</p>
-                    <p className='az-caption text-az-steel truncate'>
+                    <p className='text-xs font-semibold text-[#111111] truncate'>{selectedCustomer.name}</p>
+                    <p className='text-[11px] text-[#707072] truncate'>
                       {selectedCustomer.dni ? `DNI: ${selectedCustomer.dni}` : 'Sin DNI'} | {selectedCustomer.email}
                     </p>
                   </div>
@@ -656,7 +657,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <button
                   type='button'
                   onClick={() => setSelectedCustomer(null)}
-                  className='text-az-stone hover:text-az-critical p-1 transition-colors'
+                  className='text-[#707072] hover:text-[#d30005] p-1 transition-colors'
                   title='Remover cliente'
                 >
                   <X className='h-4 w-4' />
@@ -667,72 +668,72 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
             {/* Editable Fields */}
             <div className='grid grid-cols-2 gap-3 pt-1'>
               <div className='space-y-1'>
-                <Label htmlFor='posCustName' className='az-caption-bold text-az-stone uppercase tracking-wider'>Nombre Completo</Label>
+                <Label htmlFor='posCustName' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Nombre Completo</Label>
                 <Input
-                    data-testid='pos-customer-search'
+                  data-testid='pos-customer-search'
                   id='posCustName'
                   placeholder='Consumidor Final'
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   disabled={!!selectedCustomer}
-                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                 />
               </div>
               <div className='space-y-1'>
-                <Label htmlFor='posCustEmail' className='az-caption-bold text-az-stone uppercase tracking-wider'>Correo Electrónico</Label>
+                <Label htmlFor='posCustEmail' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Correo Electrónico</Label>
                 <Input
-                    data-testid='pos-customer-search'
+                  data-testid='pos-customer-search'
                   id='posCustEmail'
                   type='email'
                   placeholder='consumidorfinal@local...'
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   disabled={!!selectedCustomer}
-                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                 />
               </div>
               <div className='space-y-1'>
-                <Label htmlFor='posCustDni' className='az-caption-bold text-az-stone uppercase tracking-wider'>Documento (DNI)</Label>
+                <Label htmlFor='posCustDni' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Documento (DNI)</Label>
                 <Input
-                    data-testid='pos-customer-search'
+                  data-testid='pos-customer-search'
                   id='posCustDni'
                   placeholder='DNI del cliente'
                   value={customerDni}
                   onChange={(e) => setCustomerDni(e.target.value)}
                   disabled={!!selectedCustomer && !!selectedCustomer.dni}
-                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                 />
               </div>
               <div className='space-y-1'>
-                <Label htmlFor='posCustPhone' className='az-caption-bold text-az-stone uppercase tracking-wider'>Teléfono de Contacto</Label>
+                <Label htmlFor='posCustPhone' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Teléfono de Contacto</Label>
                 <Input
-                    data-testid='pos-customer-search'
+                  data-testid='pos-customer-search'
                   id='posCustPhone'
                   placeholder='Teléfono'
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   disabled={!!selectedCustomer && !!selectedCustomer.phone}
-                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                 />
               </div>
               <div className='col-span-2 space-y-1'>
-                <Label htmlFor='posCustAddress' className='az-caption-bold text-az-stone uppercase tracking-wider'>Domicilio (Dirección)</Label>
+                <Label htmlFor='posCustAddress' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Domicilio (Dirección)</Label>
                 <Input
-                    data-testid='pos-customer-search'
+                  data-testid='pos-customer-search'
                   id='posCustAddress'
                   placeholder='Calle y número (ej. Comb. de las Piedras 1026)'
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
-                  disabled={!!selectedCustomer && (selectedCustomer.address && selectedCustomer.address.streetAddress)}
-                  className='h-9 text-xs border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                  disabled={!!selectedCustomer && !!(selectedCustomer.address && selectedCustomer.address.streetAddress)}
+                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                 />
               </div>
             </div>
           </div>
 
           {/* Local Payment Methods */}
-          <div className='pt-4 border-t border-az-hairline-soft space-y-3'>
-            <h3 className='az-caption-bold text-az-stone uppercase tracking-wider'>
+          <div className='pt-4 border-t border-[#e5e5e5] space-y-3'>
+            <h3 className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>
               Método de Pago Local
             </h3>
             <RadioGroup
@@ -751,15 +752,15 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 return (
                   <Label
                     key={method.id}
-                    className={`flex items-center gap-2 border rounded-az-xl p-3 cursor-pointer transition-all duration-150 ${
+                    className={`flex items-center gap-2.5 border rounded-2xl p-3 cursor-pointer transition-all duration-150 ${
                       active
-                        ? 'border-az-primary bg-az-canvas shadow-sm text-az-primary font-semibold'
-                        : 'border-az-hairline-soft text-az-charcoal hover:bg-az-surface-soft'
+                        ? 'border-[#111111] bg-[#f5f5f5] text-[#111111] font-semibold'
+                        : 'border-[#e5e5e5] text-[#707072] hover:bg-[#fafafa]'
                     }`}
                   >
                     <RadioGroupItem value={method.id} className='sr-only' />
-                    <Icon className={`h-4 w-4 ${active ? 'text-az-primary' : 'text-az-stone'}`} />
-                    <span className='az-caption-bold'>{method.label}</span>
+                    <Icon className={`h-4 w-4 ${active ? 'text-[#111111]' : 'text-[#707072]'}`} />
+                    <span className='text-xs font-semibold uppercase tracking-wider'>{method.label}</span>
                   </Label>
                 );
               })}
@@ -767,29 +768,28 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
           </div>
 
           {/* Price Totals & Submit */}
-          <div className='pt-4 border-t border-az-hairline-soft space-y-4'>
+          <div className='pt-4 border-t border-[#e5e5e5] space-y-4'>
             <div className='space-y-2'>
-              <div className='flex justify-between az-body-sm text-az-charcoal'>
+              <div className='flex justify-between text-sm text-[#707072]'>
                 <span>Subtotal</span>
-                <span className='tabular-nums'>{formatCurrency(totals.subtotal)}</span>
+                <span className='tabular-nums text-[#111111] font-medium'>{formatCurrency(totals.subtotal)}</span>
               </div>
-              <div className='flex justify-between border-t border-az-hairline-soft pt-3'>
-                <span className='az-body-md-bold text-az-ink-deep'>Total a Cobrar</span>
-                <span className='az-heading-sm text-az-ink-deep tabular-nums'>{formatCurrency(totals.total)}</span>
+              <div className='flex justify-between border-t border-[#e5e5e5] pt-3 items-baseline'>
+                <span className='text-sm font-semibold uppercase tracking-wider text-[#111111]'>Total a Cobrar</span>
+                <span className='text-2xl font-medium tracking-tight text-[#111111] font-marder-display tabular-nums'>{formatCurrency(totals.total)}</span>
               </div>
             </div>
 
             <Button
               id='pos-register-sale'
               type='button'
-              variant='buyCta'
               disabled={isPending || cart.length === 0}
               onClick={handleRegisterSale}
-              className='w-full h-12'
+              className='w-full h-12 rounded-full bg-[#111111] text-white hover:bg-black font-semibold text-xs uppercase tracking-wider transition-colors'
             >
               {isPending ? (
                 <>
-                  <Loader2 className='h-4 w-4 animate-spin' />
+                  <Loader2 className='h-4 w-4 animate-spin mr-2' />
                   Registrando Venta...
                 </>
               ) : (
@@ -802,50 +802,49 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
       {/* SUCCESS MODAL */}
       {successOrder && (
-        <div className='fixed inset-0 z-50 bg-az-ink-deep/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
-          <div className='bg-az-canvas rounded-az-xxxl p-8 max-w-md w-full shadow-2xl border border-az-hairline-soft space-y-6 text-center animate-in zoom-in-95 duration-200'>
-            <div className='mx-auto h-16 w-16 bg-az-surface-soft rounded-az-full flex items-center justify-center text-az-success'>
-              <CheckCircle className='h-9 w-9' />
+        <div className='fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
+          <div className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-[#e5e5e5] space-y-6 text-center animate-in zoom-in-95 duration-200'>
+            <div className='mx-auto h-16 w-16 bg-[#f5f5f5] rounded-full flex items-center justify-center text-[#007d48]'>
+              <CheckCircle className='h-8 w-8' />
             </div>
-            <div className='space-y-2'>
-              <h3 className='az-heading-sm text-az-ink-deep'>¡Venta Registrada!</h3>
-              <p className='az-body-sm text-az-steel'>La transacción fue guardada y el stock fue actualizado.</p>
+            <div className='space-y-1'>
+              <h3 className='text-2xl font-medium tracking-tight text-[#111111] font-marder-display'>¡Venta Registrada!</h3>
+              <p className='text-xs text-[#707072]'>La transacción fue guardada y el stock fue actualizado.</p>
             </div>
-            <div className='p-4 bg-az-surface-soft rounded-az-xxl text-left space-y-2.5 border border-az-hairline-soft'>
-              <div className='flex justify-between az-body-sm'>
-                <span className='text-az-charcoal'>ID de la Venta:</span>
-                <span className='font-mono az-body-sm-bold text-az-ink-deep'>{successOrder.orderId.substring(0, 8)}...</span>
+            <div className='p-4 bg-[#f9f9f9] rounded-2xl text-left space-y-2 border border-[#e5e5e5]'>
+              <div className='flex justify-between text-xs'>
+                <span className='text-[#707072]'>ID de la Venta:</span>
+                <span className='font-mono font-semibold text-[#111111]'>{successOrder.orderId.substring(0, 8)}...</span>
               </div>
-              <div className='flex justify-between az-body-sm'>
-                <span className='text-az-charcoal'>Cliente:</span>
-                <span className='az-body-sm-bold text-az-ink-deep truncate max-w-[200px] block text-right'>{customerName || 'Consumidor Final'}</span>
+              <div className='flex justify-between text-xs'>
+                <span className='text-[#707072]'>Cliente:</span>
+                <span className='font-semibold text-[#111111] truncate max-w-[200px] block text-right'>{customerName || 'Consumidor Final'}</span>
               </div>
-              <div className='flex justify-between az-body-sm'>
-                <span className='text-az-charcoal'>Total Cobrado:</span>
-                <span className='az-body-sm-bold text-az-ink-deep tabular-nums'>{formatCurrency(successOrder.total)}</span>
+              <div className='flex justify-between text-xs'>
+                <span className='text-[#707072]'>Total Cobrado:</span>
+                <span className='font-semibold text-[#111111] tabular-nums'>{formatCurrency(successOrder.total)}</span>
               </div>
-              <div className='flex justify-between az-body-sm'>
-                <span className='text-az-charcoal'>Método de Pago:</span>
-                <span className='az-body-sm-bold text-az-ink-deep'>
+              <div className='flex justify-between text-xs'>
+                <span className='text-[#707072]'>Método de Pago:</span>
+                <span className='font-semibold text-[#111111]'>
                   {paymentMethod.replace('PuntoDeVenta_', 'POS ')}
                 </span>
               </div>
             </div>
             <div className='flex gap-3'>
               <Button
-                variant='outlineLight'
+                variant='outline'
                 onClick={() => {
                   window.open(`/order/${successOrder.orderId}`, '_blank');
                 }}
-                className='flex-1 h-11'
+                className='flex-1 h-11 rounded-full border border-[#e5e5e5] text-xs font-semibold uppercase tracking-wider text-[#111111] hover:bg-[#f5f5f5]'
               >
-                <Receipt className='h-4 w-4' />
+                <Receipt className='h-4 w-4 mr-1.5' />
                 Ver Comprobante
               </Button>
               <Button
-                variant='buyCta'
                 onClick={handleResetSale}
-                className='flex-1 h-11'
+                className='flex-1 h-11 rounded-full bg-[#111111] text-white hover:bg-black text-xs font-semibold uppercase tracking-wider'
               >
                 Nueva Venta
               </Button>
@@ -856,14 +855,14 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
       {/* CREATE CUSTOMER MODAL */}
       {isCreateModalOpen && (
-        <div className='fixed inset-0 z-50 bg-az-ink-deep/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
-          <div className='bg-az-canvas rounded-az-xxxl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-az-hairline-soft space-y-5 animate-in zoom-in-95 duration-200'>
-            <div className='flex justify-between items-center border-b border-az-hairline-soft pb-3'>
-              <h3 className='az-heading-sm text-az-ink-deep'>Registrar Nuevo Cliente</h3>
+        <div className='fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
+          <div className='bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-[#e5e5e5] space-y-5 animate-in zoom-in-95 duration-200'>
+            <div className='flex justify-between items-center border-b border-[#e5e5e5] pb-3'>
+              <h3 className='text-xl font-medium tracking-tight text-[#111111] font-marder-display'>Registrar Nuevo Cliente</h3>
               <button
                 type='button'
                 onClick={() => setIsCreateModalOpen(false)}
-                className='text-az-stone hover:text-az-ink p-1 transition-colors'
+                className='text-[#707072] hover:text-[#111111] p-1 transition-colors'
               >
                 <X className='h-5 w-5' />
               </button>
@@ -872,7 +871,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
             <form onSubmit={handleCreateCustomer} className='space-y-4'>
               <div className='grid grid-cols-2 gap-3.5'>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalName' className='az-caption-bold text-az-stone uppercase tracking-wider'>Nombre Completo *</Label>
+                  <Label htmlFor='modalName' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Nombre Completo *</Label>
                   <Input
                     data-testid='pos-customer-search'
                     id='modalName'
@@ -880,11 +879,11 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='Ej: Carlos Jimenez'
                     value={newCustomerForm.name}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
-                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalEmail' className='az-caption-bold text-az-stone uppercase tracking-wider'>Email *</Label>
+                  <Label htmlFor='modalEmail' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Email *</Label>
                   <Input
                     data-testid='pos-customer-search'
                     id='modalEmail'
@@ -893,80 +892,79 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='ejemplo@correo.com'
                     value={newCustomerForm.email}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
-                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalDni' className='az-caption-bold text-az-stone uppercase tracking-wider'>Documento (DNI)</Label>
+                  <Label htmlFor='modalDni' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Documento (DNI)</Label>
                   <Input
                     data-testid='pos-customer-search'
                     id='modalDni'
                     placeholder='Ej: 38444555'
                     value={newCustomerForm.dni}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, dni: e.target.value })}
-                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalPhone' className='az-caption-bold text-az-stone uppercase tracking-wider'>Teléfono de Contacto</Label>
+                  <Label htmlFor='modalPhone' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Teléfono de Contacto</Label>
                   <Input
                     data-testid='pos-customer-search'
                     id='modalPhone'
                     placeholder='Ej: 3814445555'
                     value={newCustomerForm.phone}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
-                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                   />
                 </div>
                 <div className='col-span-2 space-y-1.5'>
-                  <Label htmlFor='modalStreet' className='az-caption-bold text-az-stone uppercase tracking-wider'>Domicilio (Calle y Altura)</Label>
+                  <Label htmlFor='modalStreet' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Domicilio (Calle y Altura)</Label>
                   <Input
                     data-testid='pos-customer-search'
                     id='modalStreet'
                     placeholder='Ej: Comb. de las Piedras 1026'
                     value={newCustomerForm.streetAddress}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, streetAddress: e.target.value })}
-                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalCity' className='az-caption-bold text-az-stone uppercase tracking-wider'>Ciudad</Label>
+                  <Label htmlFor='modalCity' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Ciudad</Label>
                   <Input
                     data-testid='pos-customer-search'
                     id='modalCity'
                     placeholder='Tucumán'
                     value={newCustomerForm.city}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, city: e.target.value })}
-                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='modalProvince' className='az-caption-bold text-az-stone uppercase tracking-wider'>Provincia</Label>
+                  <Label htmlFor='modalProvince' className='text-xs font-semibold text-[#707072] uppercase tracking-wider'>Provincia</Label>
                   <Input
                     data-testid='pos-customer-search'
                     id='modalProvince'
                     placeholder='Tucumán'
                     value={newCustomerForm.province}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, province: e.target.value })}
-                    className='h-9 text-sm border-az-hairline-soft focus-visible:ring-az-primary rounded-az-lg'
+                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
                   />
                 </div>
               </div>
 
-              <div className='flex justify-end gap-3 pt-4 border-t border-az-hairline-soft'>
+              <div className='flex justify-end gap-3 pt-4 border-t border-[#e5e5e5]'>
                 <Button
                   type='button'
-                  variant='outlineLight'
+                  variant='ghost'
                   onClick={() => setIsCreateModalOpen(false)}
-                  className='h-10 px-5'
+                  className='h-10 px-5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#707072] hover:bg-[#f5f5f5]'
                 >
                   Cancelar
                 </Button>
                 <Button
                   type='submit'
-                  variant='buyCta'
                   disabled={isCreatingCustomer}
-                  className='h-10 px-5 flex items-center gap-1.5'
+                  className='h-10 px-6 rounded-full bg-[#111111] text-white hover:bg-black text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5'
                 >
                   {isCreatingCustomer ? (
                     <>

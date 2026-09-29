@@ -209,12 +209,12 @@ export async function getAllProducts({
   };
 }
 
-import { requireAdminOrSeller } from '@/lib/auth-guard';
+import { assertAdminOrSeller } from '@/lib/auth-guard';
 
 // Delete a product
 export async function deleteProduct(id: string) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
     const productExists = await prisma.product.findFirst({
       where: { id },
       include: { colors: true },
@@ -249,7 +249,7 @@ export async function deleteProduct(id: string) {
 // Create a product
 export async function createProduct(data: z.infer<typeof insertProductSchema>) {
   try {
-    const session = await requireAdminOrSeller();
+    const session = await assertAdminOrSeller();
     const productData = insertProductSchema.parse(data);
 
     // Separamos del core: variants (stock), colors (ProductColor pivot),
@@ -336,7 +336,7 @@ export async function createProduct(data: z.infer<typeof insertProductSchema>) {
 // Update a product
 export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
   try {
-    const session = await requireAdminOrSeller();
+    const session = await assertAdminOrSeller();
     const productData = updateProductSchema.parse(data);
 
     // Traemos el producto viejo CON sus imágenes para poder calcular el diff

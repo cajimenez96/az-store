@@ -16,8 +16,8 @@ interface BankValues {
 }
 
 const inputClass =
-  'bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0';
-const labelClass = 'az-body-sm-bold text-az-ink-deep';
+  'bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111]';
+const labelClass = 'text-xs font-bold uppercase tracking-wider text-[#111111]';
 
 export default function BankSettingsForm({ initialValues }: { initialValues: BankValues }) {
   const {
@@ -61,7 +61,11 @@ export default function BankSettingsForm({ initialValues }: { initialValues: Ban
         </div>
       </div>
       <div className='flex justify-end pt-2'>
-        <Button type='submit' variant='buyCta' disabled={isSubmitting}>
+        <Button
+          type='submit'
+          disabled={isSubmitting}
+          className='bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-2.5 h-auto'
+        >
           {isSubmitting ? 'Guardando...' : 'Guardar datos bancarios'}
         </Button>
       </div>

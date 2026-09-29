@@ -16,7 +16,7 @@ import { PAGE_SIZE } from '../constants';
 import { sendWelcomeEmail } from '../email';
 import { ShippingAddress } from '@/types';
 import { z } from 'zod';
-import { requireAdmin, requireAdminOrSeller } from '@/lib/auth-guard';
+import { assertAdmin, assertAdminOrSeller } from '@/lib/auth-guard';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 import { loginLimiter } from '@/lib/rate-limiter';
@@ -201,7 +201,7 @@ export async function getAllUsers({
   query: string;
   role?: string;
 }) {
-  await requireAdmin();
+  await assertAdmin();
   const queryFilter: Prisma.UserWhereInput =
     query && query !== 'all'
       ? {
@@ -238,7 +238,7 @@ export async function getAllUsers({
 // Delete a user
 export async function deleteUser(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     await prisma.user.delete({ where: { id } });
 
     revalidatePath('/admin/users');
@@ -258,7 +258,7 @@ export async function deleteUser(id: string) {
 // Update a user
 export async function updateUser(user: z.infer<typeof updateUserSchema>) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -281,7 +281,7 @@ export async function updateUser(user: z.infer<typeof updateUserSchema>) {
 // Search registered customers for POS autocomplete
 export async function searchPosCustomers(query: string) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
 
     if (!query || query.trim() === '') {
       return { success: true, data: [] };
@@ -310,7 +310,7 @@ export async function searchPosCustomers(query: string) {
 
 // Update the commission rate for a seller (admin only)
 export async function updateSellerCommission(userId: string, percentage: number) {
-  await requireAdmin();
+  await assertAdmin();
   if (percentage < 0 || percentage > 100) {
     return { success: false, message: 'La comisión debe ser un valor entre 0 y 100' };
   }
@@ -380,7 +380,7 @@ export async function createPosCustomer(data: {
   postalCode?: string;
 }) {
   try {
-    await requireAdminOrSeller();
+    await assertAdminOrSeller();
 
     const { name, email, phone, dni, streetAddress, city, province, postalCode } = data;
 

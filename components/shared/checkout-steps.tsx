@@ -10,20 +10,15 @@ const CheckoutSteps = ({ current = 0 }) => {
         <React.Fragment key={step}>
           <div
             className={cn(
-              'py-2 px-5 rounded-az-full text-center transition-all duration-200 border w-full md:w-auto',
+              'py-2 px-5 rounded-full text-center transition-all font-sans text-xs sm:text-sm font-medium border w-full md:w-auto',
               index === current
-                ? 'bg-az-canvas border-az-primary text-az-primary az-body-sm-bold shadow-sm'
+                ? 'bg-nike-ink border-nike-ink text-white shadow-sm'
                 : index < current
-                ? 'bg-az-canvas border-az-hairline-soft text-az-ink az-body-sm'
-                : 'bg-az-surface-soft border-az-hairline-soft text-az-stone az-caption'
+                ? 'bg-white border-nike-hairline text-nike-ink'
+                : 'bg-nike-soft-cloud border-transparent text-nike-mute opacity-60'
             )}
           >
-            <span
-              className={cn(
-                'mr-1.5 font-mono text-xs',
-                index === current ? 'opacity-100' : 'opacity-50'
-              )}
-            >
+            <span className='mr-1.5 opacity-70'>
               {index + 1}.
             </span>
             {step}
@@ -31,8 +26,8 @@ const CheckoutSteps = ({ current = 0 }) => {
           {index < steps.length - 1 && (
             <div
               className={cn(
-                'hidden md:block h-px w-8 flex-shrink-0',
-                index < current ? 'bg-az-primary/40' : 'bg-az-hairline-soft'
+                'hidden md:block h-px w-6 flex-shrink-0',
+                index < current ? 'bg-nike-ink' : 'bg-nike-hairline-soft'
               )}
             />
           )}

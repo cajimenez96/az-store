@@ -36,8 +36,15 @@ const AdminOrdersPage = async (props: {
   });
 
   return (
-    <div className='space-y-5'>
-      <h1 className='az-heading-lg text-az-ink-deep'>Pedidos</h1>
+    <div className='space-y-8 max-w-7xl mx-auto'>
+      <div className='pb-4 border-b border-[#e5e5e5]'>
+        <h1 className='text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display'>
+          Pedidos
+        </h1>
+        <p className='text-xs text-[#707072] uppercase tracking-wider font-semibold mt-1'>
+          Seguimiento de compras, estados de pago y despachos
+        </p>
+      </div>
 
       <OrderFilters
         currentQuery={searchText}
@@ -45,68 +52,68 @@ const AdminOrdersPage = async (props: {
         currentPaymentMethod={paymentMethod}
       />
 
-      <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft overflow-hidden'>
+      <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-none overflow-hidden'>
         <div className='overflow-x-auto'>
           <Table>
             <TableHeader>
-              <TableRow className='border-b border-az-hairline-soft hover:bg-transparent bg-az-surface-soft/50'>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-10 pl-5'>ID</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-10'>Fecha</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-10'>Comprador</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-10 text-right'>Total</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-10 text-center'>Pagado</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-10 text-center'>Entregado</TableHead>
-                <TableHead className='az-caption-bold text-az-stone uppercase tracking-wider h-10'></TableHead>
+              <TableRow className='border-b border-[#e5e5e5] hover:bg-transparent'>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>ID</TableHead>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>Fecha</TableHead>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>Comprador</TableHead>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>Total</TableHead>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-center'>Pagado</TableHead>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-center'>Entregado</TableHead>
+                <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.data.map((order) => (
                 <TableRow
                   key={order.id}
-                  className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors'
+                  className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors'
                 >
-                  <TableCell className='az-caption text-az-steel py-3 pl-5 font-mono'>
+                  <TableCell className='text-xs text-[#707072] py-4 font-mono'>
                     {formatId(order.id)}
                   </TableCell>
-                  <TableCell className='az-body-sm text-az-charcoal py-3 tabular-nums whitespace-nowrap'>
+                  <TableCell className='text-xs text-[#707072] py-4 tabular-nums whitespace-nowrap'>
                     {formatDateTime(order.createdAt).dateTime}
                   </TableCell>
-                  <TableCell className='az-body-sm-bold text-az-ink-deep py-3'>
+                  <TableCell className='text-sm font-semibold text-[#111111] py-4'>
                     {order.user.name}
                   </TableCell>
-                  <TableCell className='az-body-sm-bold text-az-ink-deep py-3 text-right tabular-nums'>
+                  <TableCell className='text-sm font-semibold text-[#111111] py-4 text-right tabular-nums'>
                     {formatCurrency(order.totalPrice)}
                   </TableCell>
-                  <TableCell className='py-3 text-center'>
+                  <TableCell className='py-4 text-center'>
                     {order.isPaid && order.paidAt ? (
-                      <span className='inline-flex items-center gap-1 az-caption text-az-success'>
+                      <span className='inline-flex items-center gap-1 text-xs font-semibold text-[#007d48]'>
                         <CheckCircle2 className='w-3.5 h-3.5' />
                         {formatDateTime(order.paidAt).dateOnly}
                       </span>
                     ) : (
-                      <span className='inline-flex items-center gap-1 az-caption text-az-stone'>
+                      <span className='inline-flex items-center gap-1 text-xs font-semibold text-[#d97706]'>
                         <XCircle className='w-3.5 h-3.5' />
                         Pendiente
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className='py-3 text-center'>
+                  <TableCell className='py-4 text-center'>
                     {order.isDelivered && order.deliveredAt ? (
-                      <span className='inline-flex items-center gap-1 az-caption text-az-primary'>
+                      <span className='inline-flex items-center gap-1 text-xs font-semibold text-[#111111]'>
                         <Package className='w-3.5 h-3.5' />
                         {formatDateTime(order.deliveredAt).dateOnly}
                       </span>
                     ) : (
-                      <span className='az-caption text-az-stone'>—</span>
+                      <span className='text-xs text-[#707072]'>—</span>
                     )}
                   </TableCell>
-                  <TableCell className='py-3 pr-5'>
-                    <div className='flex items-center gap-2'>
+                  <TableCell className='py-4 text-right'>
+                    <div className='flex items-center justify-end gap-2'>
                       <Button
                         asChild
                         variant='outline'
                         size='sm'
-                        className='h-7 az-caption-bold rounded-az-full border-az-hairline-soft text-az-ink hover:bg-az-ink-deep hover:text-white hover:border-az-ink-deep transition-colors'
+                        className='h-8 px-4 text-xs font-semibold uppercase tracking-wider rounded-full border border-[#e5e5e5] text-[#111111] hover:bg-[#111111] hover:text-white transition-colors'
                       >
                         <Link href={`/order/${order.id}`}>Detalles</Link>
                       </Button>
@@ -120,7 +127,7 @@ const AdminOrdersPage = async (props: {
         </div>
 
         {orders.totalPages > 1 && (
-          <div className='border-t border-az-hairline-soft p-4'>
+          <div className='border-t border-[#e5e5e5] pt-6 mt-4'>
             <Pagination page={Number(page) || 1} totalPages={orders?.totalPages} />
           </div>
         )}

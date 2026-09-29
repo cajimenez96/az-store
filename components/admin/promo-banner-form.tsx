@@ -181,7 +181,7 @@ export default function PromoBannerForm({
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Imagen del banner</FormLabel>
+              <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Imagen del banner</FormLabel>
               <FormControl>
                 <FileUploadField
                   files={field.value ? [field.value] : []}
@@ -204,9 +204,13 @@ export default function PromoBannerForm({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Título</FormLabel>
+              <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Título</FormLabel>
               <FormControl>
-                <Input placeholder="Ej: Liquidación de invierno" {...field} />
+                <Input
+                  placeholder="Ej: Liquidación de invierno"
+                  className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -219,9 +223,13 @@ export default function PromoBannerForm({
           name="subtitle"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Subtítulo (opcional)</FormLabel>
+              <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Subtítulo (opcional)</FormLabel>
               <FormControl>
-                <Input placeholder="Ej: Hasta 50% off en toda la colección" {...field} />
+                <Input
+                  placeholder="Ej: Hasta 50% off en toda la colección"
+                  className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -235,9 +243,13 @@ export default function PromoBannerForm({
             name="linkLabel"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Texto del botón (opcional)</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Texto del botón (opcional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej: Ver oferta" {...field} />
+                  <Input
+                    placeholder="Ej: Ver oferta"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -248,13 +260,14 @@ export default function PromoBannerForm({
             name="discountPercent"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Descuento % (opcional, solo para productos del banner)</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Descuento % (opcional, solo para productos del banner)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     min={0}
                     max={100}
                     placeholder="Ej: 15"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
                     {...field}
                     value={field.value ?? ''}
                     onChange={(e) =>
@@ -275,9 +288,13 @@ export default function PromoBannerForm({
             name="startsAt"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Fecha de inicio (opcional)</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Fecha de inicio (opcional)</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -288,9 +305,13 @@ export default function PromoBannerForm({
             name="endsAt"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Fecha de fin (opcional)</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Fecha de fin (opcional)</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -305,27 +326,31 @@ export default function PromoBannerForm({
           render={({ field }) => (
             <FormItem className="flex items-center space-x-2 space-y-0">
               <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  className="data-[state=checked]:bg-[#111111] data-[state=checked]:border-[#111111] rounded-md"
+                />
               </FormControl>
-              <FormLabel className="font-semibold">Activar banner</FormLabel>
+              <FormLabel className="text-sm font-semibold text-[#111111] cursor-pointer">Activar banner</FormLabel>
             </FormItem>
           )}
         />
 
         {/* Product picker */}
-        <div className="border border-az-hairline-soft rounded-xl overflow-hidden">
+        <div className="border border-[#e5e5e5] rounded-2xl overflow-hidden bg-white shadow-sm">
           <button
             type="button"
             onClick={() => setPickerOpen((v) => !v)}
-            className="w-full flex items-center justify-between px-5 py-4 bg-az-surface-soft hover:bg-az-hairline-soft transition-colors"
+            className="w-full flex items-center justify-between px-5 py-4 bg-[#f9f9f9] hover:bg-[#f0f0f0] transition-colors"
           >
-            <span className="font-semibold text-az-ink-deep">
+            <span className="text-sm font-bold text-[#111111]">
               Productos del banner ({selectedProducts.length} seleccionados)
             </span>
             {pickerOpen ? (
-              <ChevronUp className="w-4 h-4 text-az-steel" />
+              <ChevronUp className="w-4 h-4 text-[#707072]" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-az-steel" />
+              <ChevronDown className="w-4 h-4 text-[#707072]" />
             )}
           </button>
 
@@ -334,18 +359,18 @@ export default function PromoBannerForm({
               {/* Selected products */}
               {selectedProducts.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold text-az-ink-deep">Seleccionados:</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#111111]">Seleccionados:</p>
                   <div className="flex flex-wrap gap-2">
                     {selectedProducts.map((p) => (
                       <span
                         key={p.id}
-                        className="inline-flex items-center gap-1.5 bg-az-primary/10 text-az-primary text-sm px-3 py-1 rounded-full"
+                        className="inline-flex items-center gap-1.5 bg-[#111111] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-xs"
                       >
                         {p.name}
                         <button
                           type="button"
                           onClick={() => removeProduct(p.id)}
-                          className="hover:text-red-600 transition-colors"
+                          className="hover:text-red-400 transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -362,12 +387,12 @@ export default function PromoBannerForm({
                   value={pickerQuery}
                   onChange={(e) => setPickerQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearch())}
-                  className="flex-1"
+                  className="flex-1 bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] h-10"
                 />
                 <select
                   value={pickerCategory}
                   onChange={(e) => setPickerCategory(e.target.value)}
-                  className="flex-1 h-9 rounded-az-md border border-az-hairline bg-background px-3 text-sm text-az-ink focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex-1 h-10 rounded-xl border border-[#e5e5e5] bg-white px-3 text-sm text-[#111111] focus:outline-none focus:ring-1 focus:ring-[#111111]"
                 >
                   <option value="all">Todas las categorías</option>
                   {categories.map((c) => (
@@ -377,7 +402,7 @@ export default function PromoBannerForm({
                 <select
                   value={pickerBrand}
                   onChange={(e) => setPickerBrand(e.target.value)}
-                  className="flex-1 h-9 rounded-az-md border border-az-hairline bg-background px-3 text-sm text-az-ink focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex-1 h-10 rounded-xl border border-[#e5e5e5] bg-white px-3 text-sm text-[#111111] focus:outline-none focus:ring-1 focus:ring-[#111111]"
                 >
                   <option value="all">Todas las marcas</option>
                   {brands.map((b) => (
@@ -389,7 +414,7 @@ export default function PromoBannerForm({
                   variant="outline"
                   onClick={handleSearch}
                   disabled={isPending}
-                  className="gap-1.5"
+                  className="gap-1.5 border-[#e5e5e5] rounded-full text-[#111111] hover:bg-[#f5f5f5] font-semibold h-10 px-4"
                 >
                   <Search className="w-4 h-4" />
                   Buscar
@@ -398,35 +423,36 @@ export default function PromoBannerForm({
 
               {/* Results table */}
               {searchResults.length > 0 && (
-                <div className="border border-az-hairline-soft rounded-lg overflow-hidden max-h-72 overflow-y-auto">
+                <div className="border border-[#e5e5e5] rounded-xl overflow-hidden max-h-72 overflow-y-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-az-surface-soft sticky top-0">
+                    <thead className="bg-[#f9f9f9] sticky top-0 border-b border-[#e5e5e5]">
                       <tr>
-                        <th className="px-3 py-2 text-left w-8"></th>
-                        <th className="px-3 py-2 text-left">Producto</th>
-                        <th className="px-3 py-2 text-left hidden sm:table-cell">Categoría</th>
-                        <th className="px-3 py-2 text-right">Precio</th>
+                        <th className="px-3 py-2.5 text-left w-8"></th>
+                        <th className="px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-[#707072]">Producto</th>
+                        <th className="px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-[#707072] hidden sm:table-cell">Categoría</th>
+                        <th className="px-3 py-2.5 text-right text-xs font-bold uppercase tracking-wider text-[#707072]">Precio</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-[#e5e5e5]">
                       {searchResults.map((product) => {
                         const isSelected = productIds.includes(product.id);
                         return (
                           <tr
                             key={product.id}
-                            className={`border-t border-az-hairline-soft cursor-pointer hover:bg-az-surface-soft/50 transition-colors ${
-                              isSelected ? 'bg-az-primary/5' : ''
+                            className={`cursor-pointer hover:bg-[#f5f5f5] transition-colors ${
+                              isSelected ? 'bg-[#f5f5f5]' : ''
                             }`}
                             onClick={() => toggleProduct(product)}
                           >
-                            <td className="px-3 py-2">
+                            <td className="px-3 py-2.5">
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => toggleProduct(product)}
                                 onClick={(e) => e.stopPropagation()}
+                                className="data-[state=checked]:bg-[#111111] data-[state=checked]:border-[#111111] rounded-md"
                               />
                             </td>
-                            <td className="px-3 py-2">
+                            <td className="px-3 py-2.5">
                               <div className="flex items-center gap-2">
                                 {product.images[0] && (
                                   <Image
@@ -434,18 +460,18 @@ export default function PromoBannerForm({
                                     alt={product.name}
                                     width={32}
                                     height={32}
-                                    className="rounded object-contain flex-shrink-0"
+                                    className="rounded-lg object-contain flex-shrink-0 bg-white border border-[#e5e5e5]"
                                   />
                                 )}
-                                <span className="font-medium text-az-ink-deep line-clamp-1">
+                                <span className="font-medium text-[#111111] line-clamp-1">
                                   {product.name}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-3 py-2 text-az-charcoal hidden sm:table-cell">
+                            <td className="px-3 py-2.5 text-[#707072] hidden sm:table-cell">
                               {product.category.name}
                             </td>
-                            <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                            <td className="px-3 py-2.5 text-right font-bold text-[#111111] tabular-nums">
                               ${Number(product.price).toLocaleString('es-AR')}
                             </td>
                           </tr>
@@ -457,7 +483,7 @@ export default function PromoBannerForm({
               )}
 
               {searchResults.length === 0 && !isPending && (
-                <p className="text-sm text-az-steel text-center py-4">
+                <p className="text-xs text-[#707072] text-center py-4">
                   Usá los filtros y hacé clic en &quot;Buscar&quot; para encontrar productos.
                 </p>
               )}
@@ -470,9 +496,8 @@ export default function PromoBannerForm({
 
         <Button
           type="submit"
-          size="lg"
           disabled={form.formState.isSubmitting}
-          className="button col-span-2 w-full"
+          className="w-full bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-3 h-auto"
         >
           {form.formState.isSubmitting
             ? 'Guardando...'

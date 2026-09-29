@@ -74,35 +74,35 @@ export default function PlaceOrderContent({
       <div className='w-full'>
         <CheckoutSteps current={3} />
 
-        <h1 className='az-heading-lg text-az-ink-deep mb-8'>
+        <h1 className='font-marder-display font-medium text-4xl sm:text-5xl tracking-tight text-nike-ink mb-8'>
           Confirmar Compra
         </h1>
 
-        <div className='grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8'>
+        <div className='grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8'>
           {/* Left column: summary sections */}
-          <div className='space-y-4'>
+          <div className='space-y-5'>
             {/* Shipping address */}
-            <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft p-6 space-y-3'>
-              <div className='flex items-center justify-between pb-3 border-b border-az-hairline-soft'>
+            <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 space-y-3 shadow-sm'>
+              <div className='flex items-center justify-between pb-3 border-b border-[#e5e5e5]'>
                 <div className='flex items-center gap-2'>
-                  <MapPin className='w-4 h-4 text-az-steel' />
-                  <h2 className='az-body-md-bold text-az-ink-deep'>
+                  <MapPin className='w-4 h-4 text-[#757575]' />
+                  <h2 className='text-sm font-bold uppercase tracking-wider text-nike-ink'>
                     Dirección de Envío
                   </h2>
                 </div>
                 <Link href='/shipping-address'>
                   <Button
                     id='edit-shipping'
-                    variant='outlineLight'
-                    className='border border-az-ink-button/20'
+                    variant='outline'
+                    className='rounded-full border-[#cacacb] text-nike-ink text-xs font-semibold px-4 h-8 hover:bg-[#f5f5f5]'
                     size='sm'
                   >
                     Editar
                   </Button>
                 </Link>
               </div>
-              <div className='az-body-sm text-az-charcoal space-y-1'>
-                <p className='az-body-sm-bold text-az-ink-deep'>
+              <div className='text-sm text-[#484848] space-y-1'>
+                <p className='font-semibold text-nike-ink'>
                   {userAddress.fullName}
                 </p>
                 <p>
@@ -119,7 +119,7 @@ export default function PlaceOrderContent({
                   CP {userAddress.postalCode} · {userAddress.country}
                 </p>
                 {userAddress.phone && (
-                  <p className='text-az-steel'>{userAddress.phone}</p>
+                  <p className='text-[#757575]'>{userAddress.phone}</p>
                 )}
               </div>
             </div>
@@ -131,35 +131,35 @@ export default function PlaceOrderContent({
             />
 
             {/* Payment method */}
-            <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft p-6 space-y-3'>
-              <div className='flex items-center justify-between pb-3 border-b border-az-hairline-soft'>
+            <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 space-y-3 shadow-sm'>
+              <div className='flex items-center justify-between pb-3 border-b border-[#e5e5e5]'>
                 <div className='flex items-center gap-2'>
-                  <CreditCard className='w-4 h-4 text-az-steel' />
-                  <h2 className='az-body-md-bold text-az-ink-deep'>
+                  <CreditCard className='w-4 h-4 text-[#757575]' />
+                  <h2 className='text-sm font-bold uppercase tracking-wider text-nike-ink'>
                     Método de Pago
                   </h2>
                 </div>
                 <Link href='/payment-method'>
                   <Button
                     id='edit-payment'
-                    variant='outlineLight'
-                    className='border border-az-ink-button/20'
+                    variant='outline'
+                    className='rounded-full border-[#cacacb] text-nike-ink text-xs font-semibold px-4 h-8 hover:bg-[#f5f5f5]'
                     size='sm'
                   >
                     Editar
                   </Button>
                 </Link>
               </div>
-              <p className='az-body-sm text-az-charcoal'>
+              <p className='text-sm font-medium text-nike-ink'>
                 {PAYMENT_LABELS[paymentMethod] || paymentMethod}
               </p>
             </div>
 
             {/* Order items */}
-            <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft p-6 space-y-3'>
-              <div className='flex items-center gap-2 pb-3 border-b border-az-hairline-soft'>
-                <Package className='w-4 h-4 text-az-steel' />
-                <h2 className='az-body-md-bold text-az-ink-deep'>
+            <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 space-y-3 shadow-sm'>
+              <div className='flex items-center gap-2 pb-3 border-b border-[#e5e5e5]'>
+                <Package className='w-4 h-4 text-[#757575]' />
+                <h2 className='text-sm font-bold uppercase tracking-wider text-nike-ink'>
                   Artículos ({cart.items.length})
                 </h2>
               </div>
@@ -167,14 +167,14 @@ export default function PlaceOrderContent({
               <div className='overflow-x-auto'>
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className='az-body-sm-bold text-az-ink pl-0'>
+                    <TableRow className='border-b border-[#e5e5e5]'>
+                      <TableHead className='text-xs uppercase font-semibold text-[#757575] pl-0'>
                         Producto
                       </TableHead>
-                      <TableHead className='az-body-sm-bold text-az-ink text-center w-20'>
+                      <TableHead className='text-xs uppercase font-semibold text-[#757575] text-center w-20'>
                         Cantidad
                       </TableHead>
-                      <TableHead className='az-body-sm-bold text-az-ink text-right h-10 pr-0'>
+                      <TableHead className='text-xs uppercase font-semibold text-[#757575] text-right h-10 pr-0'>
                         Precio
                       </TableHead>
                     </TableRow>
@@ -183,38 +183,38 @@ export default function PlaceOrderContent({
                     {cart.items.map((item) => (
                       <TableRow
                         key={`${item.slug}-${item.size || ''}`}
-                        className='border-b border-az-hairline-soft last:border-0 hover:bg-az-surface-soft/50 transition-colors duration-150'
+                        className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors duration-150'
                       >
                         <TableCell className='py-3 pl-0'>
                           <Link
                             href={`/product/${item.slug}`}
                             className='flex items-center gap-3 group'
                           >
-                            <div className='rounded-az-xl border border-az-hairline-soft bg-az-surface-soft p-1.5 flex-shrink-0'>
+                            <div className='w-12 h-12 rounded-lg bg-[#f5f5f5] p-1 flex-shrink-0 flex items-center justify-center'>
                               <Image
                                 src={item.image}
                                 alt={item.name}
-                                width={48}
-                                height={48}
-                                className='object-contain rounded-az-lg'
+                                width={44}
+                                height={44}
+                                className='object-contain'
                               />
                             </div>
                             <div className='flex flex-col gap-0.5'>
-                              <span className='az-body-sm-bold text-az-ink-deep group-hover:underline transition duration-150'>
+                              <span className='text-sm font-medium text-nike-ink group-hover:underline transition duration-150'>
                                 {item.name}
                               </span>
                               {item.size && (
-                                <span className='az-caption text-az-steel'>
+                                <span className='text-xs text-[#757575]'>
                                   Talle: {item.size}
                                 </span>
                               )}
                             </div>
                           </Link>
                         </TableCell>
-                        <TableCell className='py-3 text-center az-body-sm-bold text-az-ink-deep tabular-nums'>
+                        <TableCell className='py-3 text-center text-sm font-semibold text-nike-ink tabular-nums'>
                           {item.qty}
                         </TableCell>
-                        <TableCell className='py-3 text-right az-body-sm-bold text-az-ink-deep tabular-nums pr-0'>
+                        <TableCell className='py-3 text-right text-sm font-semibold text-nike-ink tabular-nums pr-0'>
                           {formatCurrency(item.priceUsed)}
                         </TableCell>
                       </TableRow>
@@ -227,69 +227,61 @@ export default function PlaceOrderContent({
 
           {/* Right column: order summary + CTA */}
           <div className='lg:sticky lg:top-24 h-fit'>
-            <div className='bg-az-canvas rounded-az-xl border border-az-hairline-soft shadow-[rgba(20,22,26,0.3)_0px_1px_4px_0px] p-6 flex flex-col gap-5'>
-              <h2 className='az-body-md-bold text-az-ink-deep border-b border-az-hairline-soft pb-4'>
+            <div className='bg-white rounded-2xl border border-[#e5e5e5] shadow-sm p-6 flex flex-col gap-5'>
+              <h2 className='text-sm font-bold uppercase tracking-wider text-nike-ink border-b border-[#e5e5e5] pb-4'>
                 Resumen del Pedido
               </h2>
 
               <div className='space-y-3'>
-                <div className='flex justify-between az-body-sm text-az-charcoal'>
+                <div className='flex justify-between text-sm text-[#757575]'>
                   <span>Productos</span>
-                  <span className='az-body-sm-bold text-az-ink-deep tabular-nums'>
+                  <span className='font-semibold text-nike-ink tabular-nums'>
                     {formatCurrency(cart.itemsPrice)}
                   </span>
                 </div>
-                {/* {Number(cart.taxPrice) > 0 && (
-                  <div className='flex justify-between az-body-sm text-az-charcoal'>
-                    <span>Impuestos</span>
-                    <span className='az-body-sm-bold text-az-ink-deep tabular-nums'>
-                      {formatCurrency(cart.taxPrice)}
-                    </span>
-                  </div>
-                )} */}
-                <div className='flex justify-between az-body-sm text-az-charcoal'>
+                <div className='flex justify-between text-sm text-[#757575]'>
                   <span>Envío</span>
-                  <span className='az-body-sm-bold text-az-ink-deep tabular-nums'>
+                  <span className='font-semibold text-nike-ink tabular-nums'>
                     {Number(cart.shippingPrice) === 0
                       ? 'Gratis'
                       : formatCurrency(cart.shippingPrice)}
                   </span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className='flex justify-between az-body-sm text-green-600'>
+                  <div className='flex justify-between text-sm text-green-700 font-medium'>
                     <span>
                       Descuento ({appliedPromoCode}
                       {appliedPaymentMethod
-                        ? ` — ${appliedDiscount}% con ${PAYMENT_LABELS[appliedPaymentMethod] || appliedPaymentMethod}`
+                        ? ` — ${appliedDiscount}%`
                         : ` — ${appliedDiscount}%`}
                       )
                     </span>
-                    <span className='az-body-sm-bold tabular-nums'>
+                    <span className='font-semibold tabular-nums'>
                       -{formatCurrency(discountAmount)}
                     </span>
                   </div>
                 )}
                 {bannerDiscount > 0 && (
-                  <div className='flex justify-between az-body-sm text-green-600'>
+                  <div className='flex justify-between text-sm text-green-700 font-medium'>
                     <span>
                       Descuento banner ({activeBanner?.discountPercent}%)
                     </span>
-                    <span className='az-body-sm-bold tabular-nums'>
+                    <span className='font-semibold tabular-nums'>
                       -{formatCurrency(bannerDiscount)}
                     </span>
                   </div>
                 )}
-                <div className='border-t border-az-hairline-soft pt-3 flex justify-between'>
-                  <span className='az-body-md-bold text-az-ink-deep'>
+                <div className='border-t border-[#e5e5e5] pt-4 flex justify-between items-baseline'>
+                  <span className='font-bold text-base text-nike-ink'>
                     Total
                   </span>
-                  <span className='az-heading-sm text-az-ink-deep tabular-nums'>
+                  <span className='text-2xl font-bold tracking-tight text-nike-ink tabular-nums'>
                     {formatCurrency(finalTotal)}
                   </span>
                 </div>
               </div>
 
-              <div className='border-t border-az-hairline-soft pt-4'>
+              <div className='border-t border-[#e5e5e5] pt-4'>
                 <PromoCodeInput
                   appliedCode={appliedPromoCode}
                   appliedDiscount={appliedDiscount}

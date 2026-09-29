@@ -55,7 +55,7 @@ export function Sidebar({ children, className }: SidebarProps) {
         <SheetContent
           side='left'
           className={cn(
-            'w-64 overflow-y-auto bg-az-canvas text-az-ink p-0 shadow-lg',
+            'w-64 overflow-y-auto bg-white text-[#111111] p-0 shadow-lg border-r border-[#e5e5e5]',
             className
           )}
         >
@@ -68,7 +68,7 @@ export function Sidebar({ children, className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'hidden md:flex flex-col h-full bg-az-canvas border-r border-az-hairline-soft transition-all duration-300 ease-in-out',
+        'hidden md:flex flex-col h-full bg-white border-r border-[#e5e5e5] transition-all duration-300 ease-in-out',
         isCollapsed ? 'w-20' : 'w-64',
         className
       )}
@@ -88,10 +88,10 @@ export function SidebarTrigger() {
         variant='ghost'
         size='icon'
         onClick={() => setIsOpen(true)}
-        className='h-10 w-10 hover:bg-az-surface-soft transition-colors duration-200'
+        className='h-10 w-10 rounded-full hover:bg-[#f5f5f5] text-[#111111] transition-colors duration-200'
         aria-label='Open navigation menu'
       >
-        <Menu className='h-5 w-5 text-az-ink' />
+        <Menu className='h-5 w-5' />
       </Button>
     );
   }
@@ -101,11 +101,11 @@ export function SidebarTrigger() {
       variant='ghost'
       size='icon'
       onClick={() => setIsCollapsed(!isCollapsed)}
-      className='h-10 w-10 hover:bg-az-surface-soft transition-colors duration-200'
+      className='h-10 w-10 rounded-full hover:bg-[#f5f5f5] text-[#111111] transition-colors duration-200'
       aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
     >
-      <Menu className='h-5 w-5 text-az-ink transition-transform duration-200' />
+      <Menu className='h-5 w-5 transition-transform duration-200' />
     </Button>
   );
 }
@@ -143,7 +143,7 @@ export function SidebarGroup({ children, label, className }: SidebarGroupProps) 
   return (
     <div className={cn('mb-6', className)}>
       {label && !isCollapsed && (
-        <h3 className='mb-3 px-2 text-xs font-semibold text-az-stone uppercase tracking-wider'>
+        <h3 className='mb-3 px-3 text-[11px] font-semibold text-[#707072] uppercase tracking-wider'>
           {label}
         </h3>
       )}
@@ -159,7 +159,7 @@ interface SidebarHeaderProps {
 
 export function SidebarHeader({ children, className }: SidebarHeaderProps) {
   return (
-    <div className={cn('border-b border-az-hairline-soft px-4 py-4', className)}>
+    <div className={cn('border-b border-[#e5e5e5] px-4 py-4', className)}>
       {children}
     </div>
   );
@@ -172,7 +172,7 @@ interface SidebarFooterProps {
 
 export function SidebarFooter({ children, className }: SidebarFooterProps) {
   return (
-    <div className={cn('border-t border-az-hairline-soft mt-auto px-4 py-4', className)}>
+    <div className={cn('border-t border-[#e5e5e5] mt-auto px-4 py-4', className)}>
       {children}
     </div>
   );

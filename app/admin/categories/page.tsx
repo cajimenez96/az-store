@@ -33,23 +33,26 @@ export default async function AdminCategoriesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="h2-bold">Categorías y Sub-categorías</h1>
-        <Button asChild variant="default">
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e5e5]">
+        <div>
+          <h1 className="text-3xl lg:text-4xl font-medium tracking-tight text-[#111111] font-marder-display">Categorías y Sub-categorías</h1>
+          <p className="text-xs text-[#707072] uppercase tracking-wider font-semibold mt-1">Estructura taxonómica del catálogo</p>
+        </div>
+        <Button asChild className="rounded-full bg-[#111111] text-white hover:bg-black text-xs font-semibold uppercase tracking-wider px-6 h-10">
           <Link href="/admin/categories/create">+ Categoría</Link>
         </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-none overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>CATEGORÍA</TableHead>
-              <TableHead>SLUG</TableHead>
-              <TableHead>PRODUCTOS</TableHead>
-              <TableHead>SUB-CATEGORÍAS</TableHead>
-              <TableHead className="w-[180px]">ACCIONES</TableHead>
+            <TableRow className="border-b border-[#e5e5e5] hover:bg-transparent">
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">CATEGORÍA</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">SLUG</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">PRODUCTOS</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10">SUB-CATEGORÍAS</TableHead>
+              <TableHead className="text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right">ACCIONES</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -63,30 +66,30 @@ export default async function AdminCategoriesPage() {
 
               return (
                 <React.Fragment key={category.id}>
-                  <TableRow className="bg-az-surface-soft border-b border-az-hairline-soft">
-                    <TableCell className="font-medium text-az-ink-deep">{category.name}</TableCell>
-                    <TableCell className="text-sm text-az-steel">{category.slug}</TableCell>
-                    <TableCell className="text-sm text-az-steel">{productCount}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
+                  <TableRow className="border-b border-[#e5e5e5] hover:bg-[#fafafa] transition-colors">
+                    <TableCell className="font-semibold text-sm text-[#111111] py-4">{category.name}</TableCell>
+                    <TableCell className="text-xs text-[#707072] font-mono py-4">{category.slug}</TableCell>
+                    <TableCell className="text-sm font-semibold text-[#111111] py-4 tabular-nums">{productCount}</TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex flex-wrap gap-1.5">
                         {category.subCategories.length === 0 ? (
-                          <span className="text-xs text-az-stone">Sin sub-categorías</span>
+                          <span className="text-xs text-[#707072]">Sin sub-categorías</span>
                         ) : (
                           category.subCategories.map((sub) => (
-                            <Badge key={sub.id} variant="outline" className="border-az-hairline-soft text-az-charcoal">
+                            <Badge key={sub.id} variant="outline" className="border-[#e5e5e5] text-[#111111] rounded-full text-[11px] font-semibold px-2.5 py-0.5">
                               {sub.name}
                             </Badge>
                           ))
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
+                    <TableCell className="py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
                         {isDefault ? (
-                          <Badge variant="secondary">Predeterminada</Badge>
+                          <Badge variant="secondary" className="rounded-full text-xs">Predeterminada</Badge>
                         ) : (
                           <>
-                            <Button asChild variant="outline" size="sm">
+                            <Button asChild variant="outline" size="sm" className="h-8 px-4 text-xs font-semibold uppercase tracking-wider rounded-full border border-[#e5e5e5] text-[#111111] hover:bg-[#111111] hover:text-white transition-colors">
                               <Link href={`/admin/categories/${category.id}`}>Editar</Link>
                             </Button>
                             <DeleteDialog
@@ -101,16 +104,16 @@ export default async function AdminCategoriesPage() {
                   </TableRow>
 
                   {category.subCategories.map((sub) => (
-                    <TableRow key={sub.id} className="border-t-0">
-                      <TableCell className="pl-10 az-body-sm text-az-stone">
+                    <TableRow key={sub.id} className="border-b border-[#f0f0f0] bg-[#fafafa]/50 hover:bg-[#f5f5f5]">
+                      <TableCell className="pl-8 text-xs font-medium text-[#707072] py-2.5">
                         └ {sub.name}
                       </TableCell>
-                      <TableCell className="az-caption text-az-stone">{sub.slug}</TableCell>
+                      <TableCell className="text-xs text-[#707072] font-mono py-2.5">{sub.slug}</TableCell>
                       <TableCell />
                       <TableCell />
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button asChild variant="ghost" size="sm">
+                      <TableCell className="py-2.5 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button asChild variant="ghost" size="sm" className="h-7 px-3 text-xs font-semibold uppercase tracking-wider rounded-full text-[#707072] hover:text-[#111111] hover:bg-white">
                             <Link href={`/admin/categories/sub/${sub.id}`}>Editar</Link>
                           </Button>
                           <DeleteDialog id={sub.id} action={deleteSubCategory} />
@@ -119,9 +122,9 @@ export default async function AdminCategoriesPage() {
                     </TableRow>
                   ))}
 
-                  <TableRow key={`${category.id}-add`} className="border-t-0">
-                    <TableCell colSpan={5} className="py-1 pl-10">
-                      <Button asChild variant="link" size="sm" className="h-auto p-0 az-caption text-az-stone hover:text-az-ink-deep">
+                  <TableRow key={`${category.id}-add`} className="border-b border-[#e5e5e5]">
+                    <TableCell colSpan={5} className="py-2 pl-8">
+                      <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs font-semibold text-[#707072] hover:text-[#111111]">
                         <Link href={`/admin/categories/sub/create?categoryId=${category.id}`}>
                           + Agregar sub-categoría a &quot;{category.name}&quot;
                         </Link>

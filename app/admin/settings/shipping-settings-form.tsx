@@ -29,8 +29,8 @@ const TUCUMAN_CITIES =
   provincias.provinces.find((p) => p.name === 'Tucumán')?.cities ?? [];
 
 const inputClass =
-  'bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0';
-const labelClass = 'az-body-sm-bold text-az-ink-deep';
+  'bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111]';
+const labelClass = 'text-xs font-bold uppercase tracking-wider text-[#111111]';
 
 interface CityComboboxFieldProps {
   value: string;
@@ -48,8 +48,8 @@ function CityComboboxField({ value, onChange }: CityComboboxFieldProps) {
           role='combobox'
           aria-expanded={open}
           className={cn(
-            'w-full justify-between bg-az-canvas border-az-hairline text-az-ink hover:bg-az-surface-soft',
-            !value && 'text-az-stone'
+            'w-full justify-between bg-white border-[#e5e5e5] rounded-xl text-[#111111] hover:bg-[#f5f5f5]',
+            !value && 'text-[#707072]'
           )}
         >
           {value || 'Seleccionar localidad...'}
@@ -57,7 +57,7 @@ function CityComboboxField({ value, onChange }: CityComboboxFieldProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft'
+        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-white border-[#e5e5e5] rounded-2xl shadow-xl'
         align='start'
       >
         <Command className='bg-transparent'>
@@ -76,11 +76,11 @@ function CityComboboxField({ value, onChange }: CityComboboxFieldProps) {
                     onChange(city);
                     setOpen(false);
                   }}
-                  className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
+                  className='cursor-pointer text-[#111111] hover:bg-[#f5f5f5] aria-selected:bg-[#f5f5f5]'
                 >
                   <Check
                     className={cn(
-                      'mr-2 h-4 w-4 text-az-primary',
+                      'mr-2 h-4 w-4 text-[#111111]',
                       city === value ? 'opacity-100' : 'opacity-0'
                     )}
                   />
@@ -141,7 +141,7 @@ export default function ShippingSettingsForm({
           placeholder='Ej: 60000'
           className={inputClass}
         />
-        <p className='az-caption text-az-stone mt-1'>
+        <p className='text-xs text-[#707072] mt-1'>
           Órdenes mayores a este monto tienen envío gratis
         </p>
       </div>
@@ -167,7 +167,7 @@ export default function ShippingSettingsForm({
                 variant='ghost'
                 size='icon'
                 onClick={() => remove(index)}
-                className='h-10 w-10 text-az-critical hover:bg-red-50'
+                className='h-10 w-10 text-red-600 hover:bg-red-50 rounded-full'
               >
                 <Trash2 className='h-4 w-4' />
               </Button>
@@ -178,18 +178,22 @@ export default function ShippingSettingsForm({
           type='button'
           variant='outline'
           onClick={() => append({ city: '' })}
-          className='mt-2'
+          className='mt-2 border-[#e5e5e5] rounded-full text-xs font-semibold hover:bg-[#f5f5f5]'
         >
           + Agregar localidad
         </Button>
-        <p className='az-caption text-az-stone mt-1'>
+        <p className='text-xs text-[#707072] mt-1'>
           Estas localidades de Tucumán tendrán envío gratis (retiro en local)
         </p>
       </div>
 
       {/* Submit */}
       <div className='flex justify-end pt-2'>
-        <Button type='submit' variant='buyCta' disabled={isSubmitting}>
+        <Button
+          type='submit'
+          disabled={isSubmitting}
+          className='bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-2.5 h-auto'
+        >
           {isSubmitting ? 'Guardando...' : 'Guardar configuración de envíos'}
         </Button>
       </div>

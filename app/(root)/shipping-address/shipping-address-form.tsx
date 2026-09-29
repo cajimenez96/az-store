@@ -33,8 +33,8 @@ import {
 import { cn } from '@/lib/utils';
 
 const inputClass =
-  'bg-az-canvas border-az-hairline-soft rounded-az-lg text-az-ink placeholder:text-az-stone focus-visible:ring-az-primary focus-visible:ring-offset-0 h-11';
-const labelClass = 'az-body-sm-bold text-az-ink-deep';
+  'bg-white border-[#cacacb] rounded-full text-nike-ink placeholder:text-[#8e8e93] focus-visible:ring-1 focus-visible:ring-nike-ink focus-visible:ring-offset-0 h-12 px-5 text-sm transition-colors';
+const labelClass = 'text-xs font-semibold uppercase tracking-wider text-nike-ink/80 mb-1 block';
 
 const ShippingAddressForm = ({
   address,
@@ -81,11 +81,13 @@ const ShippingAddressForm = ({
 
   return (
     <div className='max-w-xl mx-auto'>
-      <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft p-6 md:p-8 space-y-6'>
+      <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 md:p-8 space-y-6 shadow-sm'>
         {/* Header */}
-        <div className='space-y-1 border-b border-az-hairline-soft pb-5'>
-          <h1 className='az-heading-sm text-az-ink-deep'>Dirección de Envío</h1>
-          <p className='az-body-sm text-az-steel'>
+        <div className='space-y-1 border-b border-[#e5e5e5] pb-5'>
+          <h1 className='font-marder-display font-medium text-3xl tracking-tight text-nike-ink'>
+            Dirección de Envío
+          </h1>
+          <p className='text-sm text-[#757575]'>
             Ingresá los datos del destinatario y la dirección de entrega.
           </p>
         </div>
@@ -254,8 +256,8 @@ const ShippingAddressForm = ({
                             variant='outline'
                             role='combobox'
                             className={cn(
-                              'w-full justify-between bg-az-canvas border-az-hairline-soft text-az-ink rounded-az-lg h-11 hover:bg-az-surface-soft',
-                              !field.value && 'text-az-stone'
+                              'w-full justify-between bg-white border-[#cacacb] text-nike-ink rounded-full h-12 px-5 text-sm hover:bg-[#f5f5f5]',
+                              !field.value && 'text-[#8e8e93]'
                             )}
                           >
                             {field.value
@@ -266,7 +268,7 @@ const ShippingAddressForm = ({
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent
-                        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft rounded-az-xl'
+                        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-white border border-[#e5e5e5] rounded-xl shadow-lg'
                         align='start'
                       >
                         <Command className='bg-transparent'>
@@ -286,11 +288,11 @@ const ShippingAddressForm = ({
                                     form.setValue('city', '');
                                     setOpenProvince(false);
                                   }}
-                                  className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
+                                  className='cursor-pointer text-nike-ink hover:bg-[#f5f5f5]'
                                 >
                                   <Check
                                     className={cn(
-                                      'mr-2 h-4 w-4 text-az-primary',
+                                      'mr-2 h-4 w-4 text-nike-ink',
                                       prov.name === field.value ? 'opacity-100' : 'opacity-0'
                                     )}
                                   />
@@ -331,8 +333,8 @@ const ShippingAddressForm = ({
                               role='combobox'
                               disabled={!form.getValues('province')}
                               className={cn(
-                                'w-full justify-between bg-az-canvas border-az-hairline-soft text-az-ink rounded-az-lg h-11 hover:bg-az-surface-soft',
-                                !field.value && 'text-az-stone'
+                                'w-full justify-between bg-white border-[#cacacb] text-nike-ink rounded-full h-12 px-5 text-sm hover:bg-[#f5f5f5]',
+                                !field.value && 'text-[#8e8e93]'
                               )}
                             >
                               {field.value
@@ -345,7 +347,7 @@ const ShippingAddressForm = ({
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent
-                          className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft rounded-az-xl'
+                          className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-white border border-[#e5e5e5] rounded-xl shadow-lg'
                           align='start'
                         >
                           <Command className='bg-transparent'>
@@ -364,11 +366,11 @@ const ShippingAddressForm = ({
                                       form.setValue('city', city);
                                       setOpenCity(false);
                                     }}
-                                    className='cursor-pointer text-az-ink hover:bg-az-surface-soft'
+                                    className='cursor-pointer text-nike-ink hover:bg-[#f5f5f5]'
                                   >
                                     <Check
                                       className={cn(
-                                        'mr-2 h-4 w-4 text-az-primary',
+                                        'mr-2 h-4 w-4 text-nike-ink',
                                         city === field.value ? 'opacity-100' : 'opacity-0'
                                       )}
                                     />
@@ -393,12 +395,12 @@ const ShippingAddressForm = ({
                   name='country'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={cn(labelClass, 'text-az-stone')}>País</FormLabel>
+                      <FormLabel className={cn(labelClass, 'text-[#8e8e93]')}>País</FormLabel>
                       <FormControl>
                         <Input
                           disabled
                           placeholder='País'
-                          className='bg-az-surface-soft border-az-hairline-soft rounded-az-lg text-az-stone cursor-not-allowed h-11'
+                          className='bg-[#f5f5f5] border-[#e5e5e5] rounded-full text-[#8e8e93] cursor-not-allowed h-12 px-5 text-sm'
                           {...field}
                         />
                       </FormControl>
@@ -412,18 +414,16 @@ const ShippingAddressForm = ({
             <Button
               id='shipping-submit'
               type='submit'
-              variant='buyCta'
-              size='lg'
-              className='w-full mt-2'
+              className='w-full mt-4 h-12 rounded-full bg-nike-ink text-white hover:bg-black font-medium transition-colors'
               disabled={isPending}
             >
               {isPending ? (
                 <Loader className='w-4 h-4 animate-spin' />
               ) : (
-                <>
+                <span className='flex items-center justify-center gap-2'>
                   Continuar al pago
                   <ArrowRight className='w-4 h-4' />
-                </>
+                </span>
               )}
             </Button>
           </form>

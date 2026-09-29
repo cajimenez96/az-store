@@ -8,6 +8,7 @@ import {
   shippingUpdateTemplate,
   welcomeTemplate,
   saleNotificationTemplate,
+  abandonedCartTemplate,
 } from '@/lib/email-templates';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -115,6 +116,16 @@ export async function POST(request: Request) {
           data.qty,
           data.price,
           data.sellerName
+        );
+        recipientEmail = data.email;
+        break;
+
+      case 'abandoned-cart':
+        subject = '¿Olvidaste algo en tu carrito?';
+        html = abandonedCartTemplate(
+          data.customerName,
+          data.recoveryLink,
+          data.items
         );
         recipientEmail = data.email;
         break;

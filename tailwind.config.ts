@@ -95,6 +95,27 @@ export default {
   			'link-cool-3': '#bdbdca',
   			'link-mint': '#99b3ad',
   			ink: '#000000',
+  			'nike-ink': '#111111',
+  			'nike-canvas': '#ffffff',
+  			'nike-soft-cloud': '#f5f5f5',
+  			'nike-hairline': '#cacacb',
+  			'nike-hairline-soft': '#e5e5e5',
+  			'nike-charcoal': '#39393b',
+  			'nike-ash': '#4b4b4d',
+  			'nike-mute': '#707072',
+  			'nike-stone': '#9e9ea0',
+  			'nike-sale': '#d30005',
+  			'nike-sale-deep': '#780700',
+  			'nike-success': '#007d48',
+  			'nike-success-bright': '#1eaa52',
+  			'nike-info': '#1151ff',
+  			'nike-info-deep': '#0034e3',
+  			'nike-accent-pink': '#ed1aa0',
+  			'nike-accent-pink-soft': '#ffb0dd',
+  			'nike-accent-purple-soft': '#beaffd',
+  			'nike-accent-purple-pale': '#d6d1ff',
+  			'nike-accent-teal': '#0a7281',
+  			'nike-accent-pink-deep': '#4c012d',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
@@ -108,8 +129,9 @@ export default {
   		},
   		fontFamily: {
   			sans: [
+  				'var(--font-inter)',
   				'var(--font-geist)',
-  				'Geist',
+  				'Inter',
   				'Helvetica Neue',
   				'Helvetica',
   				'Arial',
@@ -122,9 +144,33 @@ export default {
   				'serif'
   			],
   			display: [
+  				'var(--font-cormorant)',
+  				'Cormorant Garamond',
+  				'Georgia',
+  				'serif'
+  			],
+  			'marder-display': [
+  				'var(--font-cormorant)',
+  				'Cormorant Garamond',
+  				'Georgia',
+  				'serif'
+  			],
+  			'marder-body': [
+  				'var(--font-inter)',
   				'var(--font-geist)',
-  				'Geist',
-  				'Helvetica Neue',
+  				'Inter',
+  				'sans-serif'
+  			],
+  			'nike-display': [
+  				'var(--font-cormorant)',
+  				'Cormorant Garamond',
+  				'Georgia',
+  				'serif'
+  			],
+  			'nike-body': [
+  				'var(--font-inter)',
+  				'Inter',
+  				'Helvetica Now Text',
   				'Helvetica',
   				'Arial',
   				'sans-serif'
@@ -144,7 +190,12 @@ export default {
   			'az-feature': '40px',
   			'az-full': '100px',
   			'az-circle': '9999px',
-  			pill: '9999px'
+  			pill: '9999px',
+  			'nike-none': '0px',
+  			'nike-sm': '18px',
+  			'nike-md': '24px',
+  			'nike-lg': '30px',
+  			'nike-full': '9999px'
   		},
   		spacing: {
   			'az-xxs': '4px',
@@ -159,11 +210,20 @@ export default {
   			'az-section-sm': '48px',
   			'az-section': '64px',
   			'az-section-lg': '80px',
-  			'az-hero': '120px'
+  			'az-hero': '120px',
+  			'nike-xxs': '2px',
+  			'nike-xs': '4px',
+  			'nike-sm': '8px',
+  			'nike-md': '12px',
+  			'nike-lg': '18px',
+  			'nike-xl': '24px',
+  			'nike-xxl': '30px',
+  			'nike-section': '48px'
   		},
   		boxShadow: {
   			'az-sticky': 'rgba(20, 22, 26, 0.3) 0px 1px 4px 0px',
-  			'az-tab': 'rgba(0, 0, 0, 0.2) 1px 1px 0px 0px'
+  			'az-tab': 'rgba(0, 0, 0, 0.2) 1px 1px 0px 0px',
+  			'nike-hairline-inset': 'inset 0 -1px 0 #e5e5e5'
   		}
   	}
   },

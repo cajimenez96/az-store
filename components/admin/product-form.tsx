@@ -301,23 +301,24 @@ const ProductForm = ({
       >
         <div className='lg:col-span-2 space-y-8'>
           {/* Información Básica */}
-          <Card className='shadow-az-card border-az-hairline-soft'>
-            <CardHeader>
-              <CardTitle className='az-body-lg-bold'>
+          <Card className='bg-white border border-[#e5e5e5] rounded-2xl shadow-sm overflow-hidden'>
+            <CardHeader className='px-6 py-5 border-b border-[#e5e5e5] bg-white'>
+              <CardTitle className='text-sm font-bold uppercase tracking-wider text-[#111111]'>
                 Información Básica
               </CardTitle>
             </CardHeader>
-            <CardContent className='space-y-6'>
+            <CardContent className='p-6 space-y-6'>
               <div className='flex flex-col md:flex-row gap-5'>
                 <FormField
                   control={form.control}
                   name='name'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel>Nombre</FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Nombre</FormLabel>
                       <FormControl>
                         <Input
                           placeholder='Ingresá el nombre del producto'
+                          className='bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11'
                           {...field}
                           onChange={(e) => {
                             field.onChange(e);
@@ -342,17 +343,19 @@ const ProductForm = ({
                   name='slug'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel>Slug</FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Slug</FormLabel>
                       <FormControl>
                         <div className='relative flex gap-2'>
                           <Input
                             placeholder='Ingresá el slug'
+                            className='bg-[#f5f5f5] border-[#e5e5e5] rounded-xl text-[#707072] h-11'
                             {...field}
                             disabled
                           />
                           <Button
                             type='button'
                             variant='outline'
+                            className='border-[#e5e5e5] rounded-full text-xs font-semibold px-4 hover:bg-[#f5f5f5] h-11'
                             onClick={() => {
                               form.setValue(
                                 'slug',
@@ -378,10 +381,10 @@ const ProductForm = ({
                   name='categoryId'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel>Categoría</FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Categoría</FormLabel>
                       <FormControl>
                         <select
-                          className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                          className='flex h-11 w-full rounded-xl border border-[#e5e5e5] bg-white px-3 py-2 text-sm text-[#111111] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#111111]'
                           {...field}
                         >
                           <option value=''>Seleccione una categoría</option>
@@ -403,10 +406,10 @@ const ProductForm = ({
                     name='subCategoryId'
                     render={({ field }) => (
                       <FormItem className='w-full'>
-                        <FormLabel>Sub-categoría</FormLabel>
+                        <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Sub-categoría</FormLabel>
                         <FormControl>
                           <select
-                            className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                            className='flex h-11 w-full rounded-xl border border-[#e5e5e5] bg-white px-3 py-2 text-sm text-[#111111] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#111111]'
                             {...field}
                             value={field.value ?? ''}
                           >
@@ -429,10 +432,10 @@ const ProductForm = ({
                   name='brandId'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel>Marca</FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Marca</FormLabel>
                       <FormControl>
                         <select
-                          className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                          className='flex h-11 w-full rounded-xl border border-[#e5e5e5] bg-white px-3 py-2 text-sm text-[#111111] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#111111]'
                           {...field}
                         >
                           <option value=''>Seleccione una marca</option>
@@ -448,7 +451,7 @@ const ProductForm = ({
                   )}
                 />
               </div>
-              <div className='flex flex-col gap-5'>
+              <div className='flex flex-col md:flex-row gap-5'>
                 {/* Fase 2: dual pricing. priceCash es la base; priceMercadoPago
                     se sugiere como `priceCash * (1 + MP_SURCHARGE_PERCENT / 100)`,
                     pero siempre editable. */}
@@ -457,10 +460,11 @@ const ProductForm = ({
                   name='priceCash'
                   render={({ field }) => (
                     <FormItem className='w-full md:w-1/2'>
-                      <FormLabel>Precio efectivo / transferencia</FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Precio efectivo / transferencia</FormLabel>
                       <FormControl>
                         <Input
                           placeholder='Ingresá el precio base'
+                          className='bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11'
                           {...field}
                         />
                       </FormControl>
@@ -473,15 +477,16 @@ const ProductForm = ({
                   name='priceMercadoPago'
                   render={({ field }) => (
                     <FormItem className='w-full md:w-1/2'>
-                      <FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>
                         Precio MercadoPago
-                        <span className='ml-2 az-caption text-az-stone'>
+                        <span className='ml-2 text-xs font-normal normal-case text-[#707072]'>
                           (sugerido: cash + recargo)
                         </span>
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder='Ingresá el precio para MP'
+                          className='bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11'
                           {...field}
                         />
                       </FormControl>
@@ -496,11 +501,11 @@ const ProductForm = ({
                   name='description'
                   render={({ field }) => (
                     <FormItem className='w-full'>
-                      <FormLabel>Descripción</FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>Descripción</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder='Ingresá la descripción del producto'
-                          className='resize-none h-24'
+                          className='resize-none h-24 bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111]'
                           {...field}
                         />
                       </FormControl>
@@ -513,13 +518,13 @@ const ProductForm = ({
           </Card>
 
           {/* Variantes de color */}
-          <Card className='shadow-az-card border-az-hairline-soft'>
-            <CardHeader>
-              <CardTitle className='az-body-lg-bold'>
+          <Card className='bg-white border border-[#e5e5e5] rounded-2xl shadow-sm overflow-hidden'>
+            <CardHeader className='px-6 py-5 border-b border-[#e5e5e5] bg-white'>
+              <CardTitle className='text-sm font-bold uppercase tracking-wider text-[#111111]'>
                 Variantes de Color
               </CardTitle>
             </CardHeader>
-            <CardContent className='space-y-6'>
+            <CardContent className='p-6 space-y-6'>
               <FormField
                 control={form.control}
                 name='hasColorVariants'
@@ -532,9 +537,10 @@ const ProductForm = ({
                           field.onChange(v);
                           if (!v) form.setValue('colors', []);
                         }}
+                        className='data-[state=checked]:bg-[#111111] data-[state=checked]:border-[#111111] rounded-md'
                       />
                     </FormControl>
-                    <FormLabel className='font-semibold text-base'>
+                    <FormLabel className='text-sm font-bold text-[#111111] cursor-pointer'>
                       Este producto tiene variantes de color
                     </FormLabel>
                   </FormItem>
@@ -543,7 +549,7 @@ const ProductForm = ({
 
               {hasColorVariants && (
                 <div className='space-y-4'>
-                  <p className='az-caption text-az-stone'>
+                  <p className='text-xs text-[#707072]'>
                     Definí los colores disponibles para este producto. Cada
                     color tiene sus propias imágenes y comparte talles con los
                     demás colores.
@@ -564,6 +570,7 @@ const ProductForm = ({
                     onClick={() =>
                       colorFields.append({ colorId: '', images: [] })
                     }
+                    className='border-[#e5e5e5] rounded-full text-xs font-semibold hover:bg-[#f5f5f5]'
                   >
                     <Plus className='w-4 h-4 mr-2' />
                     Agregar color
@@ -574,17 +581,17 @@ const ProductForm = ({
           </Card>
 
           {/* Inventario */}
-          <Card className='shadow-az-card border-az-hairline-soft'>
-            <CardHeader>
-              <CardTitle className='az-body-lg-bold'>Inventario</CardTitle>
+          <Card className='bg-white border border-[#e5e5e5] rounded-2xl shadow-sm overflow-hidden'>
+            <CardHeader className='px-6 py-5 border-b border-[#e5e5e5] bg-white'>
+              <CardTitle className='text-sm font-bold uppercase tracking-wider text-[#111111]'>Inventario</CardTitle>
             </CardHeader>
-            <CardContent className='space-y-4'>
+            <CardContent className='p-6 space-y-4'>
               {!categoryId ? (
-                <p className='az-body-sm text-az-stone'>
+                <p className='text-xs text-[#707072]'>
                   Seleccioná una categoría para cargar talles.
                 </p>
               ) : currentSizes.length === 0 ? (
-                <p className='az-body-sm text-az-stone'>
+                <p className='text-xs text-[#707072]'>
                   La categoría seleccionada no tiene talles asignados.
                 </p>
               ) : hasColorVariants ? (
@@ -615,28 +622,28 @@ const ProductForm = ({
           </Card>
 
           {/* Imágenes y destacado */}
-          <Card className='shadow-az-card border-az-hairline-soft'>
-            <CardHeader>
-              <CardTitle className='az-body-lg-bold'>
+          <Card className='bg-white border border-[#e5e5e5] rounded-2xl shadow-sm overflow-hidden'>
+            <CardHeader className='px-6 py-5 border-b border-[#e5e5e5] bg-white'>
+              <CardTitle className='text-sm font-bold uppercase tracking-wider text-[#111111]'>
                 Imágenes y Destacado
               </CardTitle>
             </CardHeader>
-            <CardContent className='space-y-6'>
+            <CardContent className='p-6 space-y-6'>
               <div className='upload-field'>
                 <FormField
                   control={form.control}
                   name='images'
                   render={() => (
                     <FormItem className='w-full'>
-                      <FormLabel>
+                      <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>
                         Imágenes del producto (fallback / OG)
                       </FormLabel>
-                      <p className='az-caption text-az-stone mb-2'>
+                      <p className='text-xs text-[#707072] mb-2'>
                         Se usan como galería por defecto y para compartir en
                         redes. Si el producto tiene variantes de color, las
                         imágenes por color tienen prioridad.
                       </p>
-                      <div className='p-4 border border-az-hairline-soft rounded-az-lg mt-2'>
+                      <div className='p-4 border border-[#e5e5e5] rounded-2xl mt-2 bg-[#f9f9f9]'>
                         <FormControl>
                           <ImageUploadField
                             images={images}
@@ -650,7 +657,7 @@ const ProductForm = ({
                 />
               </div>
 
-              <div className='upload-field pt-4 border-t border-az-hairline-soft'>
+              <div className='upload-field pt-4 border-t border-[#e5e5e5]'>
                 <FormField
                   control={form.control}
                   name='isFeatured'
@@ -660,9 +667,10 @@ const ProductForm = ({
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          className='data-[state=checked]:bg-[#111111] data-[state=checked]:border-[#111111] rounded-md'
                         />
                       </FormControl>
-                      <FormLabel className='font-semibold text-base'>
+                      <FormLabel className='text-sm font-bold text-[#111111] cursor-pointer'>
                         ¿Es producto destacado?
                       </FormLabel>
                     </FormItem>
@@ -670,8 +678,8 @@ const ProductForm = ({
                 />
 
                 {isFeatured && (
-                  <div className='mt-4 border border-az-hairline-soft p-4 rounded-az-lg'>
-                    <p className='text-sm text-zinc-500 mb-4'>
+                  <div className='mt-4 border border-[#e5e5e5] p-4 rounded-2xl bg-[#f9f9f9]'>
+                    <p className='text-xs text-[#707072] mb-4'>
                       Sube un banner ancho para la página principal.
                     </p>
                     {banner ? (
@@ -679,13 +687,13 @@ const ProductForm = ({
                         <Image
                           src={banner}
                           alt='Imagen del banner'
-                          className='w-full object-cover object-center rounded-sm'
+                          className='w-full object-cover object-center rounded-xl'
                           width={1920}
                           height={680}
                         />
                         <button
                           type='button'
-                          className='absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
+                          className='absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-bold'
                           onClick={() => form.setValue('banner', '')}
                         >
                           &times;
@@ -715,13 +723,13 @@ const ProductForm = ({
         {/* Right Column - Preview & Actions */}
         <div className='space-y-6'>
           <div className='sticky top-24'>
-            <Card className='shadow-az-card border-az-hairline-soft overflow-hidden bg-az-surface-soft'>
-              <CardHeader className='bg-az-canvas border-b border-az-hairline-soft pb-4'>
-                <CardTitle className='text-sm uppercase tracking-widest text-zinc-500 font-medium text-center'>
+            <Card className='bg-white border border-[#e5e5e5] rounded-2xl shadow-sm overflow-hidden'>
+              <CardHeader className='bg-white border-b border-[#e5e5e5] pb-4'>
+                <CardTitle className='text-xs uppercase tracking-widest text-[#707072] font-bold text-center'>
                   Vista Previa
                 </CardTitle>
               </CardHeader>
-              <CardContent className='p-6 flex justify-center bg-az-surface-soft'>
+              <CardContent className='p-6 flex justify-center bg-[#f9f9f9]'>
                 <div className='w-full max-w-[300px] pointer-events-none'>
                   <ProductCard product={previewProduct} />
                 </div>
@@ -730,10 +738,8 @@ const ProductForm = ({
 
             <Button
               type='submit'
-              size='lg'
               disabled={form.formState.isSubmitting}
-              variant='buyCta'
-              className='w-full mt-6 shadow-az-card transition-shadow py-6 text-base font-semibold'
+              className='w-full mt-6 bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all py-3.5 text-base h-auto'
             >
               {form.formState.isSubmitting
                 ? 'Enviando...'
@@ -742,8 +748,8 @@ const ProductForm = ({
             {type === 'Update' && (
               <Button
                 type='button'
-                variant='outlineOnLight'
-                className='w-full mt-3'
+                variant='outline'
+                className='w-full mt-3 border-[#e5e5e5] rounded-full text-[#111111] hover:bg-[#f5f5f5] font-semibold py-3 h-auto'
                 onClick={() => router.push('/admin/products')}
               >
                 Cancelar
@@ -786,25 +792,25 @@ function ColorCombobox({
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className='w-full justify-between bg-az-canvas'
+          className='w-full justify-between bg-white border-[#e5e5e5] rounded-xl text-[#111111] hover:bg-[#f5f5f5] h-11'
         >
           {selected ? (
             <span className='flex items-center gap-2'>
               <span
-                className='inline-block w-4 h-4 rounded-full border border-az-hairline'
+                className='inline-block w-4 h-4 rounded-full border border-[#e5e5e5]'
                 style={{ backgroundColor: selected.hex }}
                 aria-hidden
               />
-              {selected.name}
+              <span className='text-sm font-medium text-[#111111]'>{selected.name}</span>
             </span>
           ) : (
-            <span className='text-az-stone'>Seleccionar color...</span>
+            <span className='text-sm text-[#707072]'>Seleccionar color...</span>
           )}
           <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-az-canvas border-az-hairline-soft'
+        className='w-full p-0 max-h-[300px] overflow-y-auto z-[9999] bg-white border-[#e5e5e5] rounded-2xl shadow-xl'
         align='start'
       >
         <Command className='bg-transparent'>
@@ -825,20 +831,20 @@ function ColorCombobox({
                     onChange(opt.id);
                     setOpen(false);
                   }}
-                  className='cursor-pointer'
+                  className='cursor-pointer hover:bg-[#f5f5f5]'
                 >
                   <Check
                     className={cn(
-                      'mr-2 h-4 w-4 text-az-primary',
+                      'mr-2 h-4 w-4 text-[#111111]',
                       opt.id === value ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   <span
-                    className='inline-block w-4 h-4 rounded-full border border-az-hairline mr-2'
+                    className='inline-block w-4 h-4 rounded-full border border-[#e5e5e5] mr-2'
                     style={{ backgroundColor: opt.hex }}
                     aria-hidden
                   />
-                  {opt.name}
+                  <span className='text-sm font-medium text-[#111111]'>{opt.name}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -870,10 +876,10 @@ function ColorFieldRow({
     .filter((id): id is string => !!id);
 
   return (
-    <div className='border border-az-hairline-soft rounded-az-lg p-4 space-y-3 bg-az-surface-soft'>
+    <div className='border border-[#e5e5e5] rounded-2xl p-5 space-y-4 bg-[#f9f9f9]'>
       <div className='flex items-start gap-3'>
         <div className='flex-1 space-y-2'>
-          <label className='az-caption-bold text-az-stone uppercase tracking-wider'>
+          <label className='text-xs font-bold uppercase tracking-wider text-[#111111] block'>
             Color
           </label>
           <ColorCombobox
@@ -890,17 +896,17 @@ function ColorFieldRow({
           variant='ghost'
           size='icon'
           onClick={onRemove}
-          className='h-10 w-10 text-az-critical hover:bg-red-50 mt-6'
+          className='h-10 w-10 text-red-600 hover:bg-red-50 rounded-full mt-6 shrink-0'
         >
           <Trash2 className='h-4 w-4' />
         </Button>
       </div>
 
       <div>
-        <label className='az-caption-bold text-az-stone uppercase tracking-wider'>
+        <label className='text-xs font-bold uppercase tracking-wider text-[#111111] block mb-2'>
           Imágenes del color
         </label>
-        <div className='mt-2'>
+        <div className='p-4 border border-[#e5e5e5] rounded-xl bg-white'>
           <ImageUploadField
             images={images}
             onChange={(urls) =>
@@ -953,56 +959,54 @@ function ColorSizeStockGrid({
 
   if (colors.length === 0) {
     return (
-      <p className='az-body-sm text-az-stone'>
+      <p className='text-xs text-[#707072]'>
         Agregá al menos un color en la sección de arriba para cargar stock.
       </p>
     );
   }
 
   return (
-    <div className='overflow-x-auto'>
+    <div className='overflow-x-auto border border-[#e5e5e5] rounded-xl'>
       <table className='w-full text-sm border-collapse'>
-        <thead>
+        <thead className='bg-[#f9f9f9]'>
           <tr>
-            <th className='text-left p-2 border-b border-az-hairline-soft'>
+            <th className='text-left p-3 border-b border-[#e5e5e5] text-xs font-bold uppercase tracking-wider text-[#707072]'>
               Talle
             </th>
             {colors.map((c, i) => (
               <th
                 key={`${c.colorId}-${i}`}
-                className='text-center p-2 border-b border-az-hairline-soft'
+                className='text-center p-3 border-b border-[#e5e5e5] text-xs font-bold uppercase tracking-wider text-[#707072]'
               >
                 <div className='flex items-center justify-center gap-2'>
                   <span
-                    className='inline-block w-3 h-3 rounded-full border border-az-hairline'
+                    className='inline-block w-3 h-3 rounded-full border border-[#e5e5e5]'
                     style={{ backgroundColor: c.hex }}
                     aria-hidden
                   />
-                  {c.name}
+                  <span>{c.name}</span>
                 </div>
               </th>
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className='divide-y divide-[#e5e5e5]'>
           {sizes.map((s) => (
-            <tr key={s.id} className='border-b border-az-hairline-soft'>
-              <td className='p-2 font-medium'>{s.name}</td>
+            <tr key={s.id} className='hover:bg-[#f9f9f9] transition-colors'>
+              <td className='p-3 font-semibold text-[#111111]'>{s.name}</td>
               {colors.map((c, i) => {
                 const current = getStock(s.id, c.colorId);
                 return (
-                  <td key={`${c.colorId}-${i}`} className='p-2 text-center'>
+                  <td key={`${c.colorId}-${i}`} className='p-3 text-center'>
                     <Input
                       type='number'
                       min={0}
                       placeholder='0'
-                      className='w-20 mx-auto text-center'
+                      className='w-20 mx-auto text-center bg-white border-[#e5e5e5] rounded-xl text-[#111111] font-semibold h-9'
                       value={current > 0 ? current : ''}
                       onChange={(e) => {
                         const raw = e.target.value;
                         if (raw === '') {
-                          // Campo vacío: persistimos stock = 0 (sin variante
-                          // creada). El server action filtra los = 0.
                           setStock(s.id, c.colorId, 0);
                         } else {
                           setStock(s.id, c.colorId, Number(raw));
@@ -1051,16 +1055,17 @@ function SimpleSizeStockGrid({ sizes }: { sizes: Size[] }) {
   };
 
   return (
-    <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+    <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
       {sizes.map((s) => {
         const current = getStock(s.id);
         return (
-          <div key={s.id} className='space-y-2'>
-            <label className='text-sm font-medium'>{s.name}</label>
+          <div key={s.id} className='space-y-1.5 p-3.5 bg-[#f9f9f9] border border-[#e5e5e5] rounded-xl'>
+            <label className='text-xs font-bold uppercase tracking-wider text-[#111111] block'>{s.name}</label>
             <Input
               type='number'
               min={0}
               placeholder='0'
+              className='bg-white border-[#e5e5e5] rounded-lg text-[#111111] font-semibold h-9'
               value={current > 0 ? current : ''}
               onChange={(e) => {
                 const raw = e.target.value;

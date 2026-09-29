@@ -51,11 +51,11 @@ export function SidebarMenuButton({
     <button
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-3 px-3 py-2.5 rounded-az-md text-sm font-medium',
+        'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium',
         'transition-all duration-200 ease-in-out',
-        'text-az-stone hover:text-az-ink-deep hover:bg-az-surface-soft',
-        isActive && 'bg-az-primary/10 text-az-primary font-semibold',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-az-primary/50',
+        'text-[#707072] hover:text-[#111111] hover:bg-[#f5f5f5]',
+        isActive && 'bg-[#111111] text-white hover:bg-[#111111] hover:text-white font-medium shadow-sm',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111]/20',
         isCollapsed && 'justify-center gap-0 px-2',
         className
       )}
@@ -64,13 +64,13 @@ export function SidebarMenuButton({
       {Icon && (
         <Icon
           className={cn(
-            'h-5 w-5 flex-shrink-0 transition-transform duration-200',
+            'h-4 w-4 flex-shrink-0 transition-transform duration-200',
             isCollapsed && 'h-5 w-5',
-            isActive && 'text-az-primary'
+            isActive ? 'text-white' : 'text-current'
           )}
         />
       )}
-      {!isCollapsed && <span className='truncate'>{children}</span>}
+      {!isCollapsed && <span className='truncate text-xs tracking-wide uppercase font-semibold'>{children}</span>}
     </button>
   );
 }

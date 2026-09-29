@@ -39,18 +39,23 @@ export default function CommissionEditor({ sellerId, sellerName, currentRate }: 
 
   return (
     <>
-      <Button variant='ghost' size='icon' className='h-8 w-8' onClick={() => setOpen(true)}>
+      <Button
+        variant='ghost'
+        size='icon'
+        className='h-8 w-8 rounded-full hover:bg-[#f5f5f5] text-[#111111]'
+        onClick={() => setOpen(true)}
+      >
         <Pencil className='h-3.5 w-3.5' />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className='bg-az-canvas border-az-hairline-soft max-w-sm'>
+        <DialogContent className='bg-white border-[#e5e5e5] rounded-2xl max-w-sm p-6'>
           <DialogHeader>
-            <DialogTitle className='az-body-lg-bold text-az-ink-deep'>
+            <DialogTitle className='text-xl font-medium tracking-tight text-[#111111] font-marder-display'>
               Comisión de {sellerName}
             </DialogTitle>
           </DialogHeader>
           <div className='py-4 space-y-2'>
-            <label className='az-body-sm-bold text-az-ink-deep block'>
+            <label className='text-xs font-semibold uppercase tracking-wider text-[#707072] block'>
               Porcentaje de comisión
             </label>
             <div className='flex items-center gap-2'>
@@ -61,16 +66,24 @@ export default function CommissionEditor({ sellerId, sellerName, currentRate }: 
                 step={0.5}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                className='bg-az-canvas border-az-hairline rounded-az-lg text-az-ink focus-visible:ring-az-primary focus-visible:ring-offset-0 w-28'
+                className='bg-[#f5f5f5] border-transparent rounded-full text-sm font-medium text-[#111111] focus-visible:ring-2 focus-visible:ring-[#111111] focus:bg-white w-28'
               />
-              <span className='az-body-sm text-az-stone'>%</span>
+              <span className='text-sm font-semibold text-[#707072]'>%</span>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant='ghost' onClick={() => setOpen(false)}>
+          <DialogFooter className='gap-2 sm:gap-0'>
+            <Button
+              variant='ghost'
+              className='rounded-full text-xs font-semibold uppercase tracking-wider text-[#707072] hover:bg-[#f5f5f5]'
+              onClick={() => setOpen(false)}
+            >
               Cancelar
             </Button>
-            <Button variant='buyCta' onClick={handleSave} disabled={loading}>
+            <Button
+              className='rounded-full bg-[#111111] text-white hover:bg-black text-xs font-semibold uppercase tracking-wider px-6'
+              onClick={handleSave}
+              disabled={loading}
+            >
               {loading ? 'Guardando...' : 'Guardar'}
             </Button>
           </DialogFooter>

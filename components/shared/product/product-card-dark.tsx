@@ -21,37 +21,39 @@ const ProductCardDark = ({
 
   return (
     <Link href={`/product/${product.slug}`} className='group block'>
-      <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft overflow-hidden hover:shadow-az-sticky hover:-translate-y-1 transition-all duration-200'>
-        {/* Image area */}
-        <div className='relative aspect-square bg-az-surface-soft p-4'>
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            className='object-contain group-hover:scale-[1.03] transition-transform duration-300 p-4'
-            sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
-          />
-          {stock === 0 && (
-            <div className='absolute top-3 left-3'>
-              <span className='az-caption-bold bg-az-critical text-white px-3 py-1 rounded-az-full'>
-                Sin stock
-              </span>
-            </div>
-          )}
-        </div>
+      {/* 1:1 Product Photography Stage */}
+      <div className='relative aspect-square bg-nike-soft-cloud overflow-hidden flex items-center justify-center'>
+        <Image
+          src={product.images[0]}
+          alt={product.name}
+          fill
+          className='object-contain object-center p-4 group-hover:scale-105 transition-transform duration-300'
+          sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
+        />
+        {stock === 0 ? (
+          <div className='absolute top-3 left-3'>
+            <span className='bg-nike-ink text-white font-sans text-[11px] font-medium px-2.5 py-1 rounded-full tracking-wide uppercase'>
+              Agotado
+            </span>
+          </div>
+        ) : null}
+      </div>
 
-        {/* Info */}
-        <div className='px-6 py-5'>
-          {brandName && (
-            <p className='az-caption text-az-steel mb-1'>{brandName}</p>
-          )}
-          <h3 className='az-body-sm-bold text-az-ink mb-3 line-clamp-2 group-hover:text-az-ink-deep transition-colors duration-150'>
-            {product.name}
-          </h3>
+      {/* Metadata Row */}
+      <div className='pt-3 pb-1'>
+        {brandName && (
+          <p className='font-sans text-xs sm:text-sm font-normal text-nike-mute mb-0.5 tracking-normal'>
+            {brandName}
+          </p>
+        )}
+        <h3 className='font-sans text-sm sm:text-base font-medium text-nike-ink leading-snug line-clamp-1 group-hover:opacity-70 transition-opacity'>
+          {product.name}
+        </h3>
+        <div className='mt-1.5'>
           {stock > 0 ? (
-            <DualPrice product={product} className='az-body-md-bold text-az-ink-deep' />
+            <DualPrice product={product} className='font-sans text-sm sm:text-base font-medium text-nike-ink' />
           ) : (
-            <span className='az-caption text-az-stone'>Sin stock</span>
+            <span className='font-sans text-xs sm:text-sm text-nike-mute font-normal'>Agotado temporalmente</span>
           )}
         </div>
       </div>

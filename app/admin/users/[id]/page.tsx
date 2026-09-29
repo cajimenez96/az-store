@@ -22,9 +22,14 @@ const AdminUserUpdatePage = async (props: {
   if (!user) notFound();
 
   return (
-    <div className='space-y-8 max-w-lg mx-auto'>
-      <h1 className='h2-bold'>Actualizar Usuario</h1>
-      <UpdateUserForm user={user} currentUserId={session?.user?.id} />
+    <div className='max-w-xl mx-auto space-y-6'>
+      <div>
+        <h1 className='font-marder-display text-3xl font-black uppercase tracking-tight text-[#111111]'>Actualizar Usuario</h1>
+        <p className='text-sm text-[#707072] mt-1'>Modifica los datos y permisos de este usuario.</p>
+      </div>
+      <div className='bg-white border border-[#e5e5e5] rounded-2xl p-6 md:p-8 shadow-sm'>
+        <UpdateUserForm user={user} currentUserId={session?.user?.id} />
+      </div>
     </div>
   );
 };

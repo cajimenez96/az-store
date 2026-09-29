@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/db/prisma';
-import { randomBytes } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
+import { sendAbandonedCartEmail } from '@/lib/email';
+
+function isSecretValid(provided: string | null, expected: string): boolean {
+  if (!provided) return false;
+  const providedBuffer = Buffer.from(provided);
+  const expectedBuffer = Buffer.from(expected);
+  if (providedBuffer.length !== expectedBuffer.length) return false;
+  return timingSafeEqual(providedBuffer, expectedBuffer);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +27,11 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('Authorization');
     const secretHeader = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
-    if (secretParam !== expectedSecret && secretHeader !== expectedSecret) {
+    const authorized =
+      isSecretValid(secretParam, expectedSecret) ||
+      isSecretValid(secretHeader, expectedSecret);
+
+    if (!authorized) {
       return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 });
     }
 
@@ -26,7 +39,6 @@ export async function POST(request: NextRequest) {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
     // Find abandoned carts: updatedAt > 1 hour, user exists
-    // Note: Will filter by items.length > 0 and email exists in JavaScript after fetching
     const abandonedCarts = await prisma.cart.findMany({
       where: {
         updatedAt: {
@@ -99,11 +111,22 @@ export async function POST(request: NextRequest) {
         token,
       });
 
+      // Dispatch recovery email
+      const cartItems = (cart.items as any[]).map((item) => ({
+        name: item.name,
+        qty: item.qty || 1,
+        price: String(item.priceUsed || item.price || '0'),
+      }));
+
+      await sendAbandonedCartEmail({
+        email: cart.user.email,
+        customerName: cart.user.name || 'Cliente',
+        recoveryToken: token,
+        items: cartItems,
+      });
+
       processedCount++;
     }
-
-    // TODO: Send recovery emails in batch (integrate with lib/email.ts when ready)
-    // For now, recovery tokens are stored in CartRecovery table
 
     return NextResponse.json({
       success: true,

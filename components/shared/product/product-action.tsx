@@ -79,25 +79,25 @@ export default function ProductAction({
         {/* Color selector (solo si el producto tiene colores) */}
         {product.colors.length > 0 && (
           <div className='space-y-3'>
-            <p className='az-caption-bold text-az-steel uppercase tracking-widest'>
-              Color: {selectedColor?.color?.name}
+            <p className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest'>
+              Color: <span className='text-nike-ink font-medium normal-case tracking-normal'>{selectedColor?.color?.name}</span>
             </p>
-            <div className='flex flex-wrap gap-2'>
+            <div className='flex flex-wrap gap-2.5'>
               {product.colors.map((pc) => {
                 const isSelected = selectedColorId === pc.id;
                 return (
-                    <button
-                      key={pc.id}
-                      type='button'
-                      onClick={() => {
-                        handleSelectColor(pc.id);
-                        setSelectedSize(null); // reset talle al cambiar color
-                      }}
+                  <button
+                    key={pc.id}
+                    type='button'
+                    onClick={() => {
+                      handleSelectColor(pc.id);
+                      setSelectedSize(null);
+                    }}
                     className={cn(
-                      'w-9 h-9 rounded-full border-2 transition-all',
+                      'w-8 h-8 rounded-full border-2 transition-all active:scale-95',
                       isSelected
-                        ? 'border-az-ink-deep scale-110'
-                        : 'border-az-hairline hover:border-az-ink-deep/50'
+                        ? 'border-nike-ink ring-2 ring-nike-ink ring-offset-2 scale-105'
+                        : 'border-nike-hairline hover:border-nike-ink/60'
                     )}
                     style={{ backgroundColor: pc.color?.hex ?? '#cccccc' }}
                     title={pc.color?.name}
@@ -112,7 +112,9 @@ export default function ProductAction({
         {/* Size selector */}
         {allVariants.length > 0 && (
           <div className='space-y-3'>
-            <p className='az-caption-bold text-az-steel uppercase tracking-widest'>Talles</p>
+            <p className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest'>
+              Seleccionar Talle
+            </p>
             <div className='flex flex-wrap gap-2'>
               {allVariants.map((v) => {
                 const inStock = v.stock > 0;
@@ -124,12 +126,12 @@ export default function ProductAction({
                     disabled={!inStock}
                     onClick={() => inStock && v.size && setSelectedSize(v.size.name)}
                     className={cn(
-                      'min-w-[3rem] px-4 py-2 rounded-az-full border-2 az-button-md transition-colors duration-150',
+                      'min-w-[3.5rem] px-5 py-2.5 rounded-full font-sans text-sm font-medium border transition-all active:scale-95',
                       isSelected
-                        ? 'bg-az-ink-deep text-white border-az-ink-deep'
+                        ? 'bg-nike-ink text-white border-nike-ink shadow-sm'
                         : inStock
-                        ? 'bg-az-canvas text-az-ink-deep border-az-hairline hover:border-az-ink-deep'
-                        : 'bg-az-canvas text-az-disabled-text border-az-hairline cursor-not-allowed line-through'
+                        ? 'bg-nike-soft-cloud hover:bg-[#eaeaea] text-nike-ink border-transparent hover:border-nike-ink'
+                        : 'bg-nike-soft-cloud/40 text-nike-mute border-transparent cursor-not-allowed line-through opacity-40'
                     )}
                   >
                     {v.size?.name ?? '—'}
@@ -141,36 +143,31 @@ export default function ProductAction({
         )}
 
         {/* Stock status */}
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-2 pt-1'>
           {currentVariant ? (
             currentVariant.stock > 0 ? (
-              <>
-                <span className='inline-flex items-center gap-1.5 az-caption-bold bg-az-success/10 text-az-success px-3 py-1 rounded-az-full'>
-                  <span className='w-1.5 h-1.5 rounded-full bg-az-success'></span>
-                  En stock
-                </span>
-                <span className='az-body-sm text-az-stone'>
-                  {currentVariant.stock} disponibles
-                </span>
-              </>
+              <span className='inline-flex items-center gap-1.5 font-sans text-xs font-medium text-nike-success bg-nike-success/10 px-3 py-1 rounded-full'>
+                <span className='w-1.5 h-1.5 rounded-full bg-nike-success animate-pulse'></span>
+                En stock ({currentVariant.stock} disponibles)
+              </span>
             ) : (
-              <span className='az-caption-bold text-az-critical'>Sin stock en este talle</span>
+              <span className='font-sans text-xs font-semibold text-nike-sale'>
+                Sin stock en este talle
+              </span>
             )
           ) : hasStock ? (
-            <span className='az-body-sm text-az-stone'>
-              {product.colors.length > 0
-                ? 'Seleccioná un talle para continuar'
-                : 'Seleccioná un talle para continuar'}
+            <span className='font-sans text-xs text-nike-mute'>
+              Seleccioná tu talle para ver disponibilidad
             </span>
           ) : (
-            <span className='az-caption-bold bg-az-critical/10 text-az-critical px-3 py-1 rounded-az-full'>
-              Sin stock
+            <span className='font-sans text-xs font-semibold text-nike-sale bg-nike-sale/10 px-3 py-1 rounded-full'>
+              Sin stock disponible
             </span>
           )}
         </div>
 
         {/* CTA — desktop */}
-        <div className='hidden md:block border-t border-az-hairline-soft pt-6'>
+        <div className='hidden md:block border-t border-nike-hairline-soft pt-6'>
           {hasStock ? (
             selectedSize ? (
               <AddToCart
@@ -179,8 +176,6 @@ export default function ProductAction({
                   productId: product.id,
                   name: product.name,
                   slug: product.slug,
-                  // Fase 2: el item del carrito arranca con CASH por default
-                  // (el método final se elige en checkout).
                   priceUsed: priceCash,
                   paymentMethod: 'CASH',
                   qty: 1,
@@ -194,58 +189,60 @@ export default function ProductAction({
             ) : (
               <button
                 disabled
-                className='w-full az-button-md bg-az-disabled-text text-white py-4 rounded-az-full cursor-not-allowed'
+                className='w-full font-sans text-sm font-medium bg-nike-soft-cloud text-nike-mute py-4 rounded-full cursor-not-allowed'
               >
-                Elegí un talle para comprar
+                Seleccioná un talle para comprar
               </button>
             )
           ) : (
             <button
               disabled
-              className='w-full az-button-md bg-az-disabled-text text-white py-4 rounded-az-full cursor-not-allowed'
+              className='w-full font-sans text-sm font-medium bg-nike-soft-cloud text-nike-mute py-4 rounded-full cursor-not-allowed'
             >
-              Sin stock
+              Agotado
             </button>
           )}
         </div>
       </div>
 
       {/* Mobile sticky bottom bar */}
-      <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-az-canvas border-t border-az-hairline-soft px-4 py-3 flex items-center gap-3'>
+      <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-nike-hairline-soft px-4 py-3.5 flex items-center justify-between gap-4 shadow-lg'>
         <div className='flex-1'>
-          <p className='az-caption text-az-stone'>Precio</p>
-          <p className='az-body-md-bold text-az-ink-deep'>{formattedCash}</p>
+          <p className='font-sans text-xs text-nike-mute font-medium'>Total</p>
+          <p className='font-sans text-lg font-bold text-nike-ink leading-tight'>{formattedCash}</p>
           {showDual && (
-            <p className='az-caption text-az-stone line-through'>
-              o {formattedMp} por MP
+            <p className='font-sans text-[11px] text-nike-mute line-through'>
+              o {formattedMp} MP
             </p>
           )}
         </div>
-        {hasStock && selectedSize ? (
-          <AddToCart
-            cart={cart}
-            item={{
-              productId: product.id,
-              name: product.name,
-              slug: product.slug,
-              priceUsed: priceCash,
-              paymentMethod: 'CASH',
-              qty: 1,
-              image: currentImage,
-              size: selectedSize,
-              productColorId: selectedColor?.id,
-              colorName: selectedColor?.color?.name,
-              colorHex: selectedColor?.color?.hex,
-            }}
-          />
-        ) : (
-          <button
-            disabled
-            className='az-button-md bg-az-disabled-text text-white px-6 py-3 rounded-az-full cursor-not-allowed'
-          >
-            {hasStock ? 'Elegí un talle' : 'Sin stock'}
-          </button>
-        )}
+        <div className='flex-1 max-w-[200px]'>
+          {hasStock && selectedSize ? (
+            <AddToCart
+              cart={cart}
+              item={{
+                productId: product.id,
+                name: product.name,
+                slug: product.slug,
+                priceUsed: priceCash,
+                paymentMethod: 'CASH',
+                qty: 1,
+                image: currentImage,
+                size: selectedSize,
+                productColorId: selectedColor?.id,
+                colorName: selectedColor?.color?.name,
+                colorHex: selectedColor?.color?.hex,
+              }}
+            />
+          ) : (
+            <button
+              disabled
+              className='w-full font-sans text-xs font-semibold bg-nike-soft-cloud text-nike-mute px-4 py-3 rounded-full cursor-not-allowed'
+            >
+              {hasStock ? 'Elegí talle' : 'Agotado'}
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

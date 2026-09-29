@@ -71,11 +71,13 @@ const PaymentMethodForm = ({
 
   return (
     <div className='max-w-xl mx-auto'>
-      <div className='bg-az-canvas rounded-az-xxxl border border-az-hairline-soft p-6 md:p-8 space-y-6'>
+      <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 md:p-8 space-y-6 shadow-sm'>
         {/* Header */}
-        <div className='space-y-1 border-b border-az-hairline-soft pb-5'>
-          <h1 className='az-heading-sm text-az-ink-deep'>Método de Pago</h1>
-          <p className='az-body-sm text-az-steel'>
+        <div className='space-y-1 border-b border-[#e5e5e5] pb-5'>
+          <h1 className='font-marder-display font-medium text-3xl tracking-tight text-nike-ink'>
+            Método de Pago
+          </h1>
+          <p className='text-sm text-[#757575]'>
             Seleccioná la opción que prefieras para realizar el pago de tu
             pedido.
           </p>
@@ -105,10 +107,10 @@ const PaymentMethodForm = ({
                             <FormLabel
                               htmlFor={`payment-${method}`}
                               className={cn(
-                                'flex items-center gap-4 rounded-az-xl border p-4 cursor-pointer transition-all duration-150',
+                                'flex items-center gap-4 rounded-xl border p-4 cursor-pointer transition-all duration-150',
                                 isSelected
-                                  ? 'border-az-primary bg-az-canvas shadow-sm'
-                                  : 'border-az-hairline-soft bg-az-canvas hover:bg-az-surface-soft'
+                                  ? 'border-nike-ink bg-[#f5f5f5]'
+                                  : 'border-[#e5e5e5] bg-white hover:bg-[#fafafa]'
                               )}
                             >
                               <FormControl>
@@ -117,24 +119,24 @@ const PaymentMethodForm = ({
                                   value={method}
                                   checked={isSelected}
                                   className={cn(
-                                    'border-az-hairline',
+                                    'border-[#cacacb]',
                                     isSelected &&
-                                      'border-az-primary text-az-primary'
+                                      'border-nike-ink text-nike-ink'
                                   )}
                                 />
                               </FormControl>
                               <span
                                 className={cn(
-                                  'az-body-sm-bold flex-1 select-none',
+                                  'text-sm font-medium flex-1 select-none',
                                   isSelected
-                                    ? 'text-az-ink-deep'
-                                    : 'text-az-ink'
+                                    ? 'text-nike-ink font-semibold'
+                                    : 'text-[#484848]'
                                 )}
                               >
                                 {DISPLAY_NAMES[method] ?? method}
                               </span>
                               {isSelected && (
-                                <span className='az-caption text-az-primary font-semibold'>
+                                <span className='text-xs text-nike-ink font-semibold bg-white border border-[#e5e5e5] px-2.5 py-1 rounded-full'>
                                   Seleccionado
                                 </span>
                               )}
@@ -152,18 +154,16 @@ const PaymentMethodForm = ({
             <Button
               id='payment-submit'
               type='submit'
-              variant='buyCta'
-              size='lg'
-              className='w-full'
+              className='w-full h-12 rounded-full bg-nike-ink text-white hover:bg-black font-medium transition-colors'
               disabled={isPending}
             >
               {isPending ? (
                 <Loader className='w-4 h-4 animate-spin' />
               ) : (
-                <>
+                <span className='flex items-center justify-center gap-2'>
                   Continuar
                   <ArrowRight className='w-4 h-4' />
-                </>
+                </span>
               )}
             </Button>
           </form>

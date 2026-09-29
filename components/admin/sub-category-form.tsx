@@ -90,16 +90,16 @@ export default function SubCategoryForm({
           name="categoryId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Categoría Padre</FormLabel>
+              <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Categoría Padre</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] h-11">
                     <SelectValue placeholder="Seleccioná una categoría" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-white border-[#e5e5e5] rounded-xl shadow-xl">
                   {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
+                    <SelectItem key={c.id} value={c.id} className="cursor-pointer hover:bg-[#f5f5f5]">
                       {c.name}
                     </SelectItem>
                   ))}
@@ -117,10 +117,11 @@ export default function SubCategoryForm({
             name="name"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Nombre</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Nombre</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Ej: Jeans"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
                     {...field}
                     onChange={(e) => {
                       field.onChange(e);
@@ -144,9 +145,13 @@ export default function SubCategoryForm({
             name="slug"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Slug</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Slug</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej: jeans" {...field} />
+                  <Input
+                    placeholder="Ej: jeans"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -156,9 +161,8 @@ export default function SubCategoryForm({
 
         <Button
           type="submit"
-          size="lg"
           disabled={form.formState.isSubmitting}
-          className="button col-span-2 w-full"
+          className="w-full bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-3 h-auto"
         >
           {form.formState.isSubmitting
             ? 'Guardando...'

@@ -5,7 +5,7 @@ import { formatError } from '../utils';
 import { revalidatePath } from 'next/cache';
 import { insertColorSchema, updateColorSchema } from '../validators';
 import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth-guard';
+import { assertAdmin } from '@/lib/auth-guard';
 
 // Get all colors (para /admin/colors)
 export async function getAllColors() {
@@ -52,7 +52,7 @@ export async function searchColors(query: string) {
 // Create a color
 export async function createColor(data: z.infer<typeof insertColorSchema>) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const colorData = insertColorSchema.parse(data);
 
     const existing = await prisma.color.findFirst({
@@ -74,7 +74,7 @@ export async function createColor(data: z.infer<typeof insertColorSchema>) {
 // Update a color
 export async function updateColor(data: z.infer<typeof updateColorSchema>) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const colorData = updateColorSchema.parse(data);
 
     const exists = await prisma.color.findFirst({ where: { id: colorData.id } });
@@ -103,7 +103,7 @@ export async function updateColor(data: z.infer<typeof updateColorSchema>) {
 // Delete a color — falla si está en uso por algún ProductColor
 export async function deleteColor(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     const exists = await prisma.color.findFirst({ where: { id } });
     if (!exists) throw new Error('Color no encontrado');

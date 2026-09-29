@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/db/prisma';
-import { requireAdmin } from '@/lib/auth-guard';
+import { assertAdmin } from '@/lib/auth-guard';
 import { formatError } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -87,7 +87,7 @@ function toOutput(code: PromoCodeWithUsage): PromoCodeOutput {
 
 export async function getPromoCodes() {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     const promoCodes = await prisma.promoCode.findMany({
       include: {
@@ -106,7 +106,7 @@ export async function getPromoCodes() {
 
 export async function getPromoCodeById(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     const promoCode = await prisma.promoCode.findUnique({
       where: { id },
@@ -122,7 +122,7 @@ export async function getPromoCodeById(id: string) {
 
 export async function createPromoCode(data: PromoCodeInput) {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     if (!data.code || data.code.length < 3) {
       throw new Error('El código debe tener al menos 3 caracteres');
@@ -176,7 +176,7 @@ export async function updatePromoCode(
   data: Partial<PromoCodeInput>
 ) {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     // When the caller is touching discount fields, validate the final shape of
     // the persisted row. We re-read the existing row to merge partial updates
@@ -254,7 +254,7 @@ export async function updatePromoCode(
 
 export async function deletePromoCode(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     await prisma.promoCode.delete({
       where: { id },

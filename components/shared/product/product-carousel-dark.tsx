@@ -18,17 +18,17 @@ const ProductCarouselDark = ({ data }: { data: Product[] }) => {
   if (featuredWithBanner.length === 0) {
     // Fallback hero when no featured products with banners exist
     return (
-      <section className='relative flex items-center justify-center bg-az-ink-deep overflow-hidden pt-24 pb-32 md:pt-32 md:pb-48 min-h-[60vh]'>
-        <div className='az-wrapper relative z-10 text-center'>
-          <p className='az-caption-bold text-white/60 dark:text-hairline-dark/60 uppercase tracking-widest mb-6'>
+      <section className='relative flex items-center justify-center bg-nike-ink overflow-hidden pt-24 pb-32 md:pt-32 md:pb-48 min-h-[70vh]'>
+        <div className='max-w-[1440px] mx-auto px-6 relative z-10 text-center'>
+          <p className='font-sans text-xs sm:text-sm font-semibold text-white/70 uppercase tracking-widest mb-4'>
             Nueva Colección
           </p>
-          <h1 className='az-hero-display text-white dark:text-hairline-dark mb-8 max-w-4xl mx-auto'>
+          <h1 className='font-nike-display text-5xl sm:text-7xl md:text-8xl lg:text-[96px] leading-[0.9] text-white uppercase mb-6 max-w-4xl mx-auto'>
             Estilo que habla por vos
           </h1>
           <Link
             href='/search'
-            className='inline-block bg-white dark:bg-[#0a1317] text-az-ink-deep px-8 py-4 rounded-az-full az-button-md hover:bg-az-surface-soft transition-colors duration-150'
+            className='inline-flex items-center justify-center bg-white text-nike-ink px-8 py-3.5 rounded-full text-base font-medium hover:bg-nike-soft-cloud active:scale-95 transition-all shadow-sm'
           >
             Explorar colección
           </Link>
@@ -38,7 +38,7 @@ const ProductCarouselDark = ({ data }: { data: Product[] }) => {
   }
 
   return (
-    <section className='relative bg-az-ink-deep overflow-hidden'>
+    <section className='relative bg-nike-ink overflow-hidden'>
       <Carousel
         className='w-full'
         opts={{ loop: true }}
@@ -53,7 +53,7 @@ const ProductCarouselDark = ({ data }: { data: Product[] }) => {
         <CarouselContent>
           {featuredWithBanner.map((product: Product, index: number) => (
             <CarouselItem key={product.id}>
-              <div className='relative w-full min-h-[70vh] md:min-h-[85vh] flex items-end'>
+              <div className='relative w-full min-h-[75vh] md:min-h-[90vh] flex items-end'>
                 {/* Full-bleed banner image */}
                 <Image
                   src={product.banner!}
@@ -64,30 +64,32 @@ const ProductCarouselDark = ({ data }: { data: Product[] }) => {
                   sizes='100vw'
                 />
 
-                {/* Gradient overlay — text reads cleanly over the photo */}
-                <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40' />
+                {/* Editorial gradient overlay */}
+                <div className='absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/20' />
 
-                {/* Text content — sits at bottom left, like a magazine spread */}
-                <div className='relative z-10 az-wrapper pb-16 md:pb-24'>
-                  <p className='az-caption-bold text-white/60 uppercase tracking-widest mb-4'>
+                {/* Text content */}
+                <div className='relative z-10 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 w-full pb-16 md:pb-24'>
+                  <p className='font-sans text-xs sm:text-sm font-semibold text-white/70 uppercase tracking-widest mb-2'>
                     Destacado
                   </p>
-                  <h1 className='az-heading-md text-white mb-6 max-w-2xl'>
+                  <h1 className='font-nike-display text-5xl sm:text-7xl md:text-8xl lg:text-[96px] leading-[0.9] uppercase tracking-tight text-white mb-3 max-w-4xl drop-shadow-md'>
                     {product.name}
                   </h1>
-                  <p className='text-white/70 text-base mb-8 max-w-md leading-relaxed'>
-                    {product.description}
-                  </p>
-                  <div className='flex gap-4 flex-wrap'>
+                  {product.description && (
+                    <p className='font-sans text-white/90 text-base md:text-lg mb-8 max-w-xl leading-relaxed font-normal'>
+                      {product.description}
+                    </p>
+                  )}
+                  <div className='flex gap-3 flex-wrap items-center'>
                     <Link
                       href={`/product/${product.slug}`}
-                      className='bg-white text-az-ink-deep px-8 py-4 rounded-az-full az-button-md hover:bg-az-surface-soft transition-colors duration-150'
+                      className='inline-flex items-center justify-center bg-white text-nike-ink px-8 py-3.5 rounded-full text-base font-medium hover:bg-nike-soft-cloud active:scale-95 transition-all shadow-sm'
                     >
                       Ver producto
                     </Link>
                     <Link
                       href='/search'
-                      className='border-2 border-white text-white px-8 py-4 rounded-az-full az-button-md hover:bg-white/10 transition-colors duration-150'
+                      className='inline-flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 text-white px-8 py-3.5 rounded-full text-base font-medium hover:bg-white/30 active:scale-95 transition-all'
                     >
                       Ver colección
                     </Link>
@@ -99,8 +101,8 @@ const ProductCarouselDark = ({ data }: { data: Product[] }) => {
         </CarouselContent>
 
         {/* Nav arrows */}
-        <CarouselPrevious className='left-4 md:left-8 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white' />
-        <CarouselNext className='right-4 md:right-8 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white' />
+        <CarouselPrevious className='left-4 md:left-8 bg-white/80 hover:bg-white text-nike-ink border-0 h-11 w-11 shadow-md' />
+        <CarouselNext className='right-4 md:right-8 bg-white/80 hover:bg-white text-nike-ink border-0 h-11 w-11 shadow-md' />
       </Carousel>
     </section>
   );

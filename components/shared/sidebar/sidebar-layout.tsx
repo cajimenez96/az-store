@@ -109,7 +109,7 @@ function SidebarLayoutContent({
   };
 
   return (
-    <div className='flex h-screen bg-az-canvas'>
+    <div className='flex h-screen bg-[#f9f9f9] text-[#111111]'>
       {/* Sidebar */}
       <Sidebar>
         <SidebarHeader>
@@ -132,15 +132,15 @@ function SidebarLayoutContent({
       {/* Main Content */}
       <div className='flex flex-col flex-1 overflow-hidden'>
         {/* Header */}
-        <header className='sticky top-0 z-40 bg-az-canvas border-b border-az-hairline-soft'>
-          <div className='flex items-center justify-between h-14 px-4 gap-3'>
+        <header className='sticky top-0 z-40 bg-white border-b border-[#e5e5e5]'>
+          <div className='flex items-center justify-between h-16 px-6 gap-4'>
             <SidebarTrigger />
             <div className='flex-1'>{headerContent}</div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className={cn('flex-1 overflow-y-auto', className)}>
+        <main className={cn('flex-1 overflow-y-auto bg-[#f9f9f9] p-6 lg:p-8', className)}>
           {children}
         </main>
       </div>

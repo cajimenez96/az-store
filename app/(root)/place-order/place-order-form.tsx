@@ -52,17 +52,16 @@ const PlaceOrderForm = ({
   return (
     <div className='w-full space-y-4'>
       {error && (
-        <div className='flex items-start gap-2 bg-red-50 p-3 rounded-az-lg border border-red-200'>
-          <AlertTriangle className='w-5 h-5 text-red-600 mt-0.5 flex-shrink-0' />
-          <p className='az-body-sm text-red-800'>{error}</p>
+        <div className='flex items-start gap-2 bg-red-50 p-3.5 rounded-xl border border-red-200/60'>
+          <AlertTriangle className='w-4 h-4 text-red-600 mt-0.5 flex-shrink-0' />
+          <p className='text-xs text-red-800 font-medium'>{error}</p>
         </div>
       )}
       <form onSubmit={handleSubmit} className='w-full'>
         <Button
+          type='submit'
           disabled={pending}
-          className='w-full'
-          variant='buyCta'
-          size='lg'
+          className='w-full h-12 rounded-full bg-nike-ink text-white hover:bg-black font-medium transition-colors'
           data-testid='place-order-submit'
         >
           {pending ? (

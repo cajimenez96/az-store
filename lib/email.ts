@@ -275,3 +275,41 @@ export async function sendSaleNotification({
     console.error('Failed to send sale notification email:', error);
   }
 }
+
+/**
+ * Send abandoned cart recovery email to customer
+ */
+export async function sendAbandonedCartEmail({
+  email,
+  customerName,
+  recoveryToken,
+  items,
+}: {
+  email: string;
+  customerName: string;
+  recoveryToken: string;
+  items: Array<{ name: string; qty: number; price: string }>;
+}) {
+  if (!email) return;
+
+  try {
+    const recoveryLink = `${BASE_URL}/cart-recovery/${recoveryToken}`;
+    await fetch(`${BASE_URL}/api/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+      },
+      body: JSON.stringify({
+        type: 'abandoned-cart',
+        email,
+        customerName,
+        recoveryLink,
+        items,
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to send abandoned cart recovery email:', error);
+  }
+}
+

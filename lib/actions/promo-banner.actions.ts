@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { insertPromoBannerSchema, updatePromoBannerSchema } from '../validators';
 import { deleteUTFiles } from '../uploadthing-helpers';
 import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth-guard';
+import { assertAdmin } from '@/lib/auth-guard';
 
 export async function getAllPromoBanners() {
   return prisma.promoBanner.findMany({
@@ -77,7 +77,7 @@ export async function getPromoBannerWithProductsPublic(id: string) {
 
 export async function createPromoBanner(data: z.infer<typeof insertPromoBannerSchema>) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const parsed = insertPromoBannerSchema.parse(data);
     const { productIds, ...rest } = parsed;
 
@@ -109,7 +109,7 @@ export async function createPromoBanner(data: z.infer<typeof insertPromoBannerSc
 
 export async function updatePromoBanner(data: z.infer<typeof updatePromoBannerSchema>) {
   try {
-    await requireAdmin();
+    await assertAdmin();
     const parsed = updatePromoBannerSchema.parse(data);
     const { id, productIds, ...rest } = parsed;
 
@@ -150,7 +150,7 @@ export async function updatePromoBanner(data: z.infer<typeof updatePromoBannerSc
 
 export async function deletePromoBanner(id: string) {
   try {
-    await requireAdmin();
+    await assertAdmin();
 
     const exists = await prisma.promoBanner.findFirst({ where: { id } });
     if (!exists) throw new Error('Banner no encontrado');

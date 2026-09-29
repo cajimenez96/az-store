@@ -14,36 +14,36 @@ const SettingsPage = async () => {
   const shippingSettings = await getShippingSettings();
 
   return (
-    <div className='max-w-2xl space-y-8'>
+    <div className='max-w-3xl space-y-8'>
       <div>
-        <h1 className='az-heading-sm text-az-ink-deep'>Configuración</h1>
-        <p className='az-body-sm text-az-stone mt-1'>Ajustes generales de la tienda.</p>
+        <h1 className='font-marder-display text-3xl font-black uppercase tracking-tight text-[#111111]'>Configuración</h1>
+        <p className='text-sm text-[#707072] mt-1'>Ajustes generales y pasarelas de pago de la tienda.</p>
       </div>
 
-      <section className='bg-az-canvas border border-az-hairline-soft rounded-az-lg p-6 space-y-4'>
-        <div className='border-b border-az-hairline-soft pb-3'>
-          <h2 className='az-body-lg-bold text-az-ink-deep'>Envíos</h2>
-          <p className='az-body-sm text-az-stone mt-0.5'>
+      <section className='bg-white border border-[#e5e5e5] rounded-2xl p-6 md:p-8 space-y-6 shadow-sm'>
+        <div className='border-b border-[#e5e5e5] pb-4'>
+          <h2 className='text-lg font-bold text-[#111111]'>Envíos</h2>
+          <p className='text-sm text-[#707072] mt-0.5'>
             Configura el monto mínimo para envío gratis y las localidades con retiro disponible.
           </p>
         </div>
         <ShippingSettingsForm initialValues={shippingSettings} />
       </section>
 
-      <section className='bg-az-canvas border border-az-hairline-soft rounded-az-lg p-6 space-y-4'>
-        <div className='border-b border-az-hairline-soft pb-3'>
-          <h2 className='az-body-lg-bold text-az-ink-deep'>Datos Bancarios</h2>
-          <p className='az-body-sm text-az-stone mt-0.5'>
+      <section className='bg-white border border-[#e5e5e5] rounded-2xl p-6 md:p-8 space-y-6 shadow-sm'>
+        <div className='border-b border-[#e5e5e5] pb-4'>
+          <h2 className='text-lg font-bold text-[#111111]'>Datos Bancarios</h2>
+          <p className='text-sm text-[#707072] mt-0.5'>
             Esta información se muestra al cliente cuando elige pagar por transferencia bancaria.
           </p>
         </div>
         <BankSettingsForm initialValues={bankSettings} />
       </section>
 
-      <section className='bg-az-canvas border border-az-hairline-soft rounded-az-lg p-6 space-y-4'>
-        <div className='border-b border-az-hairline-soft pb-3'>
-          <h2 className='az-body-lg-bold text-az-ink-deep'>MercadoPago</h2>
-          <p className='az-body-sm text-az-stone mt-0.5'>
+      <section className='bg-white border border-[#e5e5e5] rounded-2xl p-6 md:p-8 space-y-6 shadow-sm'>
+        <div className='border-b border-[#e5e5e5] pb-4'>
+          <h2 className='text-lg font-bold text-[#111111]'>MercadoPago</h2>
+          <p className='text-sm text-[#707072] mt-0.5'>
             Credenciales para procesar pagos mediante MercadoPago.
           </p>
         </div>

@@ -16,7 +16,7 @@ export default function PromoBannerCarousel({ banners }: { banners: PromoBanner[
   if (banners.length === 0) return null;
 
   return (
-    <section className="relative bg-az-ink-deep overflow-hidden">
+    <section className="relative bg-nike-ink overflow-hidden">
       <Carousel
         className="w-full"
         opts={{ loop: true }}
@@ -31,7 +31,7 @@ export default function PromoBannerCarousel({ banners }: { banners: PromoBanner[
         <CarouselContent>
           {banners.map((banner, index) => (
             <CarouselItem key={banner.id}>
-              <div className="relative w-full min-h-[70vh] md:min-h-[85vh] flex items-end">
+              <div className="relative w-full min-h-[75vh] md:min-h-[90vh] flex items-end">
                 <Image
                   src={banner.image}
                   alt={banner.title}
@@ -41,20 +41,23 @@ export default function PromoBannerCarousel({ banners }: { banners: PromoBanner[
                   sizes="100vw"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+                {/* Editorial gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/20" />
 
-                <div className="relative z-10 az-wrapper pb-16 md:pb-24">
-                  <h1 className="az-heading-md text-white mb-4 max-w-2xl">{banner.title}</h1>
+                <div className="relative z-10 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 w-full pb-16 md:pb-24">
+                  <h1 className="font-nike-display text-5xl sm:text-7xl md:text-8xl lg:text-[96px] leading-[0.9] uppercase tracking-tight text-white mb-3 max-w-4xl drop-shadow-md">
+                    {banner.title}
+                  </h1>
                   {banner.subtitle && (
-                    <p className="text-white/70 text-base mb-8 max-w-md leading-relaxed">
+                    <p className="font-sans text-white/90 text-base md:text-lg mb-8 max-w-xl leading-relaxed font-normal">
                       {banner.subtitle}
                     </p>
                   )}
                   <Link
                     href={`/search?banner=${banner.id}`}
-                    className="inline-block bg-white text-az-ink-deep px-8 py-4 rounded-az-full az-button-md hover:bg-az-surface-soft transition-colors duration-150"
+                    className="inline-flex items-center justify-center bg-white text-nike-ink px-8 py-3.5 rounded-full text-base font-medium hover:bg-nike-soft-cloud active:scale-95 transition-all shadow-sm"
                   >
-                    {banner.linkLabel || 'Ver más'}
+                    {banner.linkLabel || 'Comprar ahora'}
                   </Link>
                 </div>
               </div>
@@ -62,8 +65,8 @@ export default function PromoBannerCarousel({ banners }: { banners: PromoBanner[
           ))}
         </CarouselContent>
 
-        <CarouselPrevious className="left-4 md:left-8 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white" />
-        <CarouselNext className="right-4 md:right-8 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white" />
+        <CarouselPrevious className="left-4 md:left-8 bg-white/80 hover:bg-white text-nike-ink border-0 h-11 w-11 shadow-md" />
+        <CarouselNext className="right-4 md:right-8 bg-white/80 hover:bg-white text-nike-ink border-0 h-11 w-11 shadow-md" />
       </Carousel>
     </section>
   );

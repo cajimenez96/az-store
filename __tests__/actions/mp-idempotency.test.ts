@@ -11,7 +11,7 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
-jest.mock('@/email', () => ({
+jest.mock('@/lib/email', () => ({
   sendPurchaseReceipt: jest.fn(),
   sendNewSaleNotification: jest.fn(),
   sendShippingUpdate: jest.fn(),
@@ -63,6 +63,7 @@ function buildMockTx() {
       update: jest.fn().mockResolvedValue(updatedOrder),
     },
     $executeRaw: jest.fn().mockResolvedValue(1),
+    $executeRawUnsafe: jest.fn().mockResolvedValue(1),
   };
 }
 

@@ -28,8 +28,15 @@ export const authConfig = {
 
       if (!auth && protectedPaths.some((p) => p.test(pathname))) return false;
 
-      if (auth && /\/admin/.test(pathname) && auth.user?.role !== 'admin' && auth.user?.role !== 'seller') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
+      if (auth && /\/admin/.test(pathname)) {
+        const role = auth.user?.role;
+        if (role === 'admin') {
+          // admin tiene acceso total a /admin
+        } else if (role === 'seller' && (pathname === '/admin/pos' || pathname.startsWith('/admin/pos/'))) {
+          // seller solo tiene acceso al POS
+        } else {
+          return NextResponse.redirect(new URL('/unauthorized', request.url));
+        }
       }
 
       if (!request.cookies.get('sessionCartId')) {

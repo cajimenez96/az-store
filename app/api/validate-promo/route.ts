@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/db/prisma';
 import { auth } from '@/auth';
+import { promoLimiter } from '@/lib/rate-limiter';
 
 type OnlinePaymentMethod = 'MercadoPago' | 'TransferenciaBancaria';
 
@@ -60,6 +61,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { valid: false, message: 'Debes estar logueado', discountPercent: 0 },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting: 10 attempts per minute per user
+    const rateLimitKey = `promo:${session.user.id}`;
+    const { success } = await promoLimiter.limit(rateLimitKey);
+    if (!success) {
+      return NextResponse.json(
+        {
+          valid: false,
+          message: 'Demasiadas consultas de códigos. Esperá un minuto antes de reintentar.',
+          discountPercent: 0,
+        },
+        { status: 429 }
       );
     }
 

@@ -71,10 +71,11 @@ export default function BrandForm({
             name="name"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Nombre de la Marca</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Nombre de la Marca</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Ej: Nike"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
                     {...field}
                     onChange={(e) => {
                       field.onChange(e);
@@ -99,9 +100,13 @@ export default function BrandForm({
             name="slug"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Slug</FormLabel>
+                <FormLabel className="text-xs font-bold uppercase tracking-wider text-[#111111]">Slug</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej: nike" {...field} />
+                  <Input
+                    placeholder="Ej: nike"
+                    className="bg-white border-[#e5e5e5] rounded-xl text-[#111111] placeholder:text-[#707072] focus-visible:ring-1 focus-visible:ring-[#111111] focus-visible:border-[#111111] h-11"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -111,9 +116,8 @@ export default function BrandForm({
 
         <Button
           type="submit"
-          size="lg"
           disabled={form.formState.isSubmitting}
-          className="button col-span-2 w-full"
+          className="w-full bg-[#111111] hover:bg-black text-white rounded-full font-medium shadow-sm transition-all px-6 py-3 h-auto"
         >
           {form.formState.isSubmitting ? 'Guardando...' : `${type === 'Create' ? 'Crear' : 'Actualizar'} Marca`}
         </Button>

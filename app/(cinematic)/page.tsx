@@ -58,20 +58,20 @@ export default async function Homepage() {
 
       {/* Band 2: Category grid (only render if categories exist) */}
       {categories.length > 0 && (
-        <section className='bg-az-canvas py-az-section-sm'>
-          <div className='az-wrapper'>
+        <section className='bg-white py-12 md:py-16 border-b border-nike-hairline-soft'>
+          <div className='max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='flex items-end justify-between mb-8'>
-              <h2 className='az-heading-md text-az-ink-deep'>
+              <h2 className='font-nike-display text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-nike-ink'>
                 Explorar por categoría
               </h2>
               <Link
                 href='/search'
-                className='az-body-sm text-az-steel hover:text-az-ink-deep transition-colors duration-150'
+                className='font-sans text-sm font-medium text-nike-mute hover:text-nike-ink underline underline-offset-4 transition-colors'
               >
-                Ver todo →
+                Ver todo
               </Link>
             </div>
-            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
+            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4'>
               {categories
                 .slice(0, 10)
                 .map(
@@ -84,24 +84,24 @@ export default async function Homepage() {
                     <Link
                       key={cat.id}
                       href={`/search?category=${cat.slug}`}
-                      className='group flex flex-col items-center gap-3 p-4 bg-az-surface-soft rounded-az-xl hover:bg-az-canvas hover:shadow-az-sticky transition-all duration-200 border border-transparent hover:border-az-hairline-soft'
+                      className='group flex flex-col items-center gap-3 p-4 bg-nike-soft-cloud hover:bg-[#ececec] transition-colors rounded-none'
                     >
-                      <div className='w-16 h-16 rounded-az-full bg-az-canvas flex items-center justify-center overflow-hidden'>
+                      <div className='w-16 h-16 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-sm'>
                         {cat.image ? (
                           <Image
                             src={cat.image}
                             alt={cat.name}
                             width={64}
                             height={64}
-                            className='object-cover w-full h-full'
+                            className='object-cover w-full h-full group-hover:scale-105 transition-transform duration-200'
                           />
                         ) : (
-                          <span className='az-heading-sm text-az-steel'>
+                          <span className='font-nike-display text-xl text-nike-ink'>
                             {cat.name.charAt(0).toUpperCase()}
                           </span>
                         )}
                       </div>
-                      <span className='az-body-sm-bold text-az-ink text-center group-hover:text-az-ink-deep transition-colors duration-150'>
+                      <span className='font-sans text-sm font-medium text-nike-ink text-center'>
                         {cat.name}
                       </span>
                     </Link>
@@ -114,23 +114,25 @@ export default async function Homepage() {
 
       {/* Band 3: Featured products */}
       {featuredProducts.length > 0 && (
-        <section className='bg-az-canvas py-az-section'>
-          <div className='az-wrapper'>
-            <div className='flex items-end justify-between mb-10'>
+        <section className='bg-white py-12 md:py-16 border-b border-nike-hairline-soft'>
+          <div className='max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8'>
+            <div className='flex items-end justify-between mb-8'>
               <div>
-                <p className='az-caption-bold text-az-steel uppercase tracking-widest mb-2'>
+                <p className='font-sans text-xs sm:text-sm font-semibold text-nike-mute uppercase tracking-widest mb-1'>
                   Colección
                 </p>
-                <h2 className='az-heading-lg text-az-ink-deep'>Destacados</h2>
+                <h2 className='font-nike-display text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-nike-ink'>
+                  Destacados
+                </h2>
               </div>
               <Link
                 href='/search?isFeatured=true'
-                className='hidden md:flex items-center gap-1 az-body-sm-bold text-az-ink-deep border-2 border-az-ink-deep px-6 py-3 rounded-az-full hover:bg-az-ink-deep hover:text-az-canvas transition-colors duration-150'
+                className='hidden md:inline-flex items-center font-sans text-sm font-medium text-nike-ink border border-nike-ink px-6 py-2.5 rounded-full hover:bg-nike-ink hover:text-white active:scale-95 transition-all'
               >
                 Ver todos
               </Link>
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+            <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
               {featuredProducts.slice(0, 4).map((product) => (
                 <ProductCardDark key={product.slug} product={product} />
               ))}
@@ -139,24 +141,24 @@ export default async function Homepage() {
         </section>
       )}
 
-      {/* Band 4: Promo strip (dark) */}
-      <section className='py-az-section-sm px-8'>
-        <div className='az-wrapper'>
-          <div className='bg-az-ink-deep dark:bg-[#0a1317] rounded-az-xxxl px-12 py-16 flex flex-col md:flex-row items-center justify-between gap-8 border'>
+      {/* Band 4: Promo strip (dark editorial) */}
+      <section className='py-12 md:py-16 bg-white'>
+        <div className='max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='bg-nike-ink text-white p-8 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8'>
             <div>
-              <p className='az-caption-bold text-az-stone dark:text-[#8595a4] uppercase tracking-widest mb-3'>
-                Envíos
+              <p className='font-sans text-xs sm:text-sm font-semibold text-white/70 uppercase tracking-widest mb-2'>
+                Envíos a todo el país
               </p>
-              <h2 className='az-heading-md text-white mb-2'>
-                Comprá con confianza
+              <h2 className='font-nike-display text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white mb-2'>
+                Comprá con total confianza
               </h2>
-              <p className='az-body-md text-az-stone dark:text-[#8595a4] max-w-md'>
-                Envíos a todo el país · Pagá en cuotas · Atención personalizada
+              <p className='font-sans text-sm sm:text-base text-white/80 max-w-xl font-normal leading-relaxed'>
+                Pagá con Mercado Pago o transferencia bancaria · Seguimiento en tiempo real · Atención personalizada
               </p>
             </div>
             <Link
               href='/search'
-              className='shrink-0 az-button-md bg-white text-az-ink-deep dark:text-[#0a1317] px-8 py-4 rounded-az-full hover:bg-az-surface-soft dark:hover:bg-white/90 transition-colors duration-150'
+              className='shrink-0 inline-flex items-center justify-center bg-white text-nike-ink px-8 py-3.5 rounded-full text-sm font-medium hover:bg-nike-soft-cloud active:scale-95 transition-all shadow-sm'
             >
               Explorar catálogo
             </Link>
@@ -166,27 +168,27 @@ export default async function Homepage() {
 
       {/* Band 5: Latest products */}
       {latestProducts.length > 0 && (
-        <section className='bg-az-canvas py-az-section'>
-          <div className='az-wrapper'>
-            <div className='flex items-end justify-between mb-10'>
+        <section className='bg-white py-12 md:py-16'>
+          <div className='max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8'>
+            <div className='flex items-end justify-between mb-8'>
               <div>
-                <p className='az-caption-bold text-az-steel uppercase tracking-widest mb-2'>
+                <p className='font-sans text-xs sm:text-sm font-semibold text-nike-mute uppercase tracking-widest mb-1'>
                   Novedades
                 </p>
-                <h2 className='az-heading-lg text-az-ink-deep'>
+                <h2 className='font-nike-display text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-nike-ink'>
                   Recién llegados
                 </h2>
               </div>
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
-              {latestProducts.slice(0, 4).map((product) => (
+            <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
+              {latestProducts.slice(0, 8).map((product) => (
                 <ProductCardDark key={product.slug} product={product} />
               ))}
             </div>
             <div className='flex justify-center mt-12'>
               <Link
                 href='/search'
-                className='az-button-md bg-az-ink-button text-white px-10 py-4 rounded-az-full hover:bg-az-charcoal transition-colors duration-150'
+                className='inline-flex items-center justify-center bg-nike-ink text-white px-10 py-3.5 rounded-full text-sm font-medium hover:bg-black/80 active:scale-95 transition-all'
               >
                 Ver todos los productos
               </Link>
