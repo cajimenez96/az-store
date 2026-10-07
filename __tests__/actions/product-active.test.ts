@@ -15,6 +15,7 @@ jest.mock('@/lib/uploadthing-helpers', () => ({ deleteUTFiles: jest.fn() }));
 jest.mock('@/lib/actions/setting.actions', () => ({ getSetting: jest.fn() }));
 jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
+  updateTag: jest.fn(),
   unstable_cache: (fn: unknown) => fn,
 }));
 jest.mock('@/db/prisma', () => ({
@@ -29,7 +30,7 @@ jest.mock('@/db/prisma', () => ({
 }));
 
 import { prisma } from '@/db/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { assertAdminOrSeller } from '@/lib/auth-guard';
 import {
   getAllProducts,
@@ -74,7 +75,7 @@ describe('Product.isActive', () => {
 
   describe('toggleProductActive', () => {
     it('flips an active product to inactive', async () => {
-      findFirst.mockResolvedValueOnce({ id: 'p1', isActive: true });
+      findFirst.mockResolvedValueOnce({ id: 'p1', slug: 'active-shirt', isActive: true });
       update.mockResolvedValueOnce({ id: 'p1', isActive: false });
 
       const result = await toggleProductActive('p1');
@@ -86,6 +87,19 @@ describe('Product.isActive', () => {
       expect(result).toMatchObject({ success: true, isActive: false });
       expect(revalidatePath).toHaveBeenCalledWith('/admin/products');
       expect(revalidatePath).toHaveBeenCalledWith('/');
+    });
+
+    it('invalidates the cached listings and the product detail page', async () => {
+      findFirst.mockResolvedValueOnce({ id: 'p1', slug: 'active-shirt', isActive: true });
+      update.mockResolvedValueOnce({ id: 'p1', isActive: false });
+
+      await toggleProductActive('p1');
+
+      // getLatestProducts / getFeaturedProducts are cached under the 'products' tag,
+      // which revalidatePath does not purge.
+      expect(updateTag).toHaveBeenCalledWith('products');
+      // The statically generated detail page (revalidate = 3600) must be purged too.
+      expect(revalidatePath).toHaveBeenCalledWith('/product/active-shirt');
     });
 
     it('flips an inactive product to active', async () => {

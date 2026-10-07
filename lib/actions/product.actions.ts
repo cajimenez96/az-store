@@ -2,7 +2,7 @@
 import { prisma } from '@/db/prisma';
 import { convertToPlainObject, formatError } from '../utils';
 import { LATEST_PRODUCTS_LIMIT, PAGE_SIZE } from '../constants';
-import { revalidatePath, unstable_cache } from 'next/cache';
+import { revalidatePath, unstable_cache, updateTag } from 'next/cache';
 import { insertProductSchema, updateProductSchema } from '../validators';
 import { deleteUTFiles } from '../uploadthing-helpers';
 import { z } from 'zod';
@@ -263,7 +263,7 @@ export async function toggleProductActive(id: string) {
     await assertAdminOrSeller();
     const product = await prisma.product.findFirst({
       where: { id },
-      select: { id: true, isActive: true },
+      select: { id: true, slug: true, isActive: true },
     });
 
     if (!product) throw new Error('Producto no encontrado');
@@ -273,6 +273,11 @@ export async function toggleProductActive(id: string) {
 
     revalidatePath('/admin/products');
     revalidatePath('/');
+    // Latest/featured listings are cached under the 'products' tag, which
+    // revalidatePath does not purge.
+    updateTag('products');
+    // The product page is statically generated (revalidate = 3600).
+    revalidatePath(`/product/${product.slug}`);
 
     return {
       success: true,
