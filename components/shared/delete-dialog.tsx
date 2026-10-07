@@ -1,6 +1,5 @@
 'use client';
-import { useState } from 'react';
-import { useTransition } from 'react';
+import { useState, useTransition, type ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '../ui/button';
 import {
@@ -18,10 +17,13 @@ const DeleteDialog = ({
   id,
   action,
   warningMessage,
+  trigger,
 }: {
   id: string;
   action: (id: string) => Promise<{ success: boolean; message: string }>;
   warningMessage?: string;
+  // Optional custom trigger element; defaults to the "Eliminar" button.
+  trigger?: ReactNode;
 }) => {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -48,9 +50,11 @@ const DeleteDialog = ({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size='sm' variant='destructive' className='ml-2'>
-          Eliminar
-        </Button>
+        {trigger ?? (
+          <Button size='sm' variant='destructive' className='ml-2'>
+            Eliminar
+          </Button>
+        )}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

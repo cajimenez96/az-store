@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { getAllProducts, deleteProduct } from '@/lib/actions/product.actions';
-import { formatCurrency, formatId } from '@/lib/utils';
+import Image from 'next/image';
+import { getAllProducts } from '@/lib/actions/product.actions';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -11,8 +12,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import Pagination from '@/components/shared/pagination';
-import DeleteDialog from '@/components/shared/delete-dialog';
+import ProductRowActions from '@/components/admin/product-row-actions';
 import { requireAdminOrSeller } from '@/lib/auth-guard';
+
+const HEAD_CLASS =
+  'text-xs font-semibold text-[#707072] uppercase tracking-wider h-10';
 
 const AdminProductsPage = async (props: {
   searchParams: Promise<{
@@ -33,6 +37,7 @@ const AdminProductsPage = async (props: {
     query: searchText,
     page,
     category,
+    includeInactive: true,
   });
 
   return (
@@ -64,50 +69,89 @@ const AdminProductsPage = async (props: {
       </div>
 
       <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-none'>
-        <Table>
-          <TableHeader>
-            <TableRow className='border-b border-[#e5e5e5] hover:bg-transparent'>
-              <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>ID</TableHead>
-              <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>NOMBRE</TableHead>
-              <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>PRECIO (BASE)</TableHead>
-              <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>CATEGORÍA</TableHead>
-              <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>STOCK TOTAL</TableHead>
-              <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10'>RATING</TableHead>
-              <TableHead className='text-xs font-semibold text-[#707072] uppercase tracking-wider h-10 text-right'>ACCIONES</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.data.map((product) => {
-              const totalStock = product.variants?.reduce((acc: number, v: { stock: number }) => acc + v.stock, 0) || 0;
-              return (
-                <TableRow key={product.id} className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors'>
-                  <TableCell className='text-xs font-mono text-[#707072] py-4'>{formatId(product.id)}</TableCell>
-                  <TableCell className='text-sm font-semibold text-[#111111] py-4'>{product.name}</TableCell>
-                  <TableCell className='text-sm font-semibold text-[#111111] text-right py-4 tabular-nums'>
-                    {formatCurrency(
-                      product.prices?.find((p) => p.paymentMethod === 'CASH')?.value ?? '0',
-                    )}
-                  </TableCell>
-                  <TableCell className='text-xs font-semibold text-[#707072] uppercase py-4'>{product.category?.name || '—'}</TableCell>
-                  <TableCell className='text-sm py-4'>
-                    <span className={totalStock > 2 ? 'text-[#007d48] font-semibold' : 'text-[#d97706] font-semibold'}>
-                      {totalStock} u.
-                    </span>
-                  </TableCell>
-                  <TableCell className='text-xs text-[#707072] py-4 tabular-nums'>{product.rating} ★</TableCell>
-                  <TableCell className='py-4 text-right'>
-                    <div className='flex items-center justify-end gap-2'>
-                      <Button asChild variant='outline' size='sm' className='h-8 px-4 text-xs font-semibold uppercase tracking-wider rounded-full border border-[#e5e5e5] text-[#111111] hover:bg-[#111111] hover:text-white transition-colors'>
-                        <Link href={`/admin/products/${product.id}`}>Editar</Link>
-                      </Button>
-                      <DeleteDialog id={product.id} action={deleteProduct} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <div className='overflow-x-auto'>
+          <Table>
+            <TableHeader>
+              <TableRow className='border-b border-[#e5e5e5] bg-[#f5f5f5] hover:bg-[#f5f5f5]'>
+                <TableHead className={`${HEAD_CLASS} rounded-l-lg`}>PRODUCTO</TableHead>
+                <TableHead className={HEAD_CLASS}>MARCA / TIPO</TableHead>
+                <TableHead className={`${HEAD_CLASS} text-right`}>PRECIO</TableHead>
+                <TableHead className={HEAD_CLASS}>STOCK TOTAL</TableHead>
+                <TableHead className={HEAD_CLASS}>ESTADO</TableHead>
+                <TableHead className={`${HEAD_CLASS} text-right rounded-r-lg`}>ACCIONES</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.data.map((product) => {
+                const totalStock =
+                  product.variants?.reduce((acc: number, v: { stock: number }) => acc + v.stock, 0) || 0;
+                const mercadoPagoPrice = product.prices?.find((p) => p.paymentMethod === 'MERCADOPAGO')?.value;
+                const cashPrice = product.prices?.find((p) => p.paymentMethod === 'CASH')?.value;
+                const thumbnail = product.images?.[0];
+
+                return (
+                  <TableRow key={product.id} className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors'>
+                    <TableCell className='py-4'>
+                      <div className='flex items-center gap-3 min-w-[220px]'>
+                        <div className='relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-[#e5e5e5] bg-[#f5f5f5]'>
+                          {thumbnail && (
+                            <Image
+                              src={thumbnail}
+                              alt={product.name}
+                              fill
+                              sizes='48px'
+                              className='object-cover'
+                            />
+                          )}
+                        </div>
+                        <span className='text-sm font-bold text-[#111111]'>{product.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className='py-4'>
+                      <div className='text-sm font-semibold text-[#111111]'>{product.brand?.name || '—'}</div>
+                      <div className='text-xs text-[#707072]'>{product.subCategory?.name || '—'}</div>
+                    </TableCell>
+                    <TableCell className='py-4 text-right tabular-nums'>
+                      <div className='text-sm font-bold text-[#111111]'>
+                        {formatCurrency(mercadoPagoPrice ?? '0')}
+                      </div>
+                      {cashPrice !== undefined && (
+                        <div className='text-xs font-semibold text-[#007d48]'>
+                          May: {formatCurrency(cashPrice)}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className='py-4'>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          totalStock > 2
+                            ? 'bg-[#e6f4ec] text-[#007d48]'
+                            : 'bg-[#fef3c7] text-[#d97706]'
+                        }`}
+                      >
+                        {totalStock} u.
+                      </span>
+                    </TableCell>
+                    <TableCell className='py-4'>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ${
+                          product.isActive
+                            ? 'bg-[#e6f4ec] text-[#007d48]'
+                            : 'bg-[#f0f0f0] text-[#707072]'
+                        }`}
+                      >
+                        {product.isActive ? 'ACTIVO' : 'INACTIVO'}
+                      </span>
+                    </TableCell>
+                    <TableCell className='py-4'>
+                      <ProductRowActions id={product.id} isActive={product.isActive} />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
         {products.totalPages > 1 && (
           <div className='pt-6 border-t border-[#e5e5e5] mt-4'>
             <Pagination page={page} totalPages={products.totalPages} />
