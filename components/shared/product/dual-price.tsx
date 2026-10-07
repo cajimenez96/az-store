@@ -28,13 +28,14 @@ const DualPrice = ({
 
   const primary = emphasize === 'CASH' ? cashNum : mpNum;
   const secondary = emphasize === 'CASH' ? mpNum : cashNum;
-  const secondaryLabel = emphasize === 'CASH' ? 'o por MP' : 'o efectivo/transferencia';
+  const secondaryLabel =
+    emphasize === 'CASH' ? 'Lista' : 'o efectivo/transferencia';
 
   return (
     <div className={`flex flex-col gap-0.5 ${className}`}>
       <ProductPrice value={primary} />
       <p className='az-caption text-az-stone'>
-        {secondaryLabel}: <span className='line-through'>${secondary.toFixed(2)}</span>
+        {secondaryLabel}: <span>${secondary.toFixed(2)}</span>
       </p>
     </div>
   );
