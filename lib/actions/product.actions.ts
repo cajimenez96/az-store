@@ -31,6 +31,7 @@ const productIncludes = {
 export const getLatestProducts = unstable_cache(
   async () => {
     const data = await prisma.product.findMany({
+      where: { isActive: true },
       take: LATEST_PRODUCTS_LIMIT,
       orderBy: { createdAt: 'desc' },
       include: productIncludes,
@@ -41,10 +42,10 @@ export const getLatestProducts = unstable_cache(
   { revalidate: 3600, tags: ['products'] }
 );
 
-// Get single product by it's slug
+// Get single product by it's slug (storefront: inactive products are not found)
 export async function getProductBySlug(slug: string) {
   const data = await prisma.product.findFirst({
-    where: { slug: slug },
+    where: { slug: slug, isActive: true },
     include: productIncludes,
   });
   return convertToPlainObject(data);
@@ -72,6 +73,7 @@ export async function getAllProducts({
   sort,
   sellerId,
   color,
+  includeInactive = false,
 }: {
   query: string;
   limit?: number;
@@ -83,7 +85,14 @@ export async function getAllProducts({
   sort?: string;
   sellerId?: string;
   color?: string;
+  // Admin lists pass true; the storefront default hides inactive products.
+  includeInactive?: boolean;
 }) {
+  // Visibility filter
+  const activeFilter: Prisma.ProductWhereInput = includeInactive
+    ? {}
+    : { isActive: true };
+
   // Query filter
   const queryFilter: Prisma.ProductWhereInput =
     query && query !== 'all'
@@ -164,6 +173,7 @@ export async function getAllProducts({
       ...ratingFilter,
       ...sellerFilter,
       ...colorFilter,
+      ...activeFilter,
     },
     include: productIncludes,
     // Fase 2: el orden por precio (`priceCash`) se hace en memoria abajo,
@@ -200,6 +210,7 @@ export async function getAllProducts({
       ...ratingFilter,
       ...sellerFilter,
       ...colorFilter,
+      ...activeFilter,
     }
   });
 
@@ -240,6 +251,35 @@ export async function deleteProduct(id: string) {
     return {
       success: true,
       message: 'Producto eliminado exitosamente',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Toggle whether a product is visible to customers (admin/seller only)
+export async function toggleProductActive(id: string) {
+  try {
+    await assertAdminOrSeller();
+    const product = await prisma.product.findFirst({
+      where: { id },
+      select: { id: true, isActive: true },
+    });
+
+    if (!product) throw new Error('Producto no encontrado');
+
+    const isActive = !product.isActive;
+    await prisma.product.update({ where: { id }, data: { isActive } });
+
+    revalidatePath('/admin/products');
+    revalidatePath('/');
+
+    return {
+      success: true,
+      isActive,
+      message: isActive
+        ? 'Producto visible para los clientes'
+        : 'Producto oculto para los clientes',
     };
   } catch (error) {
     return { success: false, message: formatError(error) };
@@ -463,6 +503,7 @@ export const getFeaturedProducts = unstable_cache(
     const data = await prisma.product.findMany({
       where: {
         isFeatured: true,
+        isActive: true,
         banner: {
           not: null,
           notIn: [''],
@@ -620,6 +661,7 @@ export async function getProductsByBanner(bannerId: string) {
       title: true,
       discountPercent: true,
       products: {
+        where: { isActive: true },
         select: {
           id: true,
           name: true,

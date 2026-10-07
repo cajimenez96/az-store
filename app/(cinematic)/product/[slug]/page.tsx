@@ -15,6 +15,7 @@ export const revalidate = 3600;
 export async function generateStaticParams() {
   try {
     const products = await prisma.product.findMany({
+      where: { isActive: true },
       select: { slug: true },
     });
     return products.map((product) => ({

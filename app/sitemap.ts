@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [products, categories] = await Promise.all([
       prisma.product.findMany({
         select: { slug: true, createdAt: true },
-        where: { isFeatured: true }, // Only featured products for sitemap (not featured don't appear in storefront)
+        where: { isFeatured: true, isActive: true }, // Only featured products for sitemap (not featured don't appear in storefront)
       }),
       prisma.category.findMany({
         select: { slug: true },

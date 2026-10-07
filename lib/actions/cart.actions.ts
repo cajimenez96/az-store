@@ -69,6 +69,9 @@ export async function addItemToCart(data: CartItem) {
       include: { variants: { include: { size: true, productColor: { include: { color: true } } } } },
     });
     if (!product) throw new Error('Producto no encontrado');
+    if (!product.isActive) {
+      throw new Error('Este producto no está disponible actualmente');
+    }
 
     let maxStock = 0;
     if (item.size && product.variants && product.variants.length > 0) {
