@@ -27,3 +27,23 @@ export function extractDualPrice(product: {
   }
   return { priceCash: map.CASH, priceMercadoPago: map.MERCADOPAGO };
 }
+
+function toPriceString(value: string | undefined): string {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed.toFixed(2) : '0.00';
+}
+
+/**
+ * Inverso de `extractDualPrice`: arma el array `prices` a partir de los valores
+ * crudos del form de admin, para que el card de vista previa los lea igual que
+ * un producto guardado. Los valores vacíos o inválidos quedan en '0.00'.
+ */
+export function buildPriceRows(values: {
+  priceCash?: string;
+  priceMercadoPago?: string;
+}): { paymentMethod: 'CASH' | 'MERCADOPAGO'; value: string }[] {
+  return [
+    { paymentMethod: 'CASH', value: toPriceString(values.priceCash) },
+    { paymentMethod: 'MERCADOPAGO', value: toPriceString(values.priceMercadoPago) },
+  ];
+}

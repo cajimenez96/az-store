@@ -45,6 +45,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
+import { buildPriceRows } from '@/lib/duo-pricing';
 import { Check, ChevronsUpDown, Plus, Trash2 } from 'lucide-react';
 
 type CategoryWithSizes = Category & {
@@ -175,8 +176,10 @@ const ProductForm = ({
   const isFeatured = form.watch('isFeatured');
   const banner = form.watch('banner');
   const name = form.watch('name');
-  // Fase 2: el preview del card usa `priceCash` (precio base) por default.
+  // Fase 2: el preview del card lee `prices` (como un producto guardado), así que
+  // observamos ambos precios para que se actualice mientras se escribe.
   const priceCash = form.watch('priceCash');
+  const priceMercadoPago = form.watch('priceMercadoPago');
   const categoryId = form.watch('categoryId');
   const brandId = form.watch('brandId');
   const slug = form.watch('slug');
@@ -217,7 +220,7 @@ const ProductForm = ({
     images: images.length > 0 ? images : ['/assets/images/placeholder.jpg'],
     brand: { name: brands?.find((b) => b.id === brandId)?.name || 'Marca' },
     description: form.watch('description') || 'Descripción corta',
-    price: priceCash || '0.00',
+    prices: buildPriceRows({ priceCash, priceMercadoPago }),
     stock: variants.reduce((acc, curr) => acc + Number(curr.stock || 0), 0),
     rating: '0',
     numReviews: '0',
