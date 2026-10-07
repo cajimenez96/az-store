@@ -478,7 +478,7 @@ const ProductForm = ({
                   render={({ field }) => (
                     <FormItem className='w-full md:w-1/2'>
                       <FormLabel className='text-xs font-bold uppercase tracking-wider text-[#111111]'>
-                        Precio MercadoPago
+                        Precio Lista
                         <span className='ml-2 text-xs font-normal normal-case text-[#707072]'>
                           (sugerido: cash + recargo)
                         </span>

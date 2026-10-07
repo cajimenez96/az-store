@@ -113,11 +113,12 @@ const AdminProductsPage = async (props: {
                     </TableCell>
                     <TableCell className='py-4 text-right tabular-nums'>
                       <div className='text-sm font-bold text-[#111111]'>
+                        <span className='mr-1 text-xs font-semibold text-[#707072]'>Lista:</span>
                         {formatCurrency(mercadoPagoPrice ?? '0')}
                       </div>
                       {cashPrice !== undefined && (
                         <div className='text-xs font-semibold text-[#007d48]'>
-                          May: {formatCurrency(cashPrice)}
+                          Efectivo: {formatCurrency(cashPrice)}
                         </div>
                       )}
                     </TableCell>
