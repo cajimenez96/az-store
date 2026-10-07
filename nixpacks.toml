@@ -9,4 +9,6 @@ cmds = ["curl -fsSL https://bun.sh/install | bash", "bun install --frozen-lockfi
 cmds = ["bun run build"]
 
 [start]
-cmd = "bun run start"
+# Apply pending Prisma migrations before serving. If a migration fails the
+# container exits and the previous deployment keeps serving traffic.
+cmd = "bunx prisma migrate deploy && bun run start"
