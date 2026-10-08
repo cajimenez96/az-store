@@ -189,12 +189,14 @@ export async function createOrder({
       }
     }
 
-    // Calculate order prices
-    const itemsPrice = Number(cart.itemsPrice);
-    const itemsAfterDiscount =
-      itemsPrice - discountPrice - verifiedBannerDiscount;
-    const totalPrice =
-      itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice);
+    // Calculate order prices with strict 2-decimal precision
+    const itemsPrice = round2(Number(cart.itemsPrice));
+    const itemsAfterDiscount = round2(
+      itemsPrice - discountPrice - verifiedBannerDiscount
+    );
+    const totalPrice = round2(
+      itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice)
+    );
 
     // Create order object
     type OrderInsertData = z.infer<typeof insertOrderSchema> & {
@@ -208,22 +210,22 @@ export async function createOrder({
       userId: user.id,
       shippingAddress: user.address,
       paymentMethod: user.paymentMethod,
-      itemsPrice: itemsPrice.toString(),
-      shippingPrice: cart.shippingPrice,
-      taxPrice: cart.taxPrice,
-      totalPrice: totalPrice.toString(),
+      itemsPrice: itemsPrice.toFixed(2),
+      shippingPrice: round2(Number(cart.shippingPrice)).toFixed(2),
+      taxPrice: round2(Number(cart.taxPrice)).toFixed(2),
+      totalPrice: totalPrice.toFixed(2),
     });
 
     // Add promo code information
     if (promoCodeId) {
       order.promoCode = promoCodeInput!.toUpperCase();
-      order.discountPrice = discountPrice.toString();
+      order.discountPrice = round2(discountPrice).toFixed(2);
     }
 
     // Add banner discount information
     if (validBannerId && verifiedBannerDiscount > 0) {
       order.bannerId = validBannerId;
-      order.bannerDiscount = verifiedBannerDiscount.toString();
+      order.bannerDiscount = round2(verifiedBannerDiscount).toFixed(2);
     }
 
     const expirationHours = process.env.ORDER_EXPIRATION_HOURS
@@ -1186,18 +1188,23 @@ export async function createMercadoPagoOrder(orderId: string) {
       }
     }
 
+    const serverUrl =
+      process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000';
+    const isLocalhost =
+      serverUrl.includes('localhost') || serverUrl.includes('127.0.0.1');
+
     const response = await preference.create({
       body: {
         items,
         back_urls: {
-          success: `${process.env.NEXT_PUBLIC_SERVER_URL}/order/${orderId}`,
-          failure: `${process.env.NEXT_PUBLIC_SERVER_URL}/order/${orderId}`,
-          pending: `${process.env.NEXT_PUBLIC_SERVER_URL}/order/${orderId}`,
+          success: `${serverUrl}/order/${orderId}`,
+          failure: `${serverUrl}/order/${orderId}`,
+          pending: `${serverUrl}/order/${orderId}`,
         },
-        auto_return: 'approved',
+        ...(isLocalhost ? {} : { auto_return: 'approved' }),
         external_reference: orderId,
         metadata: { orderId },
-        notification_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/api/webhooks/mercadopago`,
+        notification_url: `${serverUrl}/api/webhooks/mercadopago`,
       },
     });
 

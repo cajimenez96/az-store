@@ -13,8 +13,7 @@ export function convertToPlainObject<T>(value: T): T {
 
 // Format number with decimal places
 export function formatNumberWithDecimal(num: number): string {
-  const [int, decimal] = num.toString().split('.');
-  return decimal ? `${int}.${decimal.padEnd(2, '0')}` : `${int}.00`;
+  return (Math.round((num + Number.EPSILON) * 100) / 100).toFixed(2);
 }
 
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
