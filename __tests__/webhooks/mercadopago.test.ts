@@ -14,8 +14,19 @@ jest.mock('mercadopago', () => ({
 jest.mock('@/lib/actions/order.actions', () => ({
   updateOrderToPaid: jest.fn(),
 }));
+jest.mock('@/db/prisma', () => ({
+  prisma: {
+    order: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+  },
+}));
 
 import { POST } from '../../app/api/webhooks/mercadopago/route';
+import { prisma } from '@/db/prisma';
+import { updateOrderToPaid } from '@/lib/actions/order.actions';
+import { Payment } from 'mercadopago';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -159,6 +170,266 @@ describe('AZ-004 · POST /api/webhooks/mercadopago — verificación de firma', 
       );
 
       expect(res.status).toBe(200);
+    });
+  });
+
+  describe('Reconciliación de Pago y Orden', () => {
+    const mockOrder = {
+      id: 'order-123',
+      totalPrice: '10000.00',
+      paymentMethod: 'MercadoPago',
+      isPaid: false,
+      shippingStatus: 'Pendiente',
+    };
+
+    beforeEach(() => {
+      (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder);
+      (prisma.order.update as jest.Mock).mockResolvedValue({});
+      (updateOrderToPaid as jest.Mock).mockResolvedValue({ success: true });
+    });
+
+    it('retorna 404 si la orden no existe en base de datos', async () => {
+      (prisma.order.findUnique as jest.Mock).mockResolvedValue(null);
+      (Payment as unknown as jest.Mock).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue({
+          status: 'approved',
+          external_reference: 'order-inexistente',
+          transaction_amount: 10000,
+          currency_id: 'ARS',
+          payer: { email: 'buyer@test.com' },
+        }),
+      }));
+
+      const res = await POST(
+        makeWebhookRequest({
+          headers: {
+            'x-signature': buildSignature(),
+            'x-request-id': REQUEST_ID,
+          },
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(404);
+      expect(body.success).toBe(false);
+      expect(updateOrderToPaid).not.toHaveBeenCalled();
+    });
+
+    it('retorna 200 y no vuelve a procesar si la orden ya estaba pagada', async () => {
+      (prisma.order.findUnique as jest.Mock).mockResolvedValue({
+        ...mockOrder,
+        isPaid: true,
+      });
+      (Payment as unknown as jest.Mock).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue({
+          status: 'approved',
+          external_reference: 'order-123',
+          transaction_amount: 10000,
+          currency_id: 'ARS',
+          payer: { email: 'buyer@test.com' },
+        }),
+      }));
+
+      const res = await POST(
+        makeWebhookRequest({
+          headers: {
+            'x-signature': buildSignature(),
+            'x-request-id': REQUEST_ID,
+          },
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body.message).toMatch(/already paid/i);
+      expect(updateOrderToPaid).not.toHaveBeenCalled();
+    });
+
+    it('no marca pagada y retorna 200 cuando el monto es menor al total', async () => {
+      (Payment as unknown as jest.Mock).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue({
+          status: 'approved',
+          external_reference: 'order-123',
+          transaction_amount: 5000, // Menor a 10000
+          currency_id: 'ARS',
+          payer: { email: 'buyer@test.com' },
+        }),
+      }));
+
+      const res = await POST(
+        makeWebhookRequest({
+          headers: {
+            'x-signature': buildSignature(),
+            'x-request-id': REQUEST_ID,
+          },
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(updateOrderToPaid).not.toHaveBeenCalled();
+      expect(prisma.order.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'order-123' },
+          data: expect.objectContaining({
+            paymentResult: expect.objectContaining({
+              status: 'DISCREPANCY_AMOUNT',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('no marca pagada y retorna 200 cuando la moneda es distinta a ARS', async () => {
+      (Payment as unknown as jest.Mock).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue({
+          status: 'approved',
+          external_reference: 'order-123',
+          transaction_amount: 10000,
+          currency_id: 'USD', // Moneda no admitida
+          payer: { email: 'buyer@test.com' },
+        }),
+      }));
+
+      const res = await POST(
+        makeWebhookRequest({
+          headers: {
+            'x-signature': buildSignature(),
+            'x-request-id': REQUEST_ID,
+          },
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(updateOrderToPaid).not.toHaveBeenCalled();
+      expect(prisma.order.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'order-123' },
+          data: expect.objectContaining({
+            paymentResult: expect.objectContaining({
+              status: 'DISCREPANCY_CURRENCY',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('no marca pagada y retorna 200 cuando el método de pago no es Mercado Pago', async () => {
+      (prisma.order.findUnique as jest.Mock).mockResolvedValue({
+        ...mockOrder,
+        paymentMethod: 'TransferenciaBancaria',
+      });
+      (Payment as unknown as jest.Mock).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue({
+          status: 'approved',
+          external_reference: 'order-123',
+          transaction_amount: 10000,
+          currency_id: 'ARS',
+          payer: { email: 'buyer@test.com' },
+        }),
+      }));
+
+      const res = await POST(
+        makeWebhookRequest({
+          headers: {
+            'x-signature': buildSignature(),
+            'x-request-id': REQUEST_ID,
+          },
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(updateOrderToPaid).not.toHaveBeenCalled();
+      expect(prisma.order.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'order-123' },
+          data: expect.objectContaining({
+            paymentResult: expect.objectContaining({
+              status: 'DISCREPANCY_PAYMENT_METHOD',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('no marca pagada y retorna 200 cuando la orden está cancelada', async () => {
+      (prisma.order.findUnique as jest.Mock).mockResolvedValue({
+        ...mockOrder,
+        shippingStatus: 'Cancelado',
+      });
+      (Payment as unknown as jest.Mock).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue({
+          status: 'approved',
+          external_reference: 'order-123',
+          transaction_amount: 10000,
+          currency_id: 'ARS',
+          payer: { email: 'buyer@test.com' },
+        }),
+      }));
+
+      const res = await POST(
+        makeWebhookRequest({
+          headers: {
+            'x-signature': buildSignature(),
+            'x-request-id': REQUEST_ID,
+          },
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(updateOrderToPaid).not.toHaveBeenCalled();
+      expect(prisma.order.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'order-123' },
+          data: expect.objectContaining({
+            paymentResult: expect.objectContaining({
+              status: 'DISCREPANCY_ORDER_CANCELLED',
+            }),
+          }),
+        })
+      );
+    });
+
+    it('caso feliz: aprueba el pago, llama a updateOrderToPaid y retorna 200', async () => {
+      (Payment as unknown as jest.Mock).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue({
+          status: 'approved',
+          external_reference: 'order-123',
+          transaction_amount: 10000,
+          currency_id: 'ARS',
+          payer: { email: 'buyer@test.com' },
+        }),
+      }));
+
+      const res = await POST(
+        makeWebhookRequest({
+          headers: {
+            'x-signature': buildSignature(),
+            'x-request-id': REQUEST_ID,
+          },
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(updateOrderToPaid).toHaveBeenCalledWith({
+        orderId: 'order-123',
+        paymentResult: {
+          id: String(DATA_ID),
+          status: 'approved',
+          email_address: 'buyer@test.com',
+          pricePaid: '10000',
+        },
+        mpPaymentId: String(DATA_ID),
+      });
     });
   });
 });

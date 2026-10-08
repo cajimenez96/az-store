@@ -1,12 +1,13 @@
 'use server';
 
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
-import { assertAdmin, assertAdminOrSeller, requireAdmin, requireAdminOrSeller } from '../auth-guard';
+import { assertAdmin, assertAdminOrSeller } from '../auth-guard';
 import { convertToPlainObject, formatError, round2 } from '../utils';
 import { auth } from '@/auth';
 import { getMyCart } from './cart.actions';
 import { getUserById } from './user.actions';
 import { insertOrderSchema, updateShippingStatusSchema } from '../validators';
+import { z } from 'zod';
 import { prisma } from '@/db/prisma';
 import { CartItem, PaymentResult, ShippingAddress } from '@/types';
 import { paypal } from '../paypal';
@@ -28,16 +29,14 @@ import { deleteUTFiles } from '../uploadthing-helpers';
 
 // Create order and create the order items
 export async function createOrder({
-  shippingMethod,
   promoCode: promoCodeInput,
   bannerId,
-  bannerDiscount: clientBannerDiscount = 0,
 }: {
-  shippingMethod: 'retiro' | 'envio';
+  shippingMethod?: 'retiro' | 'envio';
   promoCode?: string;
   bannerId?: string;
   bannerDiscount?: number;
-}) {
+} = {}) {
   try {
     const session = await auth();
     if (!session) throw new Error('Usuario no autenticado');
@@ -198,7 +197,14 @@ export async function createOrder({
       itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice);
 
     // Create order object
-    const order = insertOrderSchema.parse({
+    type OrderInsertData = z.infer<typeof insertOrderSchema> & {
+      promoCode?: string;
+      discountPrice?: string;
+      bannerId?: string;
+      bannerDiscount?: string;
+    };
+
+    const order: OrderInsertData = insertOrderSchema.parse({
       userId: user.id,
       shippingAddress: user.address,
       paymentMethod: user.paymentMethod,
@@ -206,7 +212,7 @@ export async function createOrder({
       shippingPrice: cart.shippingPrice,
       taxPrice: cart.taxPrice,
       totalPrice: totalPrice.toString(),
-    }) as any;
+    });
 
     // Add promo code information
     if (promoCodeId) {
@@ -324,13 +330,20 @@ export async function createOrder({
             order: {
               ...createdOrder,
               user: { name: user.name || 'Cliente', email: user.email },
-            } as any,
+            } as unknown as Parameters<typeof sendPurchaseReceipt>[0]['order'],
             bankInfo,
           });
 
           // Send sale notifications to sellers
           await Promise.all(
-            (createdOrder.orderitems as any[]).map(async (item) => {
+            (
+              createdOrder.orderitems as Array<{
+                productId: string;
+                name: string;
+                qty: number;
+                priceUsed: string | number;
+              }>
+            ).map(async (item) => {
               const product = await prisma.product.findUnique({
                 where: { id: item.productId },
                 select: { sellerId: true },
@@ -348,7 +361,7 @@ export async function createOrder({
                     sellerName: seller.name || 'Vendedor',
                     productName: item.name,
                     qty: item.qty,
-                    price: item.priceUsed,
+                    price: String(item.priceUsed),
                   });
                 }
               }
@@ -1082,33 +1095,95 @@ export async function rejectBankTransfer(orderId: string) {
 // Create Mercado Pago Preference
 export async function createMercadoPagoOrder(orderId: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { success: false, message: 'No autorizado' };
+    }
+
     const order = await prisma.order.findFirst({
       where: { id: orderId },
       include: { orderitems: true, user: { select: { email: true } } },
     });
 
-    if (!order) throw new Error('Orden no encontrada');
+    if (!order) return { success: false, message: 'Orden no encontrada' };
+
+    // Validar titularidad o rol de admin
+    if (order.userId !== session.user.id && session.user.role !== 'admin') {
+      return { success: false, message: 'No autorizado' };
+    }
+
+    // Validar estado de la orden
+    if (order.isPaid) {
+      return { success: false, message: 'La orden ya está pagada' };
+    }
+
+    if (order.shippingStatus === 'Cancelado') {
+      return { success: false, message: 'La orden está cancelada' };
+    }
+
+    if (!order.paymentMethod.toLowerCase().includes('mercadopago')) {
+      return {
+        success: false,
+        message: 'El método de pago de la orden no es Mercado Pago',
+      };
+    }
 
     const mpClient = await getMercadoPagoClient();
     const preference = new Preference(mpClient);
 
-    // Prepare items for Mercado Pago
-    const items = order.orderitems.map((item) => ({
-      id: item.productId,
-      title: item.name,
-      quantity: item.qty,
-      unit_price: Number(item.priceUsed),
-      currency_id: 'ARS',
-    }));
+    const totalOrderAmount = Number(order.totalPrice);
+    const hasDiscounts =
+      (order.discountPrice && Number(order.discountPrice) > 0) ||
+      (order.bannerDiscount && Number(order.bannerDiscount) > 0);
 
-    if (Number(order.shippingPrice) > 0) {
-      items.push({
-        id: 'shipping',
-        title: 'Costo de Envío',
-        quantity: 1,
-        unit_price: Number(order.shippingPrice),
+    // Prepare items for Mercado Pago asegurando cuadre exacto con totalPrice
+    let items;
+    if (hasDiscounts) {
+      // Ítem único consolidado para garantizar cuadre exacto al centavo y evitar errores por montos negativos en MP
+      items = [
+        {
+          id: order.id,
+          title: `Orden #${order.id.slice(0, 8)} (${order.orderitems.length} productos)`,
+          quantity: 1,
+          unit_price: totalOrderAmount,
+          currency_id: 'ARS',
+        },
+      ];
+    } else {
+      items = order.orderitems.map((item) => ({
+        id: item.productId,
+        title: item.name,
+        quantity: item.qty,
+        unit_price: Number(item.priceUsed),
         currency_id: 'ARS',
-      });
+      }));
+
+      if (Number(order.shippingPrice) > 0) {
+        items.push({
+          id: 'shipping',
+          title: 'Costo de Envío',
+          quantity: 1,
+          unit_price: Number(order.shippingPrice),
+          currency_id: 'ARS',
+        });
+      }
+
+      // Verificación de seguridad de cuadre de redondeo
+      const itemsSum = items.reduce(
+        (sum, item) => sum + item.unit_price * item.quantity,
+        0
+      );
+      if (Math.abs(itemsSum - totalOrderAmount) >= 0.01) {
+        items = [
+          {
+            id: order.id,
+            title: `Orden #${order.id.slice(0, 8)} (${order.orderitems.length} productos)`,
+            quantity: 1,
+            unit_price: totalOrderAmount,
+            currency_id: 'ARS',
+          },
+        ];
+      }
     }
 
     const response = await preference.create({
