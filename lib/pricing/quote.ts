@@ -28,6 +28,9 @@ export type QuoteLine = {
 
 export type Quote = {
   lines: QuoteLine[];
+  // variantIds[i] is the ProductVariant validated for lines[i]; stock must be
+  // decremented on exactly that row, never on a second lookup.
+  variantIds: string[];
   itemsPrice: number;
 };
 
@@ -44,11 +47,11 @@ export class InsufficientStockError extends Error {
 
 type Db = Pick<typeof prisma, 'product'>;
 
-export async function resolveLine(
+async function resolveVariantLine(
   input: QuoteInput,
   method: PriceMethod,
-  db: Db = prisma
-): Promise<QuoteLine> {
+  db: Db
+): Promise<{ line: QuoteLine; variantId: string }> {
   const product = await db.product.findFirst({
     where: { id: input.productId },
     include: {
@@ -82,20 +85,31 @@ export async function resolveLine(
   const productColor = product.hasColorVariants ? variant.productColor : null;
 
   return {
-    productId: product.id,
-    name: product.name,
-    slug: product.slug,
-    image: productColor?.images[0] ?? product.images[0] ?? '/placeholder.png',
-    ...(input.size !== undefined && { size: input.size }),
-    ...(productColor && {
-      productColorId: productColor.id,
-      colorName: productColor.color.name,
-      colorHex: productColor.color.hex,
-    }),
-    qty: input.qty,
-    priceUsed: price.value.toString(),
-    paymentMethod: method,
+    variantId: variant.id,
+    line: {
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      image: productColor?.images[0] ?? product.images[0] ?? '/placeholder.png',
+      ...(input.size !== undefined && { size: input.size }),
+      ...(productColor && {
+        productColorId: productColor.id,
+        colorName: productColor.color.name,
+        colorHex: productColor.color.hex,
+      }),
+      qty: input.qty,
+      priceUsed: price.value.toString(),
+      paymentMethod: method,
+    },
   };
+}
+
+export async function resolveLine(
+  input: QuoteInput,
+  method: PriceMethod,
+  db: Db = prisma
+): Promise<QuoteLine> {
+  return (await resolveVariantLine(input, method, db)).line;
 }
 
 export async function quoteItems(
@@ -104,17 +118,23 @@ export async function quoteItems(
   db: Db = prisma
 ): Promise<Quote> {
   const lines: QuoteLine[] = [];
+  const variantIds: string[] = [];
   // Lines may target the same variant; stock must hold for their combined qty.
   const committedQty = new Map<string, number>();
   for (const input of inputs) {
     const variantKey = [input.productId, input.size ?? '', input.productColorId ?? ''].join('|');
     const combinedQty = (committedQty.get(variantKey) ?? 0) + input.qty;
-    const line = await resolveLine({ ...input, qty: combinedQty }, method, db);
+    const { line, variantId } = await resolveVariantLine(
+      { ...input, qty: combinedQty },
+      method,
+      db
+    );
     committedQty.set(variantKey, combinedQty);
     lines.push({ ...line, qty: input.qty });
+    variantIds.push(variantId);
   }
   const itemsPrice = round2(
     lines.reduce((acc, line) => acc + Number(line.priceUsed) * line.qty, 0)
   );
-  return { lines, itemsPrice };
+  return { lines, variantIds, itemsPrice };
 }

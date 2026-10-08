@@ -217,6 +217,27 @@ describe('quoteItems', () => {
     expect(quote.itemsPrice).toBe(330);
   });
 
+  it('returns the id of the variant it validated for each line, in line order', async () => {
+    findFirst.mockResolvedValue(
+      makeProduct({
+        variants: [
+          { id: 'v-m', stock: 5, colorId: null, size: { name: 'M' }, productColor: null },
+          { id: 'v-l', stock: 4, colorId: null, size: { name: 'L' }, productColor: null },
+        ],
+      })
+    );
+
+    const quote = await quoteItems(
+      [
+        { productId: 'prod-1', size: 'L', qty: 1 },
+        { productId: 'prod-1', size: 'M', qty: 2 },
+      ],
+      'CASH'
+    );
+
+    expect(quote.variantIds).toEqual(['v-l', 'v-m']);
+  });
+
   it('checks stock against the combined qty of lines hitting the same variant', async () => {
     // Variant M has stock 5: each line fits alone (3 <= 5) but 3 + 3 oversells it.
     await expect(

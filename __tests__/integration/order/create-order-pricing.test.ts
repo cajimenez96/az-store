@@ -232,6 +232,24 @@ describe('createOrder — everything is recomputed from the database', () => {
     expect(after.stock).toBe(7);
   });
 
+  it('decrements the exact variant that the quote validated, even for a sizeless line', async () => {
+    // The sized variant is created first, so a lookup without a size filter would hit it.
+    const { product, variant: sizedVariant } = await newProduct(5);
+    const sizelessVariant = await prisma.productVariant.create({
+      data: { productId: product.id, sizeId: null, stock: 3 },
+    });
+    await setupUser('TransferenciaBancaria');
+    await setupCart([{ ...tamperedItem(product, { qty: 1 }), size: undefined }]);
+
+    const result = await createOrder({ shippingMethod: 'retiro' });
+
+    expect(result.success).toBe(true);
+    const sized = await prisma.productVariant.findUniqueOrThrow({ where: { id: sizedVariant.id } });
+    const sizeless = await prisma.productVariant.findUniqueOrThrow({ where: { id: sizelessVariant.id } });
+    expect(sized.stock).toBe(5);
+    expect(sizeless.stock).toBe(2);
+  });
+
   it('does not decrement stock at creation for a MercadoPago order', async () => {
     const { product, variant } = await newProduct(10);
     await setupUser('MercadoPago');

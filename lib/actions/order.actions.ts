@@ -273,7 +273,7 @@ export async function createOrder({
         },
       });
       // Create order items from the server quote (never from the cart snapshot)
-      for (const line of quote.lines) {
+      for (const [index, line] of quote.lines.entries()) {
         await tx.orderItem.create({
           data: {
             productId: line.productId,
@@ -291,19 +291,12 @@ export async function createOrder({
           },
         });
 
-        // Decrement stock immediately if Bank Transfer. The guarded update
-        // rolls the transaction back instead of letting stock go negative.
+        // Decrement stock immediately if Bank Transfer, on the exact variant the
+        // quote validated (no second lookup). The guarded update rolls the
+        // transaction back instead of letting stock go negative.
         if (user.paymentMethod === 'TransferenciaBancaria') {
-          const variant = await tx.productVariant.findFirst({
-            where: {
-              productId: line.productId,
-              size: line.size ? { name: line.size } : undefined,
-              colorId: line.productColorId ?? null,
-            },
-          });
-          if (!variant) throw new InsufficientStockError(line.name, 0);
           const { count } = await tx.productVariant.updateMany({
-            where: { id: variant.id, stock: { gte: line.qty } },
+            where: { id: quote.variantIds[index], stock: { gte: line.qty } },
             data: { stock: { decrement: line.qty } },
           });
           if (count === 0) throw new InsufficientStockError(line.name, 0);
