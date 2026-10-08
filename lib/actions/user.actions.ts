@@ -96,7 +96,9 @@ export async function signUpUser(prevState: unknown, formData: FormData) {
 
 // Get user by the ID
 export async function getUserById(userId: string) {
-  const user = await prisma.user.findFirst({
+  if (!userId) throw new Error('Usuario no encontrado');
+
+  const user = await prisma.user.findUnique({
     where: { id: userId },
   });
   if (!user) throw new Error('Usuario no encontrado');
@@ -107,9 +109,12 @@ export async function getUserById(userId: string) {
 export async function updateUserAddress(data: ShippingAddress) {
   try {
     const session = await auth();
+    if (!session?.user?.id) {
+      throw new Error('Usuario no autorizado');
+    }
 
-    const currentUser = await prisma.user.findFirst({
-      where: { id: session?.user?.id },
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
     });
 
     if (!currentUser) throw new Error('Usuario no encontrado');
@@ -136,8 +141,12 @@ export async function updateUserPaymentMethod(
 ) {
   try {
     const session = await auth();
-    const currentUser = await prisma.user.findFirst({
-      where: { id: session?.user?.id },
+    if (!session?.user?.id) {
+      throw new Error('Usuario no autorizado');
+    }
+
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
     });
 
     if (!currentUser) throw new Error('Usuario no encontrado');
@@ -162,10 +171,13 @@ export async function updateUserPaymentMethod(
 export async function updateProfile(user: { name: string; email: string }) {
   try {
     const session = await auth();
+    if (!session?.user?.id) {
+      throw new Error('Usuario no autorizado');
+    }
 
-    const currentUser = await prisma.user.findFirst({
+    const currentUser = await prisma.user.findUnique({
       where: {
-        id: session?.user?.id,
+        id: session.user.id,
       },
     });
 

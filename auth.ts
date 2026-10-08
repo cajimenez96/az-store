@@ -2,9 +2,11 @@ import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import { prisma } from '@/db/prisma';
 import { cookies } from 'next/headers';
-import { compare } from 'bcryptjs';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { mergeCart } from './lib/actions/cart.actions';
+import { authorizeUser } from './lib/auth/authorize';
+
+export { authorizeUser };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
@@ -21,35 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { type: 'email' },
         password: { type: 'password' },
       },
-      async authorize(credentials) {
-        if (credentials == null) return null;
-
-        const email = credentials.email as string;
-        const password = credentials.password as string;
-
-        const user = await prisma.user.findFirst({
-          where: { email },
-          select: {
-            id: true,
-            email: true,
-            password: true,
-            name: true,
-            role: true,
-          },
-        });
-
-        if (!user || !user.password) return null;
-
-        const isMatch = await compare(password, user.password);
-        if (!isMatch) return null;
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
-      },
+      authorize: authorizeUser,
     }),
   ],
   callbacks: {

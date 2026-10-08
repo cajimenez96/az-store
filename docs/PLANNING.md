@@ -191,11 +191,11 @@ Como **cliente** quiero que solo yo pueda modificar mis datos para que **nadie s
 Un POST anónimo a cualquiera de las tres acciones modifica al primer usuario de la base, normalmente el más antiguo o el administrador. Permite cambiar su dirección de envío y redirigir pedidos.
 
 **Criterios de aceptación**
-- [ ] Las tres acciones responden con error de no autorizado cuando no hay `session.user.id`, sin tocar la base.
-- [ ] Se usa `findUnique({ where: { id } })` en lugar de `findFirst` con un id posiblemente indefinido.
-- [ ] Búsqueda global del patrón `where: { id: session?.user?.id }` y `where: { email }` con valor potencialmente `undefined`: sin ocurrencias restantes.
-- [ ] `authorize()` valida el input con `signInFormSchema` y falla si falta el email.
-- [ ] Se documentó la revisión de producción descrita en la sección 4 (primer usuario sin modificaciones sospechosas).
+- [x] Las tres acciones responden con error de no autorizado cuando no hay `session.user.id`, sin tocar la base.
+- [x] Se usa `findUnique({ where: { id } })` en lugar de `findFirst` con un id posiblemente indefinido.
+- [x] Búsqueda global del patrón `where: { id: session?.user?.id }` y `where: { email }` con valor potencialmente `undefined`: sin ocurrencias restantes.
+- [x] `authorize()` valida el input con `signInFormSchema` y falla si falta el email.
+- [x] Se documentó la revisión de producción descrita en la sección 4 (primer usuario sin modificaciones sospechosas).
 
 **Pruebas necesarias**
 - **Unit:** sin sesión, cada acción devuelve error y `prisma.user.update` **no** es llamado.
