@@ -11,17 +11,16 @@ import { Prisma } from '@prisma/client';
 import { getShippingSettings } from './settings.actions';
 import { v4 as uuidv4 } from 'uuid';
 import { InsufficientStockError, resolveLine } from '../pricing/quote';
+import { calcTax } from '../pricing/totals';
 
 // Calculate cart prices
 // Note: shippingPrice is always 0 in cart. It's calculated in checkout based on shipping method (retiro/envío)
 const calcPrice = async (items: CartItem[]) => {
-  const taxRate = parseFloat(process.env.TAX_RATE ?? '0');
-
   const itemsPrice = round2(
       items.reduce((acc, item) => acc + Number(item.priceUsed) * item.qty, 0)
     ),
     shippingPrice = 0, // Always 0 in cart, adjusted during checkout
-    taxPrice = round2(taxRate * itemsPrice),
+    taxPrice = calcTax(itemsPrice),
     totalPrice = round2(itemsPrice + taxPrice + shippingPrice);
 
   return {

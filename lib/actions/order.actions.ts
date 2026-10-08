@@ -25,6 +25,9 @@ import { Preference } from 'mercadopago';
 import { getMercadoPagoClient } from '../mercadopago';
 import { getBankSettings } from './settings.actions';
 import { deleteUTFiles } from '../uploadthing-helpers';
+import { priceMethodFor } from '../pricing/price-method';
+import { InsufficientStockError, quoteItems, type QuoteInput } from '../pricing/quote';
+import { calcTax } from '../pricing/totals';
 
 // Create order and create the order items
 export async function createOrder({
@@ -74,7 +77,7 @@ export async function createOrder({
 
     // Validate and apply promo code (security: validate on server side)
     let promoCodeId: string | null = null;
-    let discountPrice = 0;
+    let promoPercent = 0;
 
     if (promoCodeInput) {
       const normalizedCode = promoCodeInput.toUpperCase();
@@ -153,10 +156,36 @@ export async function createOrder({
         };
       }
 
-      discountPrice = Number(
-        (Number(cart.itemsPrice) * (appliedPercent / 100)).toFixed(2)
-      );
+      promoPercent = appliedPercent;
     }
+
+    // Everything below is recomputed from the database: the cart row is only
+    // trusted for which variants and how many units the user wants.
+    let priceMethod;
+    try {
+      priceMethod = priceMethodFor('web', user.paymentMethod);
+    } catch (error) {
+      return { success: false, message: formatError(error) };
+    }
+
+    const quoteInputs: QuoteInput[] = (cart.items as CartItem[]).map((item) => ({
+      productId: item.productId,
+      size: item.size,
+      productColorId: item.productColorId,
+      qty: item.qty,
+    }));
+    let quote;
+    try {
+      quote = await quoteItems(quoteInputs, priceMethod);
+    } catch (error) {
+      // No auto-adjust: any stock/availability problem rejects the whole order.
+      return { success: false, message: formatError(error), redirectTo: '/cart' };
+    }
+    const itemsPrice = quote.itemsPrice;
+
+    const discountPrice = promoPercent
+      ? Number((itemsPrice * (promoPercent / 100)).toFixed(2))
+      : 0;
 
     // Validate and calculate banner discount (server-side — only on banner products)
     let verifiedBannerDiscount = 0;
@@ -180,9 +209,9 @@ export async function createOrder({
 
       if (banner?.discountPercent && banner.products.length > 0) {
         const bannerProductIds = new Set(banner.products.map((p) => p.id));
-        const bannerItemsTotal = (cart.items as CartItem[])
-          .filter((item) => bannerProductIds.has(item.productId))
-          .reduce((sum, item) => sum + Number(item.priceUsed) * item.qty, 0);
+        const bannerItemsTotal = quote.lines
+          .filter((line) => bannerProductIds.has(line.productId))
+          .reduce((sum, line) => sum + Number(line.priceUsed) * line.qty, 0);
         verifiedBannerDiscount = Number(
           ((bannerItemsTotal * banner.discountPercent) / 100).toFixed(2)
         );
@@ -191,21 +220,21 @@ export async function createOrder({
     }
 
     // Calculate order prices
-    const itemsPrice = Number(cart.itemsPrice);
+    const shippingPrice = Number(cart.shippingPrice); // shipping cost is out of scope (always 0)
+    const taxPrice = calcTax(itemsPrice);
     const itemsAfterDiscount =
       itemsPrice - discountPrice - verifiedBannerDiscount;
-    const totalPrice =
-      itemsAfterDiscount + Number(cart.shippingPrice) + Number(cart.taxPrice);
+    const totalPrice = round2(itemsAfterDiscount + shippingPrice + taxPrice);
 
     // Create order object
     const order = insertOrderSchema.parse({
       userId: user.id,
       shippingAddress: user.address,
       paymentMethod: user.paymentMethod,
-      itemsPrice: itemsPrice.toString(),
-      shippingPrice: cart.shippingPrice,
-      taxPrice: cart.taxPrice,
-      totalPrice: totalPrice.toString(),
+      itemsPrice: itemsPrice.toFixed(2),
+      shippingPrice: shippingPrice.toFixed(2),
+      taxPrice: taxPrice.toFixed(2),
+      totalPrice: totalPrice.toFixed(2),
     }) as any;
 
     // Add promo code information
@@ -243,43 +272,41 @@ export async function createOrder({
           expiresAt,
         },
       });
-      // Create order items from the cart items
-      for (const item of cart.items as CartItem[]) {
+      // Create order items from the server quote (never from the cart snapshot)
+      for (const line of quote.lines) {
         await tx.orderItem.create({
           data: {
-            productId: item.productId,
-            name: item.name,
-            slug: item.slug,
-            image: item.image,
-            qty: item.qty,
-            size: item.size ?? null,
-            // Fase 2: snapshoteo priceUsed + paymentMethod
-            priceUsed: item.priceUsed,
-            paymentMethod: item.paymentMethod,
-            productColorId: item.productColorId ?? null,
-            colorName: item.colorName ?? null,
-            colorHex: item.colorHex ?? null,
+            productId: line.productId,
+            name: line.name,
+            slug: line.slug,
+            image: line.image,
+            qty: line.qty,
+            size: line.size ?? null,
+            priceUsed: line.priceUsed,
+            paymentMethod: line.paymentMethod,
+            productColorId: line.productColorId ?? null,
+            colorName: line.colorName ?? null,
+            colorHex: line.colorHex ?? null,
             orderId: insertedOrder.id,
           },
         });
 
-        // Decrement stock immediately if Bank Transfer
+        // Decrement stock immediately if Bank Transfer. The guarded update
+        // rolls the transaction back instead of letting stock go negative.
         if (user.paymentMethod === 'TransferenciaBancaria') {
-          if (item.size || item.productColorId) {
-            const variant = await tx.productVariant.findFirst({
-              where: {
-                productId: item.productId,
-                size: item.size ? { name: item.size } : undefined,
-                colorId: item.productColorId ?? null,
-              },
-            });
-            if (variant) {
-              await tx.productVariant.update({
-                where: { id: variant.id },
-                data: { stock: { decrement: item.qty } },
-              });
-            }
-          }
+          const variant = await tx.productVariant.findFirst({
+            where: {
+              productId: line.productId,
+              size: line.size ? { name: line.size } : undefined,
+              colorId: line.productColorId ?? null,
+            },
+          });
+          if (!variant) throw new InsufficientStockError(line.name, 0);
+          const { count } = await tx.productVariant.updateMany({
+            where: { id: variant.id, stock: { gte: line.qty } },
+            data: { stock: { decrement: line.qty } },
+          });
+          if (count === 0) throw new InsufficientStockError(line.name, 0);
         }
       }
       // Register promo code usage
@@ -367,6 +394,9 @@ export async function createOrder({
     };
   } catch (error) {
     if (isRedirectError(error)) throw error;
+    if (error instanceof InsufficientStockError) {
+      return { success: false, message: formatError(error), redirectTo: '/cart' };
+    }
     return { success: false, message: formatError(error) };
   }
 }
