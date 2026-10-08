@@ -31,7 +31,7 @@ colors:
 
 typography:
   display-campaign:
-    fontFamily: Nike Futura ND
+    fontFamily: Cormorant Garamond, serif
     fontSize: 96px
     fontWeight: 500
     lineHeight: 0.9
@@ -268,7 +268,7 @@ Across `/men`, the trail-running listing, the Zegama PDP, `/membership`, and Jor
 
 **Key Characteristics:**
 
-- Editorial campaign hero with `{typography.display-campaign}` (Nike Futura ND, 96px, line-height 0.9, uppercase) burned directly into full-bleed photography
+- Editorial campaign hero with `{typography.display-campaign}` (Cormorant Garamond, serif, 96px, line-height 0.9, uppercase) burned directly into full-bleed photography
 - Pure black/white/single-gray UI palette: `{colors.ink}`, `{colors.canvas}`, and `{colors.soft-cloud}` carry ~95% of the chrome surface area
 - Pill geometry everywhere: every CTA, search field, filter chip, and badge uses `{rounded.full}` (30px) or `{rounded.md}` (24px) — there are no sharp-cornered buttons in the system
 - Product cards have zero radius, zero shadow, sit directly on `{colors.soft-cloud}` swatch backgrounds — the photograph is the card
@@ -323,7 +323,7 @@ These appear sparingly — almost exclusively as small chip backgrounds, swatch 
 
 ### Font Family
 
-- **Nike Futura ND** (display campaign only) — proprietary geometric sans for the towering uppercase headlines burned into campaign hero photography. Falls back to Helvetica Now Text Medium → Helvetica → Arial.
+- **Cormorant Garamond, serif** (display campaign only) — proprietary geometric sans for the towering uppercase headlines burned into campaign hero photography. Falls back to Helvetica Now Text Medium → Helvetica → Arial.
 - **Helvetica Now Display Medium** (headings 16–32px) — modern Helvetica cut tuned for display sizes; carries every section title, PDP product name, and dialog headline.
 - **Helvetica Now Text Medium** (UI 12–16px) — buttons, captions, swatch labels, badge text. The system's UI workhorse.
 - **Helvetica Now Text** (body and links) — long-form body and underlined inline links.

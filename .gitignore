@@ -43,3 +43,7 @@ next-env.d.ts
 .atl/
 .pi
 logs/
+
+/docs
+.claude/
+odd/tasks
