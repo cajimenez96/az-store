@@ -1172,7 +1172,8 @@ export async function createMercadoPagoOrder(orderId: string) {
 
 // Create a physical POS order in a single transaction
 export async function createPosOrder(data: {
-  items: CartItem[];
+  // Narrow client input: price, name and image are always resolved on the server.
+  items: QuoteInput[];
   paymentMethod: string;
   customerId?: string;
   customerName?: string;
@@ -1209,12 +1210,18 @@ export async function createPosOrder(data: {
         })
       : null;
 
-    // 1. Calculate prices
-    const itemsPriceVal = items.reduce(
-      (acc, item) => acc + Number(item.priceUsed) * item.qty,
-      0
+    // 1. Quote on the server: the POS payment method decides CASH vs MERCADOPAGO.
+    const priceMethod = priceMethodFor('pos', paymentMethod);
+    const quote = await quoteItems(
+      items.map(({ productId, size, productColorId, qty }) => ({
+        productId,
+        size,
+        productColorId,
+        qty,
+      })),
+      priceMethod
     );
-    const itemsPrice = round2(itemsPriceVal);
+    const itemsPrice = quote.itemsPrice;
     const shippingPrice = 0;
     const taxPrice = 0;
     const totalPrice = round2(itemsPrice);
@@ -1332,46 +1339,32 @@ export async function createPosOrder(data: {
       });
 
       // Create order items and decrement stocks
-      for (const item of items) {
+      for (const [index, line] of quote.lines.entries()) {
         await tx.orderItem.create({
           data: {
             orderId: insertedOrder.id,
-            productId: item.productId,
-            name: item.name,
-            slug: item.slug,
-            image: item.image,
-            qty: item.qty,
-            // Fase 2: snapshoteo priceUsed + paymentMethod
-            priceUsed: item.priceUsed,
-            paymentMethod: item.paymentMethod,
-            size: item.size || null,
-            productColorId: item.productColorId || null,
-            colorName: item.colorName || null,
-            colorHex: item.colorHex || null,
+            productId: line.productId,
+            name: line.name,
+            slug: line.slug,
+            image: line.image,
+            qty: line.qty,
+            // Snapshot of the server-resolved price and its list (CASH / MERCADOPAGO)
+            priceUsed: line.priceUsed,
+            paymentMethod: line.paymentMethod,
+            size: line.size || null,
+            productColorId: line.productColorId || null,
+            colorName: line.colorName || null,
+            colorHex: line.colorHex || null,
           },
         });
 
-        // Decrement stock
-        if (item.size || item.productColorId) {
-          const variant = await tx.productVariant.findFirst({
-            where: {
-              productId: item.productId,
-              size: item.size ? { name: item.size } : undefined,
-              colorId: item.productColorId ?? null,
-            },
-          });
-
-          if (!variant || variant.stock < item.qty) {
-            throw new Error(
-              `Stock insuficiente para el producto ${item.name} (talle ${item.size || '—'} / color ${item.colorName || '—'})`
-            );
-          }
-
-          await tx.productVariant.update({
-            where: { id: variant.id },
-            data: { stock: { decrement: item.qty } },
-          });
-        }
+        // Guarded decrement on the exact variant the quote validated; a concurrent
+        // sale that took the stock makes the count 0 and rolls the whole sale back.
+        const { count } = await tx.productVariant.updateMany({
+          where: { id: quote.variantIds[index], stock: { gte: line.qty } },
+          data: { stock: { decrement: line.qty } },
+        });
+        if (count === 0) throw new InsufficientStockError(line.name, 0);
       }
 
       return insertedOrder.id;
@@ -1382,9 +1375,9 @@ export async function createPosOrder(data: {
 
     // Send sale notifications to sellers
     await Promise.all(
-      items.map(async (item) => {
+      quote.lines.map(async (line) => {
         const product = await prisma.product.findUnique({
-          where: { id: item.productId },
+          where: { id: line.productId },
           select: { sellerId: true },
         });
 
@@ -1398,9 +1391,9 @@ export async function createPosOrder(data: {
             await sendSaleNotification({
               sellerEmail: seller.email,
               sellerName: seller.name || 'Vendedor',
-              productName: item.name,
-              qty: item.qty,
-              price: item.priceUsed,
+              productName: line.name,
+              qty: line.qty,
+              price: line.priceUsed,
             });
           }
         }
