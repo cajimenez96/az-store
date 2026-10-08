@@ -217,6 +217,32 @@ describe('quoteItems', () => {
     expect(quote.itemsPrice).toBe(330);
   });
 
+  it('checks stock against the combined qty of lines hitting the same variant', async () => {
+    // Variant M has stock 5: each line fits alone (3 <= 5) but 3 + 3 oversells it.
+    await expect(
+      quoteItems(
+        [
+          { productId: 'prod-1', size: 'M', qty: 3 },
+          { productId: 'prod-1', size: 'M', qty: 3 },
+        ],
+        'CASH'
+      )
+    ).rejects.toThrow(/No hay suficiente stock/);
+  });
+
+  it('keeps each line qty when combined lines still fit the stock', async () => {
+    const quote = await quoteItems(
+      [
+        { productId: 'prod-1', size: 'M', qty: 2 },
+        { productId: 'prod-1', size: 'M', qty: 3 },
+      ],
+      'CASH'
+    );
+
+    expect(quote.lines.map((l) => l.qty)).toEqual([2, 3]);
+    expect(quote.itemsPrice).toBe(500);
+  });
+
   it('propagates a line error and quotes nothing', async () => {
     await expect(
       quoteItems(

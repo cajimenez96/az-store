@@ -91,8 +91,14 @@ export async function quoteItems(
   db: Db = prisma
 ): Promise<Quote> {
   const lines: QuoteLine[] = [];
+  // Lines may target the same variant; stock must hold for their combined qty.
+  const committedQty = new Map<string, number>();
   for (const input of inputs) {
-    lines.push(await resolveLine(input, method, db));
+    const variantKey = [input.productId, input.size ?? '', input.productColorId ?? ''].join('|');
+    const combinedQty = (committedQty.get(variantKey) ?? 0) + input.qty;
+    const line = await resolveLine({ ...input, qty: combinedQty }, method, db);
+    committedQty.set(variantKey, combinedQty);
+    lines.push({ ...line, qty: input.qty });
   }
   const itemsPrice = round2(
     lines.reduce((acc, line) => acc + Number(line.priceUsed) * line.qty, 0)
