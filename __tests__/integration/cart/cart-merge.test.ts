@@ -172,4 +172,113 @@ describe('3.6 · Cart merge on login — integration', () => {
     expect(items).toHaveLength(1);
     expect(items[0].qty).toBe(1);
   });
+
+  describe('re-resolution from the database', () => {
+    async function setupProduct(stock: number, size = 'M') {
+      const category = await createTestCategory();
+      const brand = await createTestBrand();
+      const sz = await createTestSize(category.id, size);
+      const product = await createTestProduct(category.id, brand.id);
+      await createTestVariant(product.id, sz.id, stock);
+      return product;
+    }
+
+    function tamperedItem(product: { id: string; name: string; slug: string }, qty: number): CartItem {
+      return {
+        productId: product.id,
+        name: 'Forged name',
+        slug: 'forged-slug',
+        qty,
+        image: '/forged.png',
+        priceUsed: '0.01',
+        paymentMethod: 'MERCADOPAGO',
+        size: 'M',
+      };
+    }
+
+    async function setItems(cartId: string, items: CartItem[]) {
+      await prisma.cart.update({ where: { id: cartId }, data: { items: items as unknown as never } });
+    }
+
+    it('re-prices a tampered session cart from the database when user has a cart', async () => {
+      const product = await setupProduct(10);
+      const user = await createTestUser();
+      await createTestCart(user.id);
+      const sessionCart = await createTestCart(undefined);
+      await setItems(sessionCart.id, [tamperedItem(product, 2)]);
+
+      await mergeCart(user.id, sessionCart.sessionCartId);
+
+      const merged = await prisma.cart.findFirst({ where: { userId: user.id } });
+      const items = merged?.items as CartItem[];
+      expect(items).toHaveLength(1);
+      expect(items[0]).toMatchObject({
+        name: product.name,
+        slug: product.slug,
+        paymentMethod: 'CASH',
+        qty: 2,
+      });
+      expect(Number(items[0].priceUsed)).toBe(100);
+      expect(Number(merged?.itemsPrice)).toBe(200);
+    });
+
+    it('re-prices a tampered session cart on the no-user-cart path', async () => {
+      const product = await setupProduct(10);
+      const user = await createTestUser();
+      const sessionCart = await createTestCart(undefined);
+      await setItems(sessionCart.id, [tamperedItem(product, 3)]);
+
+      await mergeCart(user.id, sessionCart.sessionCartId);
+
+      const merged = await prisma.cart.findFirst({ where: { userId: user.id } });
+      expect(merged?.id).toBe(sessionCart.id);
+      const items = merged?.items as CartItem[];
+      expect(items).toHaveLength(1);
+      expect(items[0]).toMatchObject({ name: product.name, paymentMethod: 'CASH', qty: 3 });
+      expect(Number(items[0].priceUsed)).toBe(100);
+      expect(Number(merged?.itemsPrice)).toBe(300);
+    });
+
+    it('clamps to variant stock on the no-user-cart path', async () => {
+      const product = await setupProduct(2);
+      const user = await createTestUser();
+      const sessionCart = await createTestCart(undefined);
+      await setItems(sessionCart.id, [tamperedItem(product, 50)]);
+
+      await mergeCart(user.id, sessionCart.sessionCartId);
+
+      const merged = await prisma.cart.findFirst({ where: { userId: user.id } });
+      expect((merged?.items as CartItem[])[0].qty).toBe(2);
+    });
+
+    it('drops items whose product is inactive', async () => {
+      const active = await setupProduct(10);
+      const inactive = await setupProduct(10);
+      await prisma.product.update({ where: { id: inactive.id }, data: { isActive: false } });
+      const user = await createTestUser();
+      await createTestCart(user.id);
+      const sessionCart = await createTestCart(undefined);
+      await setItems(sessionCart.id, [tamperedItem(active, 1), tamperedItem(inactive, 1)]);
+
+      await mergeCart(user.id, sessionCart.sessionCartId);
+
+      const merged = await prisma.cart.findFirst({ where: { userId: user.id } });
+      const items = merged?.items as CartItem[];
+      expect(items.map((i) => i.productId)).toEqual([active.id]);
+    });
+
+    it('drops items whose variant has no stock left', async () => {
+      const product = await setupProduct(0);
+      const user = await createTestUser();
+      await createTestCart(user.id);
+      const sessionCart = await createTestCart(undefined);
+      await setItems(sessionCart.id, [tamperedItem(product, 1)]);
+
+      await mergeCart(user.id, sessionCart.sessionCartId);
+
+      const merged = await prisma.cart.findFirst({ where: { userId: user.id } });
+      expect(merged?.items as CartItem[]).toHaveLength(0);
+      expect(Number(merged?.itemsPrice)).toBe(0);
+    });
+  });
 });

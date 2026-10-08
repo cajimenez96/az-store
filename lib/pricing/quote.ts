@@ -31,6 +31,17 @@ export type Quote = {
   itemsPrice: number;
 };
 
+// Thrown when the exact variant exists but cannot cover the requested qty.
+export class InsufficientStockError extends Error {
+  available: number;
+
+  constructor(productName: string, available: number) {
+    super(`No hay suficiente stock de ${productName}`);
+    this.name = 'InsufficientStockError';
+    this.available = available;
+  }
+}
+
 type Db = Pick<typeof prisma, 'product'>;
 
 export async function resolveLine(
@@ -56,7 +67,7 @@ export async function resolveLine(
   });
   if (!variant) throw new Error('Variante (talle/color) no encontrada');
   if (input.qty < 1 || variant.stock < input.qty) {
-    throw new Error(`No hay suficiente stock de ${product.name}`);
+    throw new InsufficientStockError(product.name, variant.stock);
   }
 
   const price = product.prices.find((p) => p.paymentMethod === method);

@@ -12,7 +12,7 @@ jest.mock('@/db/prisma', () => ({
 
 import { prisma } from '@/db/prisma';
 import { priceMethodFor } from '@/lib/pricing/price-method';
-import { resolveLine, quoteItems } from '@/lib/pricing/quote';
+import { resolveLine, quoteItems, InsufficientStockError } from '@/lib/pricing/quote';
 
 const findFirst = prisma.product.findFirst as jest.Mock;
 
@@ -253,5 +253,44 @@ describe('quoteItems', () => {
         'CASH'
       )
     ).rejects.toThrow(/No hay suficiente stock/);
+  });
+});
+
+describe('InsufficientStockError', () => {
+  beforeEach(() => {
+    findFirst.mockReset();
+    findFirst.mockResolvedValue(makeProduct());
+  });
+
+  it('carries the available stock of the exact variant', async () => {
+    const error = await resolveLine({ productId: 'prod-1', size: 'M', qty: 6 }, 'CASH').catch(
+      (e) => e
+    );
+    expect(error).toBeInstanceOf(InsufficientStockError);
+    expect(error.available).toBe(5);
+    expect(error.message).toMatch(/^No hay suficiente stock/);
+  });
+
+  it('reports zero available for an out-of-stock variant', async () => {
+    const error = await resolveLine({ productId: 'prod-1', size: 'L', qty: 1 }, 'CASH').catch(
+      (e) => e
+    );
+    expect(error).toBeInstanceOf(InsufficientStockError);
+    expect(error.available).toBe(0);
+  });
+
+  it('is also thrown for qty < 1', async () => {
+    const error = await resolveLine({ productId: 'prod-1', size: 'M', qty: 0 }, 'CASH').catch(
+      (e) => e
+    );
+    expect(error).toBeInstanceOf(InsufficientStockError);
+    expect(error.available).toBe(5);
+  });
+
+  it('is not used for other failures', async () => {
+    const error = await resolveLine({ productId: 'prod-1', size: 'XXL', qty: 1 }, 'CASH').catch(
+      (e) => e
+    );
+    expect(error).not.toBeInstanceOf(InsufficientStockError);
   });
 });

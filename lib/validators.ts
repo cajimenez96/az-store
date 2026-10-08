@@ -98,6 +98,13 @@ export const cartItemSchema = z.object({
   colorHex: z.string().optional(),
 });
 
+// The only fields the client may choose when adding to the cart; zod strips anything else.
+export const addToCartSchema = z.object({
+  productId: z.string().min(1, 'El producto es requerido'),
+  size: z.string().optional(),
+  productColorId: z.string().optional(),
+});
+
 export const insertCartSchema = z.object({
   items: z.array(cartItemSchema),
   itemsPrice: currency,
