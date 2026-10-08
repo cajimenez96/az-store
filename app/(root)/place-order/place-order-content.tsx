@@ -30,8 +30,22 @@ type ActiveBanner = {
   products: { id: string }[];
 } | null;
 
+// Server-quoted line (price list of the user's payment method), not the cart snapshot.
+type QuotedLine = {
+  productId: string;
+  name: string;
+  slug: string;
+  image: string;
+  size?: string;
+  qty: number;
+  priceUsed: string;
+};
+
 interface PlaceOrderContentProps {
   cart: Cart;
+  quotedLines: QuotedLine[];
+  quotedItemsPrice: number;
+  quotedTaxPrice: number;
   userAddress: ShippingAddress;
   userEmail: string;
   paymentMethod: string;
@@ -42,6 +56,9 @@ interface PlaceOrderContentProps {
 
 export default function PlaceOrderContent({
   cart,
+  quotedLines,
+  quotedItemsPrice,
+  quotedTaxPrice,
   userAddress,
   userEmail,
   paymentMethod,
@@ -56,16 +73,16 @@ export default function PlaceOrderContent({
   const bannerDiscount = useMemo(() => {
     if (!activeBanner?.discountPercent || !cart?.items) return 0;
     const bannerProductIds = new Set(activeBanner.products.map((p) => p.id));
-    const bannerItemsTotal = cart.items
+    const bannerItemsTotal = quotedLines
       .filter((item) => bannerProductIds.has(item.productId))
       .reduce((sum, item) => sum + Number(item.priceUsed) * item.qty, 0);
     return (bannerItemsTotal * activeBanner.discountPercent) / 100;
-  }, [activeBanner, cart]);
+  }, [activeBanner, cart, quotedLines]);
 
-  const itemsPrice = Number(cart.itemsPrice);
+  const itemsPrice = quotedItemsPrice;
   const discountAmount = (itemsPrice * appliedDiscount) / 100;
   const shippingPrice = Number(cart.shippingPrice);
-  const taxPrice = Number(cart.taxPrice);
+  const taxPrice = quotedTaxPrice;
   const finalTotal =
     itemsPrice - discountAmount - bannerDiscount + shippingPrice + taxPrice;
 
@@ -126,7 +143,7 @@ export default function PlaceOrderContent({
 
             {/* Shipping method */}
             <ShippingMethodSelector
-              itemsPrice={cart.itemsPrice}
+              itemsPrice={quotedItemsPrice}
               freeShippingThreshold={freeShippingThreshold}
             />
 
@@ -180,7 +197,7 @@ export default function PlaceOrderContent({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {cart.items.map((item) => (
+                    {quotedLines.map((item) => (
                       <TableRow
                         key={`${item.slug}-${item.size || ''}`}
                         className='border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa] transition-colors duration-150'
@@ -236,7 +253,7 @@ export default function PlaceOrderContent({
                 <div className='flex justify-between text-sm text-[#757575]'>
                   <span>Productos</span>
                   <span className='font-semibold text-nike-ink tabular-nums'>
-                    {formatCurrency(cart.itemsPrice)}
+                    {formatCurrency(quotedItemsPrice)}
                   </span>
                 </div>
                 <div className='flex justify-between text-sm text-[#757575]'>

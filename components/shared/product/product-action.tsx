@@ -70,9 +70,6 @@ export default function ProductAction({
   }).format(mpNum);
   const showDual = mpNum > 0 && mpNum !== cashNum;
 
-  // Imagen del color elegido (si hay) o fallback a la imagen del producto
-  const currentImage = selectedColor?.images?.[0] ?? product.images?.[0];
-
   return (
     <>
       <div className='flex flex-col gap-6 w-full'>
@@ -174,16 +171,8 @@ export default function ProductAction({
                 cart={cart}
                 item={{
                   productId: product.id,
-                  name: product.name,
-                  slug: product.slug,
-                  priceUsed: priceCash,
-                  paymentMethod: 'CASH',
-                  qty: 1,
-                  image: currentImage,
                   size: selectedSize,
                   productColorId: selectedColor?.id,
-                  colorName: selectedColor?.color?.name,
-                  colorHex: selectedColor?.color?.hex,
                 }}
               />
             ) : (
@@ -222,16 +211,8 @@ export default function ProductAction({
               cart={cart}
               item={{
                 productId: product.id,
-                name: product.name,
-                slug: product.slug,
-                priceUsed: priceCash,
-                paymentMethod: 'CASH',
-                qty: 1,
-                image: currentImage,
                 size: selectedSize,
                 productColorId: selectedColor?.id,
-                colorName: selectedColor?.color?.name,
-                colorHex: selectedColor?.color?.hex,
               }}
             />
           ) : (

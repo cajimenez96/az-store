@@ -2,13 +2,20 @@
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Plus, Minus, Loader } from 'lucide-react';
-import { Cart, CartItem } from '@/types';
+import { Cart } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { addItemToCart, removeItemFromCart } from '@/lib/actions/cart.actions';
 import { useTransition } from 'react';
 
-const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
+// The server resolves price, name, image and qty; the client only picks the variant.
+type AddToCartItem = {
+  productId: string;
+  size?: string;
+  productColorId?: string;
+};
+
+const AddToCart = ({ cart, item }: { cart?: Cart; item: AddToCartItem }) => {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -16,7 +23,11 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
 
   const handleAddToCart = async () => {
     startTransition(async () => {
-      const res = await addItemToCart(item);
+      const res = await addItemToCart({
+        productId: item.productId,
+        size: item.size,
+        productColorId: item.productColorId,
+      });
 
       if (!res.success) {
         toast({

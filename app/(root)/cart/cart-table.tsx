@@ -32,7 +32,11 @@ function QtyButton({
     startTransition(async () => {
       const res =
         action === 'add'
-          ? await addItemToCart(item)
+          ? await addItemToCart({
+              productId: item.productId,
+              size: item.size,
+              productColorId: item.productColorId,
+            })
           : await removeItemFromCart(
               item.productId,
               item.size,

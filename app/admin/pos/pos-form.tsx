@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { createPosOrder } from '@/lib/actions/order.actions';
 import { searchPosCustomers, createPosCustomer } from '@/lib/actions/user.actions';
-import { CartItem } from '@/types';
+import { priceMethodFor } from '@/lib/pricing/price-method';
+import { pickPrice } from '@/lib/pricing/price-lookup';
 import {
   Search, Plus, Minus, Trash2, CheckCircle, Store, Receipt, CreditCard,
   Landmark, DollarSign, Loader2, UserPlus, UserCheck, X, ChevronDown, Filter
@@ -30,10 +31,19 @@ interface PosProduct {
   name: string;
   slug: string;
   images: string[];
-  price: string;
+  prices: { paymentMethod: string; value: string }[];
   brand: { name: string } | null;
   categoryId: string;
   variants: PosVariant[];
+}
+
+// Only what the UI needs; price is derived at render from the selected POS method.
+interface PosCartItem {
+  productId: string;
+  name: string;
+  image: string;
+  size: string;
+  qty: number;
 }
 
 interface PosCategory {
@@ -66,7 +76,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
 
   // Cart state
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<PosCartItem[]>([]);
 
   // Customer search state
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
@@ -167,15 +177,38 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
   }, [products, searchQuery, selectedCategoryId]);
 
   // Totals calculations
+  // Unit price per product for the SELECTED POS method (null = no price configured).
+  // Display only: createPosOrder re-prices everything on the server.
+  const unitPrices = useMemo(() => {
+    const priceMethod = priceMethodFor('pos', paymentMethod);
+    const map = new Map<string, string | null>();
+    for (const p of products) {
+      try {
+        map.set(p.id, pickPrice(p.prices, priceMethod));
+      } catch {
+        map.set(p.id, null);
+      }
+    }
+    return map;
+  }, [products, paymentMethod]);
+
+  const formatUnitPrice = (productId: string) => {
+    const value = unitPrices.get(productId);
+    return value == null ? 'Sin precio' : formatCurrency(value);
+  };
+
   const totals = useMemo(() => {
-    const subtotal = cart.reduce((acc, item) => acc + Number(item.priceUsed) * item.qty, 0);
+    const subtotal = cart.reduce(
+      (acc, item) => acc + Number(unitPrices.get(item.productId) ?? 0) * item.qty,
+      0
+    );
     const total = subtotal;
     return {
       subtotal,
       tax: 0,
       total,
     };
-  }, [cart]);
+  }, [cart, unitPrices]);
 
   // Add item to local cart
   const handleAddToCart = (product: PosProduct, variant: PosVariant) => {
@@ -203,13 +236,16 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
         });
         return;
       }
-      const newItem: CartItem = {
+      if (unitPrices.get(product.id) == null) {
+        toast({
+          variant: 'destructive',
+          description: `${product.name} no tiene precio configurado para el método de pago elegido.`,
+        });
+        return;
+      }
+      const newItem: PosCartItem = {
         productId: product.id,
         name: product.name,
-        slug: product.slug,
-        // Fase 2: el POS arranca con CASH (se puede cambiar en checkout)
-        priceUsed: product.price,
-        paymentMethod: 'CASH' as const,
         qty: 1,
         image: product.images[0] || '/placeholder.png',
         size: sizeName,
@@ -267,9 +303,22 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
       return;
     }
 
+    if (cart.some((item) => unitPrices.get(item.productId) == null)) {
+      toast({
+        variant: 'destructive',
+        description: 'Hay productos sin precio configurado para el método de pago elegido.',
+      });
+      return;
+    }
+
     startTransition(async () => {
       const result = await createPosOrder({
-        items: cart,
+        // The server prices, validates stock and computes the commission.
+        items: cart.map((item) => ({
+          productId: item.productId,
+          size: item.size,
+          qty: item.qty,
+        })),
         paymentMethod,
         customerId: selectedCustomer?.id,
         customerName: customerName.trim(),
@@ -450,7 +499,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                         {product.name}
                       </h3>
                       <p className='text-sm font-semibold text-[#111111] tabular-nums'>
-                        {formatCurrency(product.price)}
+                        {formatUnitPrice(product.id)}
                       </p>
                       <p className='text-xs text-[#707072]'>
                         Stock: <span className={totalStock > 2 ? 'text-[#007d48] font-semibold' : 'text-[#d97706] font-semibold'}>{totalStock} u.</span>
@@ -534,7 +583,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   <div className='min-w-0 flex-1 space-y-0.5'>
                     <h4 className='text-sm font-semibold text-[#111111] truncate'>{item.name}</h4>
                     <p className='text-xs text-[#707072]'>
-                      Talle: <span className='font-semibold text-[#111111]'>{item.size}</span> · {formatCurrency(item.priceUsed)} c/u
+                      Talle: <span className='font-semibold text-[#111111]'>{item.size}</span> · {formatUnitPrice(item.productId)} c/u
                     </p>
                   </div>
                   <div className='flex items-center gap-2.5'>

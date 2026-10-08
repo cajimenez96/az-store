@@ -4,7 +4,7 @@ import { useShippingMethod } from '@/hooks/use-shipping-method';
 import { formatCurrency } from '@/lib/utils';
 
 interface ShippingMethodSelectorProps {
-  itemsPrice: string;
+  itemsPrice: number;
   freeShippingThreshold: number;
 }
 
@@ -13,7 +13,7 @@ export default function ShippingMethodSelector({
   freeShippingThreshold,
 }: ShippingMethodSelectorProps) {
   const { shippingMethod, setShippingMethod } = useShippingMethod();
-  const itemsPriceNum = parseFloat(itemsPrice);
+  const itemsPriceNum = itemsPrice;
 
   const getShippingInfo = () => {
     if (shippingMethod === 'retiro') {
