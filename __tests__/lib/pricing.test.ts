@@ -279,12 +279,12 @@ describe('InsufficientStockError', () => {
     expect(error.available).toBe(0);
   });
 
-  it('is also thrown for qty < 1', async () => {
-    const error = await resolveLine({ productId: 'prod-1', size: 'M', qty: 0 }, 'CASH').catch(
+  it.each([0, -2, 1.5])('is NOT thrown for an invalid qty (%s), so callers never clamp it up to the stock', async (qty) => {
+    const error = await resolveLine({ productId: 'prod-1', size: 'M', qty }, 'CASH').catch(
       (e) => e
     );
-    expect(error).toBeInstanceOf(InsufficientStockError);
-    expect(error.available).toBe(5);
+    expect(error).not.toBeInstanceOf(InsufficientStockError);
+    expect(error.message).toBe('Cantidad no válida');
   });
 
   it('is not used for other failures', async () => {

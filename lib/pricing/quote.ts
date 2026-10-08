@@ -66,7 +66,9 @@ export async function resolveLine(
     return true;
   });
   if (!variant) throw new Error('Variante (talle/color) no encontrada');
-  if (input.qty < 1 || variant.stock < input.qty) {
+  // An invalid qty is not a stock shortage: callers clamp on InsufficientStockError.
+  if (!Number.isInteger(input.qty) || input.qty < 1) throw new Error('Cantidad no válida');
+  if (variant.stock < input.qty) {
     throw new InsufficientStockError(product.name, variant.stock);
   }
 

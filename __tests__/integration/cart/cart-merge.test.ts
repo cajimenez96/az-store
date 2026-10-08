@@ -200,6 +200,19 @@ describe('3.6 · Cart merge on login — integration', () => {
       await prisma.cart.update({ where: { id: cartId }, data: { items: items as unknown as never } });
     }
 
+    it('drops a stored line with a non-positive qty instead of promoting it to the full stock', async () => {
+      const product = await setupProduct(10);
+      const user = await createTestUser();
+      await createTestCart(user.id);
+      const sessionCart = await createTestCart(undefined);
+      await setItems(sessionCart.id, [tamperedItem(product, 0)]);
+
+      await mergeCart(user.id, sessionCart.sessionCartId);
+
+      const merged = await prisma.cart.findFirst({ where: { userId: user.id } });
+      expect(merged?.items as CartItem[]).toHaveLength(0);
+    });
+
     it('re-prices a tampered session cart from the database when user has a cart', async () => {
       const product = await setupProduct(10);
       const user = await createTestUser();
