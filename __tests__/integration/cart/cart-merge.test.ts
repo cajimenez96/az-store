@@ -228,11 +228,12 @@ describe('3.6 · Cart merge on login — integration', () => {
       expect(items[0]).toMatchObject({
         name: product.name,
         slug: product.slug,
-        paymentMethod: 'CASH',
+        paymentMethod: 'MERCADOPAGO',
         qty: 2,
       });
-      expect(Number(items[0].priceUsed)).toBe(100);
-      expect(Number(merged?.itemsPrice)).toBe(200);
+      // Stored price is the LIST (MERCADOPAGO) price, not the CASH one (100).
+      expect(Number(items[0].priceUsed)).toBe(110);
+      expect(Number(merged?.itemsPrice)).toBe(220);
     });
 
     it('re-prices a tampered session cart on the no-user-cart path', async () => {
@@ -247,9 +248,9 @@ describe('3.6 · Cart merge on login — integration', () => {
       expect(merged?.id).toBe(sessionCart.id);
       const items = merged?.items as CartItem[];
       expect(items).toHaveLength(1);
-      expect(items[0]).toMatchObject({ name: product.name, paymentMethod: 'CASH', qty: 3 });
-      expect(Number(items[0].priceUsed)).toBe(100);
-      expect(Number(merged?.itemsPrice)).toBe(300);
+      expect(items[0]).toMatchObject({ name: product.name, paymentMethod: 'MERCADOPAGO', qty: 3 });
+      expect(Number(items[0].priceUsed)).toBe(110);
+      expect(Number(merged?.itemsPrice)).toBe(330);
     });
 
     it('clamps to variant stock on the no-user-cart path', async () => {

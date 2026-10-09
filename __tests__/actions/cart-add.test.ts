@@ -93,11 +93,13 @@ describe('addItemToCart — server-side resolution', () => {
         image: '/img/base.jpg',
         size: 'M',
         qty: 1,
-        priceUsed: '100.00',
-        paymentMethod: 'CASH',
+        priceUsed: '110.00',
+        paymentMethod: 'MERCADOPAGO',
       },
     ]);
-    expect(Number(storedCart?.itemsPrice)).toBe(100);
+    // The cart stores the LIST (MERCADOPAGO) price, never the CASH one.
+    expect(storedItems()[0].priceUsed).not.toBe('100.00');
+    expect(Number(storedCart?.itemsPrice)).toBe(110);
   });
 
   it('increments by exactly 1 when the item is already in the cart', async () => {
@@ -107,7 +109,7 @@ describe('addItemToCart — server-side resolution', () => {
     expect(result.success).toBe(true);
     expect(storedItems()).toHaveLength(1);
     expect(storedItems()[0].qty).toBe(2);
-    expect(Number(storedCart?.itemsPrice)).toBe(200);
+    expect(Number(storedCart?.itemsPrice)).toBe(220);
   });
 
   it('fails with a stock error at the variant stock limit and leaves the cart untouched', async () => {
@@ -142,7 +144,7 @@ describe('addItemToCart — server-side resolution', () => {
     };
     await addItemToCart({ productId: 'prod-1', size: 'M' });
 
-    expect(storedItems()[0]).toMatchObject({ name: 'Remera Oversize', priceUsed: '100.00', qty: 2 });
+    expect(storedItems()[0]).toMatchObject({ name: 'Remera Oversize', priceUsed: '110.00', qty: 2 });
   });
 
   it('returns an error for an unknown variant', async () => {

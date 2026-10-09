@@ -34,7 +34,7 @@ const calcPrice = async (items: CartItem[]) => {
 const cartItemKey = (item: { productId: string; size?: string; productColorId?: string }) =>
   [item.productId, item.size ?? '', item.productColorId ?? ''].join('|');
 
-// Re-resolves every item from the database (web cart always shows the CASH price).
+// Re-resolves every item from the database (web cart always shows the LIST/MERCADOPAGO price).
 // Same variant lines are combined; qty is clamped to the variant stock; items that
 // cannot be resolved any more (inactive product, variant gone, no price) are dropped.
 // NOT exported: this file is 'use server', every export is a public Server Action.
@@ -55,10 +55,10 @@ const reconcileItems = async (items: CartItem[]): Promise<CartItem[]> => {
       productColorId: item.productColorId,
     };
     try {
-      reconciled.push(await resolveLine({ ...input, qty: item.qty }, 'CASH'));
+      reconciled.push(await resolveLine({ ...input, qty: item.qty }, 'MERCADOPAGO'));
     } catch (error) {
       if (error instanceof InsufficientStockError && error.available > 0) {
-        reconciled.push(await resolveLine({ ...input, qty: error.available }, 'CASH'));
+        reconciled.push(await resolveLine({ ...input, qty: error.available }, 'MERCADOPAGO'));
       }
       // Any other failure (or no stock at all): drop the item.
     }
@@ -106,7 +106,7 @@ export async function addItemToCart(data: { productId: string; size?: string; pr
     const targetQty = (existItem?.qty ?? 0) + 1;
 
     // Name, slug, image, price and stock come from the database
-    const line = await resolveLine({ ...input, qty: targetQty }, 'CASH');
+    const line = await resolveLine({ ...input, qty: targetQty }, 'MERCADOPAGO');
 
     if (!cart) {
       // Create new cart object
