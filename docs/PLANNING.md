@@ -150,7 +150,7 @@
 
 ### AZ-001 · Precio y cantidad deben resolverse en el servidor
 
-- **Prioridad:** P0 · **Tipo:** Seguridad / Negocio · **Est.:** L · **Sprint:** 1
+- **Prioridad:** P0 · **Tipo:** Seguridad / Negocio · **Est.:** L · **Sprint:** 1 · **Estado:** ✅ Hecho (PR #4)
 - **Evidencia:** ✔ [lib/actions/cart.actions.ts:64](../lib/actions/cart.actions.ts#L64) solo hace `cartItemSchema.parse(data)`. El stock se compara únicamente con `maxStock < 1`, no contra `qty`. `createOrder` y `createMercadoPagoOrder` cobran el `priceUsed` guardado. `resolvePriceUsed` ([lib/actions/price.actions.ts:56](../lib/actions/price.actions.ts#L56)) existe pero nadie la llama. El front envía siempre `priceCash` y `paymentMethod: 'CASH'` ([product-action.tsx:179](../components/shared/product/product-action.tsx#L179)), por lo que el recargo de MercadoPago nunca se aplica.
 
 **Historia de usuario**
@@ -160,13 +160,13 @@ Como **dueño de la tienda** quiero que el servidor calcule siempre el precio, e
 Cualquier persona puede invocar la server action `addItemToCart` con `priceUsed: '0.01'` y `qty: 500`. El servidor guarda esos valores y, al crear la orden, los toma como verdad. Resultado: ventas a centavos y sobreventa.
 
 **Criterios de aceptación**
-- [ ] `addItemToCart` ignora `priceUsed`, `name`, `slug`, `image` y `paymentMethod` enviados por el cliente y los obtiene de la base de datos.
-- [ ] `qty` se valida contra el stock de la variante exacta (talle + color) en **todas** las rutas: carrito vacío, ítem nuevo e incremento.
-- [ ] `createOrder` vuelve a resolver el precio de cada ítem según el método de pago del usuario (con `resolvePriceUsed`), recalcula subtotal, impuestos y total, y rechaza la orden si el carrito difiere.
-- [ ] El recargo de MercadoPago se aplica cuando el método elegido es MercadoPago.
-- [ ] `createPosOrder` resuelve precios en el servidor y no acepta `priceUsed` del cliente.
-- [ ] `mergeCart` aplica las mismas validaciones al fusionar carritos.
-- [ ] El front deja de enviar precios y el cliente solo muestra el que informa el servidor.
+- [x] `addItemToCart` ignora `priceUsed`, `name`, `slug`, `image` y `paymentMethod` enviados por el cliente y los obtiene de la base de datos.
+- [x] `qty` se valida contra el stock de la variante exacta (talle + color) en **todas** las rutas: carrito vacío, ítem nuevo e incremento.
+- [x] `createOrder` vuelve a resolver el precio de cada ítem según el método de pago del usuario (con `quoteItems`, que reemplaza a `resolvePriceUsed`), recalcula subtotal, impuestos y total, y rechaza la orden si el carrito difiere. *Ver Resolución: se recalcula siempre desde la base y se rechaza por stock o producto inactivo.*
+- [x] El recargo de MercadoPago se aplica cuando el método elegido es MercadoPago.
+- [x] `createPosOrder` resuelve precios en el servidor y no acepta `priceUsed` del cliente.
+- [x] `mergeCart` aplica las mismas validaciones al fusionar carritos.
+- [x] El front deja de enviar precios y el cliente solo muestra el que informa el servidor.
 
 **Pruebas necesarias**
 - **Unit:** payload con `priceUsed: '0.01'` → se persiste el precio de la base. `qty` mayor al stock → error. Variante inexistente → error claro.
@@ -174,6 +174,16 @@ Cualquier persona puede invocar la server action `addItemToCart` con `priceUsed:
 - **Integración:** carrito con precio manipulado directamente en la base → `createOrder` recalcula y el total coincide con la lista de precios.
 - **Integración:** `createPosOrder` ignora el precio enviado.
 - **E2E:** compra completa con CASH y con MercadoPago; el total mostrado y el cobrado coinciden con el precio de catálogo.
+
+**Resolución** (PR #4, squash de 13 commits: 38 archivos, +2479 −503)
+- **Servidor autoritativo:** nuevo `lib/pricing/` (`quote.ts`, `price-method.ts`, `totals.ts`, `savings.ts`, `compare.ts`, `cart-display.ts`, `payment-options.ts`, `price-lookup.ts`). `quoteItems` resuelve nombre, imagen, precio y stock de la **variante exacta** (talle + color) y devuelve el `variantId` validado. Los módulos no son `'use server'`, así que no quedan expuestos como Server Actions.
+- **Qué manda el cliente:** `addItemToCart` solo lee `productId`, talle y color, y suma siempre 1 unidad (se ignora `qty`). `createPosOrder` solo lee `productId`, talle, color y `qty`.
+- **Mapeo de precio por método:** web transferencia → `CASH`; web MercadoPago → `MERCADOPAGO` (lista). POS efectivo y transferencia → `CASH`; POS MercadoPago y QR → `MERCADOPAGO`. Un método desconocido es un error.
+- **Órdenes:** `createOrder` recalcula todo desde la base, aplica cupón y banner sobre los totales del servidor y **rechaza la orden completa** (vuelve a `/cart`) si falta stock o el producto está inactivo; no ajusta cantidades en silencio. Como el servidor nunca recibe totales del cliente, el criterio "rechaza si el carrito difiere" se resolvió recalculando siempre. El descuento de stock por transferencia usa `updateMany` condicionado sobre la variante validada y no puede dejar stock negativo.
+- **Carrito:** `mergeCart` re-resuelve cada línea, acota la cantidad al stock y descarta lo no disponible. La resolución por talle + color también cubre el stock de productos sin talle (talle "Único") y el color en el merge, descritos en AZ-053; **sigue pendiente en AZ-053** la guarda de sesión de `mergeCart`.
+- **Cambio de producto durante el ticket:** el carrito y las tarjetas muestran el **precio de lista** como principal; el precio de transferencia/efectivo aparece siempre como beneficio y, al elegir método de pago, se muestra el ahorro (monto y porcentaje entero) calculado en el servidor desde los totales de ambos precios. Todos los importes usan el formato `$59.990,00`. UI alineada con `docs/DESIGN.md`.
+- **Verificación:** 149 tests unitarios y de integración de carrito, órdenes, POS y cupones; revisión nativa aprobada por tramos; flujo hasta `/place-order` verificado a mano en navegador (390 y 1280 px) con transferencia y MercadoPago. **No se ejecutaron** las pruebas E2E de Playwright (sin navegadores instalados) ni se creó una orden real desde la UI.
+- **Pendientes y deuda conocida:** el POS no tiene selector de color (los productos con variantes de color no se pueden vender ahí; ya fallaba antes); siguen fallando 7 tests de integración que ya fallaban sin estos cambios (`webhooks/mercadopago` y `auth/authorization`); `resolvePriceUsed` y `getPriceMapForProduct` siguen sin uso (candidatos de AZ-044); el costo de envío (`createOrder` ignora `shippingMethod`) y la protección de `createMercadoPagoOrder` quedan fuera de este ticket (AZ-004); la guarda de sesión de `mergeCart` queda en AZ-053; avisos menores de revisión (clave de ítem con `|`, redondeo de ahorros menores a 0,5 %, `catch` silencioso en `compare.ts`) quedan como mejoras.
 
 **Dependencias:** conviene hacerlo antes de AZ-004 y AZ-008.
 
