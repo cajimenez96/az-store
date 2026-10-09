@@ -5,6 +5,7 @@ import AddToCart from './add-to-cart';
 import { Cart, Product, ProductColor, ProductVariant } from '@/types';
 import { cn } from '@/lib/utils';
 import { extractDualPrice } from '@/lib/duo-pricing';
+import { formatArs } from './dual-price';
 
 type ProductWithVariants = Omit<Product, 'variants' | 'colors'> & {
   variants: ProductVariant[];
@@ -53,22 +54,15 @@ export default function ProductAction({
     ? allVariants.find((v) => v.size?.name === selectedSize)
     : null;
 
-  // Fase 2: precio dual. Mostramos efectivo/transferencia destacado
-  // y MP al lado.
+  // Dual price: the LIST price (MercadoPago) is the main price and the
+  // cash/transfer price is always shown as an emphasized secondary line.
   const { priceCash, priceMercadoPago } = extractDualPrice(product);
   const cashNum = Number(priceCash);
   const mpNum = Number(priceMercadoPago);
-  const formattedCash = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-  }).format(cashNum);
-  const formattedMp = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-  }).format(mpNum);
+  const formattedCash = formatArs(cashNum);
+  const formattedMp = formatArs(mpNum);
   const showDual = mpNum > 0 && mpNum !== cashNum;
+  const mainPrice = showDual ? formattedMp : formattedCash;
 
   return (
     <>
@@ -198,10 +192,10 @@ export default function ProductAction({
       <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white shadow-nike-hairline-inset border-t border-nike-hairline-soft px-4 py-3 flex items-center justify-between gap-4'>
         <div className='flex-1'>
           <p className='font-sans text-xs text-nike-mute font-medium'>Total</p>
-          <p className='font-sans text-lg font-medium text-nike-ink leading-tight'>{formattedCash}</p>
+          <p className='font-sans text-lg font-medium text-nike-ink leading-tight'>{mainPrice}</p>
           {showDual && (
-            <p className='font-sans text-[11px] text-nike-mute line-through'>
-              o {formattedMp} MP
+            <p className='font-sans text-[11px] font-medium text-nike-success leading-tight'>
+              Transferencia o efectivo: {formattedCash}
             </p>
           )}
         </div>
