@@ -91,7 +91,7 @@ export default function ProductAction({
                       setSelectedSize(null);
                     }}
                     className={cn(
-                      'w-8 h-8 rounded-full border-2 transition-all active:scale-95',
+                      'w-11 h-11 rounded-full border-2 transition-all active:scale-95',
                       isSelected
                         ? 'border-nike-ink ring-2 ring-nike-ink ring-offset-2 scale-105'
                         : 'border-nike-hairline hover:border-nike-ink/60'
@@ -123,11 +123,11 @@ export default function ProductAction({
                     disabled={!inStock}
                     onClick={() => inStock && v.size && setSelectedSize(v.size.name)}
                     className={cn(
-                      'min-w-[3.5rem] px-5 py-2.5 rounded-full font-sans text-sm font-medium border transition-all active:scale-95',
+                      'min-w-[3.5rem] min-h-11 px-5 py-2.5 rounded-nike-lg font-sans text-base font-medium border transition-all active:scale-95',
                       isSelected
-                        ? 'bg-nike-ink text-white border-nike-ink shadow-sm'
+                        ? 'bg-nike-ink text-white border-nike-ink'
                         : inStock
-                        ? 'bg-nike-soft-cloud hover:bg-[#eaeaea] text-nike-ink border-transparent hover:border-nike-ink'
+                        ? 'bg-nike-soft-cloud text-nike-ink border-transparent hover:border-nike-ink'
                         : 'bg-nike-soft-cloud/40 text-nike-mute border-transparent cursor-not-allowed line-through opacity-40'
                     )}
                   >
@@ -143,21 +143,21 @@ export default function ProductAction({
         <div className='flex items-center gap-2 pt-1'>
           {currentVariant ? (
             currentVariant.stock > 0 ? (
-              <span className='inline-flex items-center gap-1.5 font-sans text-xs font-medium text-nike-success bg-nike-success/10 px-3 py-1 rounded-full'>
-                <span className='w-1.5 h-1.5 rounded-full bg-nike-success animate-pulse'></span>
+              <span className='inline-flex items-center gap-1.5 font-sans text-sm font-medium text-nike-success'>
+                <span className='w-2 h-2 rounded-full bg-nike-success'></span>
                 En stock ({currentVariant.stock} disponibles)
               </span>
             ) : (
-              <span className='font-sans text-xs font-semibold text-nike-sale'>
+              <span className='font-sans text-sm font-medium text-nike-ink'>
                 Sin stock en este talle
               </span>
             )
           ) : hasStock ? (
-            <span className='font-sans text-xs text-nike-mute'>
+            <span className='font-sans text-sm text-nike-mute'>
               Seleccioná tu talle para ver disponibilidad
             </span>
           ) : (
-            <span className='font-sans text-xs font-semibold text-nike-sale bg-nike-sale/10 px-3 py-1 rounded-full'>
+            <span className='font-sans text-sm font-medium text-nike-ink'>
               Sin stock disponible
             </span>
           )}
@@ -178,7 +178,7 @@ export default function ProductAction({
             ) : (
               <button
                 disabled
-                className='w-full font-sans text-sm font-medium bg-nike-soft-cloud text-nike-mute py-4 rounded-full cursor-not-allowed'
+                className='w-full min-h-12 font-sans text-base font-medium bg-nike-soft-cloud text-nike-mute py-3 rounded-nike-lg cursor-not-allowed'
               >
                 Seleccioná un talle para comprar
               </button>
@@ -186,7 +186,7 @@ export default function ProductAction({
           ) : (
             <button
               disabled
-              className='w-full font-sans text-sm font-medium bg-nike-soft-cloud text-nike-mute py-4 rounded-full cursor-not-allowed'
+              className='w-full min-h-12 font-sans text-base font-medium bg-nike-soft-cloud text-nike-mute py-3 rounded-nike-lg cursor-not-allowed'
             >
               Agotado
             </button>
@@ -195,10 +195,10 @@ export default function ProductAction({
       </div>
 
       {/* Mobile sticky bottom bar */}
-      <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-nike-hairline-soft px-4 py-3.5 flex items-center justify-between gap-4 shadow-lg'>
+      <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white shadow-nike-hairline-inset border-t border-nike-hairline-soft px-4 py-3 flex items-center justify-between gap-4'>
         <div className='flex-1'>
           <p className='font-sans text-xs text-nike-mute font-medium'>Total</p>
-          <p className='font-sans text-lg font-bold text-nike-ink leading-tight'>{formattedCash}</p>
+          <p className='font-sans text-lg font-medium text-nike-ink leading-tight'>{formattedCash}</p>
           {showDual && (
             <p className='font-sans text-[11px] text-nike-mute line-through'>
               o {formattedMp} MP
@@ -218,7 +218,7 @@ export default function ProductAction({
           ) : (
             <button
               disabled
-              className='w-full font-sans text-xs font-semibold bg-nike-soft-cloud text-nike-mute px-4 py-3 rounded-full cursor-not-allowed'
+              className='w-full min-h-12 font-sans text-sm font-medium bg-nike-soft-cloud text-nike-mute px-4 py-3 rounded-nike-lg cursor-not-allowed'
             >
               {hasStock ? 'Elegí talle' : 'Agotado'}
             </button>

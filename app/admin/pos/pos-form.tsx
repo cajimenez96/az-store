@@ -14,7 +14,7 @@ import { priceMethodFor } from '@/lib/pricing/price-method';
 import { pickPrice } from '@/lib/pricing/price-lookup';
 import {
   Search, Plus, Minus, Trash2, CheckCircle, Store, Receipt, CreditCard,
-  Landmark, DollarSign, Loader2, UserPlus, UserCheck, X, ChevronDown, Filter
+  Landmark, DollarSign, Loader2, UserPlus, UserCheck, X, Filter
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
@@ -411,7 +411,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
       {/* Product Catalog Column */}
       <div className='lg:col-span-7 space-y-6'>
         {/* Search Header and Category Filter */}
-        <div className='bg-white border border-[#e5e5e5] rounded-2xl p-5 space-y-4 shadow-none'>
+        <div className='bg-white border border-[#e5e5e5] p-5 space-y-4'>
           <div className='flex gap-3 items-center'>
             <div className='relative flex-1'>
               <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 text-[#707072] h-4 w-4' />
@@ -421,7 +421,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 placeholder='Buscar producto por nombre, marca o slug...'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className='w-full pl-10 pr-4 h-11 text-xs font-medium text-[#111111] bg-[#f5f5f5] placeholder:text-[#707072] rounded-full border border-transparent focus:border-[#111111] focus:bg-white focus:outline-none transition-all'
+                className='w-full pl-10 pr-4 h-11 text-xs font-medium text-[#111111] bg-[#f5f5f5] placeholder:text-[#707072] rounded-nike-md border border-transparent focus:border-[#111111] focus:bg-white focus:outline-none transition-all'
                 autoFocus
               />
             </div>
@@ -445,7 +445,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               onClick={() => setSelectedCategoryId('all')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
                 selectedCategoryId === 'all'
-                  ? 'bg-[#111111] text-white shadow-sm'
+                  ? 'bg-[#111111] text-white'
                   : 'bg-[#f5f5f5] hover:bg-[#e5e5e5] text-[#111111]'
               }`}
             >
@@ -457,7 +457,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 onClick={() => setSelectedCategoryId(cat.id)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all flex-shrink-0 ${
                   selectedCategoryId === cat.id
-                    ? 'bg-[#111111] text-white shadow-sm'
+                    ? 'bg-[#111111] text-white'
                     : 'bg-[#f5f5f5] hover:bg-[#e5e5e5] text-[#111111]'
                 }`}
               >
@@ -470,7 +470,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
         {/* Product Catalog Grid */}
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[62vh] overflow-y-auto pr-2'>
           {filteredProducts.length === 0 ? (
-            <div className='col-span-2 py-12 text-center text-xs font-semibold text-[#707072] bg-[#f9f9f9] border border-dashed border-[#e5e5e5] rounded-2xl'>
+            <div className='col-span-2 py-12 text-center text-xs font-semibold text-[#707072] bg-nike-soft-cloud border border-dashed border-[#e5e5e5]'>
               No se encontraron productos con los filtros seleccionados.
             </div>
           ) : (
@@ -479,10 +479,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               return (
                 <div
                   key={product.id}
-                  className='bg-white border border-[#e5e5e5] rounded-2xl p-4 flex flex-col justify-between hover:border-[#111111] transition-all duration-200 group shadow-none'
+                  className='bg-white border border-[#e5e5e5] p-4 flex flex-col justify-between hover:border-[#111111] transition-all duration-200 group'
                 >
                   <div className='flex gap-4'>
-                    <div className='relative h-20 w-20 rounded-xl overflow-hidden bg-[#f5f5f5] border border-[#e5e5e5] flex-shrink-0'>
+                    <div className='relative h-20 w-20 overflow-hidden bg-[#f5f5f5] border border-[#e5e5e5] flex-shrink-0'>
                       <Image
                         src={product.images[0] || '/placeholder.png'}
                         alt={product.name}
@@ -502,7 +502,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                         {formatUnitPrice(product.id)}
                       </p>
                       <p className='text-xs text-[#707072]'>
-                        Stock: <span className={totalStock > 2 ? 'text-[#007d48] font-semibold' : 'text-[#d97706] font-semibold'}>{totalStock} u.</span>
+                        Stock: <span className={totalStock > 2 ? 'text-[#007d48] font-semibold' : 'text-[#111111] font-semibold'}>{totalStock} u.</span>
                       </p>
                     </div>
                   </div>
@@ -547,7 +547,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
 
       {/* POS Cart Summary Column */}
       <div className='lg:col-span-5 space-y-6'>
-        <div className='bg-white border border-[#e5e5e5] rounded-2xl p-6 space-y-6 shadow-none'>
+        <div className='bg-white border border-[#e5e5e5] p-6 space-y-6'>
           {/* Header */}
           <div className='flex items-center justify-between border-b border-[#e5e5e5] pb-4'>
             <div className='flex items-center gap-2'>
@@ -561,7 +561,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <Button
                 variant='ghost'
                 onClick={() => setCart([])}
-                className='text-xs font-semibold uppercase tracking-wider text-[#d30005] hover:text-[#d30005] hover:bg-red-50 px-3 h-8 rounded-full'
+                className='text-xs font-semibold uppercase tracking-wider text-[#111111] hover:text-[#111111] hover:bg-[#f5f5f5] px-3 h-8 rounded-full'
               >
                 Vaciar
               </Button>
@@ -578,7 +578,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               cart.map((item) => (
                 <div
                   key={`${item.productId}-${item.size}`}
-                  className='flex items-center justify-between gap-3 p-3.5 bg-[#f9f9f9] border border-[#e5e5e5] rounded-xl hover:bg-[#f5f5f5] transition-all duration-150'
+                  className='flex items-center justify-between gap-3 p-3.5 bg-nike-soft-cloud border border-[#e5e5e5] hover:bg-[#f5f5f5] transition-all duration-150'
                 >
                   <div className='min-w-0 flex-1 space-y-0.5'>
                     <h4 className='text-sm font-semibold text-[#111111] truncate'>{item.name}</h4>
@@ -610,7 +610,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     <button
                       type='button'
                       onClick={() => handleRemoveItem(item.productId, item.size)}
-                      className='text-[#707072] hover:text-[#d30005] p-1 transition-colors'
+                      className='text-[#707072] hover:text-[#111111] p-1 transition-colors'
                       title='Eliminar item'
                     >
                       <Trash2 className='h-4 w-4' />
@@ -651,14 +651,14 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                       setShowSearchResults(true);
                     }}
                     onFocus={() => setShowSearchResults(true)}
-                    className='pl-9 h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='pl-9 h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                     placeholder='Buscar por nombre, DNI o email...'
                   />
                 </div>
 
                 {/* Dropdown search results */}
                 {showSearchResults && customerSearchQuery.trim() !== '' && (
-                  <div className='absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-[#e5e5e5] rounded-2xl shadow-xl max-h-56 overflow-y-auto p-2 space-y-1'>
+                  <div className='absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-[#e5e5e5] max-h-56 overflow-y-auto p-2 space-y-1'>
                     {isSearchingCustomers ? (
                       <div className='py-4 text-center text-xs text-[#707072] flex items-center justify-center gap-2'>
                         <Loader2 className='h-3.5 w-3.5 animate-spin text-[#111111]' />
@@ -678,7 +678,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                             setShowSearchResults(false);
                             setCustomerSearchQuery('');
                           }}
-                          className='w-full text-left p-2.5 hover:bg-[#f5f5f5] rounded-xl flex flex-col gap-0.5 transition-colors'
+                          className='w-full text-left p-2.5 hover:bg-[#f5f5f5] flex flex-col gap-0.5 transition-colors'
                         >
                           <span className='text-xs font-semibold text-[#111111]'>{cust.name}</span>
                           <span className='text-[11px] text-[#707072]'>
@@ -691,7 +691,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 )}
               </div>
             ) : (
-              <div className='bg-[#f5f5f5] border border-[#e5e5e5] rounded-2xl p-3.5 flex items-center justify-between gap-3 animate-in fade-in duration-200'>
+              <div className='bg-[#f5f5f5] border border-[#e5e5e5] p-3.5 flex items-center justify-between gap-3 animate-in fade-in duration-200'>
                 <div className='flex items-center gap-2 min-w-0'>
                   <div className='bg-white h-8 w-8 rounded-full flex items-center justify-center border border-[#e5e5e5] text-[#111111] flex-shrink-0'>
                     <UserCheck className='h-4 w-4' />
@@ -706,7 +706,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 <button
                   type='button'
                   onClick={() => setSelectedCustomer(null)}
-                  className='text-[#707072] hover:text-[#d30005] p-1 transition-colors'
+                  className='text-[#707072] hover:text-[#111111] p-1 transition-colors'
                   title='Remover cliente'
                 >
                   <X className='h-4 w-4' />
@@ -725,7 +725,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   disabled={!!selectedCustomer}
-                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                  className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                 />
               </div>
               <div className='space-y-1'>
@@ -738,7 +738,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   disabled={!!selectedCustomer}
-                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                  className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                 />
               </div>
               <div className='space-y-1'>
@@ -750,7 +750,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   value={customerDni}
                   onChange={(e) => setCustomerDni(e.target.value)}
                   disabled={!!selectedCustomer && !!selectedCustomer.dni}
-                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                  className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                 />
               </div>
               <div className='space-y-1'>
@@ -762,7 +762,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   disabled={!!selectedCustomer && !!selectedCustomer.phone}
-                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                  className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                 />
               </div>
               <div className='col-span-2 space-y-1'>
@@ -774,7 +774,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
                   disabled={!!selectedCustomer && !!(selectedCustomer.address && selectedCustomer.address.streetAddress)}
-                  className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                  className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                 />
               </div>
             </div>
@@ -801,10 +801,10 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                 return (
                   <Label
                     key={method.id}
-                    className={`flex items-center gap-2.5 border rounded-2xl p-3 cursor-pointer transition-all duration-150 ${
+                    className={`flex items-center gap-2.5 border p-3 cursor-pointer transition-all duration-150 ${
                       active
                         ? 'border-[#111111] bg-[#f5f5f5] text-[#111111] font-semibold'
-                        : 'border-[#e5e5e5] text-[#707072] hover:bg-[#fafafa]'
+                        : 'border-[#e5e5e5] text-[#707072] hover:bg-[#f5f5f5]'
                     }`}
                   >
                     <RadioGroupItem value={method.id} className='sr-only' />
@@ -852,7 +852,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
       {/* SUCCESS MODAL */}
       {successOrder && (
         <div className='fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
-          <div className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-[#e5e5e5] space-y-6 text-center animate-in zoom-in-95 duration-200'>
+          <div className='bg-white p-8 max-w-md w-full border border-[#e5e5e5] space-y-6 text-center animate-in zoom-in-95 duration-200'>
             <div className='mx-auto h-16 w-16 bg-[#f5f5f5] rounded-full flex items-center justify-center text-[#007d48]'>
               <CheckCircle className='h-8 w-8' />
             </div>
@@ -860,7 +860,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
               <h3 className='text-2xl font-medium tracking-tight text-[#111111] font-marder-display'>¡Venta Registrada!</h3>
               <p className='text-xs text-[#707072]'>La transacción fue guardada y el stock fue actualizado.</p>
             </div>
-            <div className='p-4 bg-[#f9f9f9] rounded-2xl text-left space-y-2 border border-[#e5e5e5]'>
+            <div className='p-4 bg-nike-soft-cloud text-left space-y-2 border border-[#e5e5e5]'>
               <div className='flex justify-between text-xs'>
                 <span className='text-[#707072]'>ID de la Venta:</span>
                 <span className='font-mono font-semibold text-[#111111]'>{successOrder.orderId.substring(0, 8)}...</span>
@@ -905,7 +905,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
       {/* CREATE CUSTOMER MODAL */}
       {isCreateModalOpen && (
         <div className='fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200'>
-          <div className='bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-[#e5e5e5] space-y-5 animate-in zoom-in-95 duration-200'>
+          <div className='bg-white p-6 md:p-8 max-w-lg w-full border border-[#e5e5e5] space-y-5 animate-in zoom-in-95 duration-200'>
             <div className='flex justify-between items-center border-b border-[#e5e5e5] pb-3'>
               <h3 className='text-xl font-medium tracking-tight text-[#111111] font-marder-display'>Registrar Nuevo Cliente</h3>
               <button
@@ -928,7 +928,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='Ej: Carlos Jimenez'
                     value={newCustomerForm.name}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
-                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
@@ -941,7 +941,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='ejemplo@correo.com'
                     value={newCustomerForm.email}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
-                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
@@ -952,7 +952,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='Ej: 38444555'
                     value={newCustomerForm.dni}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, dni: e.target.value })}
-                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
@@ -963,7 +963,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='Ej: 3814445555'
                     value={newCustomerForm.phone}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
-                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                   />
                 </div>
                 <div className='col-span-2 space-y-1.5'>
@@ -974,7 +974,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='Ej: Comb. de las Piedras 1026'
                     value={newCustomerForm.streetAddress}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, streetAddress: e.target.value })}
-                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
@@ -985,7 +985,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='Tucumán'
                     value={newCustomerForm.city}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, city: e.target.value })}
-                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                   />
                 </div>
                 <div className='space-y-1.5'>
@@ -996,7 +996,7 @@ export default function PosForm({ products, categories, sellerName }: PosFormPro
                     placeholder='Tucumán'
                     value={newCustomerForm.province}
                     onChange={(e) => setNewCustomerForm({ ...newCustomerForm, province: e.target.value })}
-                    className='h-9 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-full focus:bg-white'
+                    className='h-10 text-xs bg-[#f5f5f5] border-transparent focus-visible:ring-2 focus-visible:ring-[#111111] rounded-nike-md focus:bg-white'
                   />
                 </div>
               </div>

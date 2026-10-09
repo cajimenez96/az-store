@@ -15,7 +15,6 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 
 function QtyButton({
@@ -52,7 +51,7 @@ function QtyButton({
     <button
       disabled={isPending}
       onClick={handleClick}
-      className='h-8 w-8 rounded-full bg-nike-soft-cloud flex items-center justify-center text-nike-ink hover:bg-nike-ink hover:text-white transition-all active:scale-90 disabled:opacity-40'
+      className='h-11 w-11 rounded-full bg-nike-soft-cloud flex items-center justify-center text-nike-ink hover:bg-nike-ink hover:text-white transition-all active:scale-90 disabled:opacity-40'
       aria-label={action === 'add' ? 'Agregar uno' : 'Quitar uno'}
     >
       {isPending ? (
@@ -83,7 +82,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
         <Link
           href='/'
           id='cart-empty-cta'
-          className='inline-flex items-center justify-center bg-nike-ink text-white font-sans text-sm sm:text-base font-medium px-8 py-3.5 rounded-full hover:bg-black/85 active:scale-95 transition-all shadow-sm'
+          className='inline-flex items-center justify-center bg-nike-ink text-white font-sans text-base font-medium px-8 min-h-12 rounded-nike-lg hover:bg-nike-charcoal active:scale-95 transition-all'
         >
           Ir a comprar
         </Link>
@@ -93,33 +92,33 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
 
   return (
     <div className='w-full'>
-      <h1 className='font-marder-display text-3xl sm:text-4xl lg:text-5xl font-bold text-nike-ink mb-8'>
+      <h1 className='font-marder-display text-3xl sm:text-4xl lg:text-5xl font-medium text-nike-ink mb-nike-section'>
         Carrito de Compras
       </h1>
 
       <div className='grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 lg:gap-12 items-start'>
         {/* Items table */}
-        <div className='bg-white border border-nike-hairline-soft overflow-hidden'>
+        <div className='bg-white border-t border-nike-hairline-soft overflow-hidden'>
           <Table>
             <TableHeader>
-              <TableRow className='border-b border-nike-hairline-soft hover:bg-transparent bg-nike-soft-cloud/50'>
-                <TableHead className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest h-12 pl-6'>Producto</TableHead>
+              <TableRow className='border-b border-nike-hairline-soft hover:bg-transparent bg-transparent'>
+                <TableHead className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest h-12 pl-0'>Producto</TableHead>
                 <TableHead className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest text-center h-12'>Cantidad</TableHead>
-                <TableHead className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest text-right h-12 pr-6'>Precio</TableHead>
+                <TableHead className='hidden sm:table-cell font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest text-right h-12 pr-0'>Precio</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {cart.items.map((item) => (
                 <TableRow
                   key={`${item.slug}-${item.size || ''}-${item.productColorId || ''}`}
-                  className='border-b border-nike-hairline-soft last:border-0 hover:bg-nike-soft-cloud/30 transition-colors'
+                  className='border-b border-nike-hairline-soft last:border-0'
                 >
-                  <TableCell className='py-5 pl-6'>
+                  <TableCell className='py-5 pl-0'>
                     <Link
                       href={`/product/${item.slug}`}
-                      className='flex items-center gap-4 group'
+                      className='flex items-center gap-3 sm:gap-4 group'
                     >
-                      <div className='w-16 h-16 sm:w-20 sm:h-20 bg-nike-soft-cloud flex items-center justify-center flex-shrink-0'>
+                      <div className='w-14 h-14 sm:w-20 sm:h-20 bg-nike-soft-cloud flex items-center justify-center flex-shrink-0'>
                         <Image
                           src={item.image}
                           alt={item.name}
@@ -129,7 +128,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                         />
                       </div>
                       <div className='flex flex-col gap-1'>
-                        <span className='font-sans text-sm sm:text-base font-medium text-nike-ink group-hover:opacity-75 transition-opacity line-clamp-1'>
+                        <span className='font-sans text-sm sm:text-base font-medium text-nike-ink group-hover:opacity-75 transition-opacity line-clamp-2'>
                           {item.name}
                         </span>
                         <div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 font-sans text-xs text-nike-mute'>
@@ -145,11 +144,18 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                             </span>
                           )}
                         </div>
+                        {/* Mobile: the price column is hidden, so the price sits under the name */}
+                        <div className='sm:hidden font-sans tabular-nums'>
+                          <span className='block text-sm font-medium text-nike-ink'>
+                            {formatCurrency(item.priceUsed)}
+                          </span>
+                          <span className='block text-xs text-nike-mute'>precio transferencia</span>
+                        </div>
                       </div>
                     </Link>
                   </TableCell>
                   <TableCell className='py-5 text-center'>
-                    <div className='flex items-center justify-center gap-2.5'>
+                    <div className='flex items-center justify-center gap-1'>
                       <QtyButton item={item} action='remove' />
                       <span className='w-6 text-center font-sans text-sm font-semibold text-nike-ink tabular-nums'>
                         {item.qty}
@@ -157,8 +163,11 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                       <QtyButton item={item} action='add' />
                     </div>
                   </TableCell>
-                  <TableCell className='py-5 text-right font-sans text-sm sm:text-base font-semibold text-nike-ink pr-6 tabular-nums'>
-                    {formatCurrency(item.priceUsed)}
+                  <TableCell className='hidden sm:table-cell py-5 text-right font-sans pr-0 tabular-nums'>
+                    <span className='block text-sm sm:text-base font-medium text-nike-ink'>
+                      {formatCurrency(item.priceUsed)}
+                    </span>
+                    <span className='block text-xs text-nike-mute'>precio transferencia</span>
                   </TableCell>
                 </TableRow>
               ))}
@@ -168,7 +177,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
 
         {/* Order summary rail */}
         <div className='lg:sticky lg:top-24 h-fit'>
-          <div className='bg-nike-soft-cloud/60 border border-nike-hairline-soft p-6 sm:p-8 flex flex-col gap-6'>
+          <div className='bg-nike-soft-cloud p-6 sm:p-8 flex flex-col gap-6'>
             <h2 className='font-sans text-xs font-semibold text-nike-mute uppercase tracking-widest'>
               Resumen de compra
             </h2>
@@ -180,9 +189,12 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                   {formatCurrency(cart.itemsPrice)}
                 </span>
               </div>
+              <p className='font-sans text-xs text-nike-mute'>
+                El total final se calcula según el método de pago que elijas.
+              </p>
               <div className='border-t border-nike-hairline-soft pt-3.5 flex justify-between items-baseline'>
-                <span className='font-sans text-base font-bold text-nike-ink'>Total estimado</span>
-                <span className='font-sans text-xl sm:text-2xl font-bold text-nike-ink tabular-nums'>
+                <span className='font-sans text-base font-medium text-nike-ink'>Total estimado</span>
+                <span className='font-sans text-xl sm:text-2xl font-medium text-nike-ink tabular-nums'>
                   {formatCurrency(cart.itemsPrice)}
                 </span>
               </div>
@@ -190,7 +202,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
 
             <button
               id='cart-checkout-cta'
-              className='w-full inline-flex items-center justify-center gap-2 bg-nike-ink hover:bg-black text-white py-4 px-8 rounded-full font-sans text-sm sm:text-base font-medium shadow-sm transition-all active:scale-95 disabled:opacity-50'
+              className='w-full inline-flex items-center justify-center gap-2 bg-nike-ink hover:bg-nike-charcoal text-white min-h-12 py-3 px-8 rounded-nike-lg font-sans text-base font-medium transition-all active:scale-95 disabled:opacity-50'
               disabled={isPending}
               onClick={() => startTransition(() => router.push('/shipping-address'))}
             >
@@ -204,7 +216,7 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
               )}
             </button>
 
-            <Link href='/' className='text-center font-sans text-xs sm:text-sm font-medium text-nike-mute hover:text-nike-ink transition-colors'>
+            <Link href='/' className='text-center font-sans text-sm font-medium text-nike-mute hover:text-nike-ink transition-colors inline-flex items-center justify-center min-h-11'>
               ← Seguir comprando
             </Link>
           </div>
