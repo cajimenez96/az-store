@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { formatNumberWithDecimal } from './utils';
-import { PAYMENT_METHODS } from './constants';
+import { PAYMENT_METHODS, SIZE_NAME_MAX_LENGTH } from './constants';
 
 const currency = z
   .string()
@@ -228,7 +228,10 @@ export const insertSizeSchema = z.object({
     .string()
     .trim()
     .min(1, 'El nombre debe tener al menos 1 caracter')
-    .max(50, 'El nombre del talle no puede superar los 50 caracteres'),
+    .max(
+      SIZE_NAME_MAX_LENGTH,
+      `El nombre del talle no puede superar los ${SIZE_NAME_MAX_LENGTH} caracteres`
+    ),
   categoryId: z.string().uuid('La categoría es inválida'),
 });
 

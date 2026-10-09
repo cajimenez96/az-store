@@ -28,7 +28,8 @@ jest.mock('@/db/prisma', () => ({
 
 import { auth } from '@/auth';
 import { prisma } from '@/db/prisma';
-import { DEFAULT_CATEGORY_ID } from '@/lib/constants';
+import { DEFAULT_CATEGORY_ID, SIZE_NAME_MAX_LENGTH } from '@/lib/constants';
+import { revalidatePath } from 'next/cache';
 import {
   createSize,
   deleteSize,
@@ -146,6 +147,89 @@ describe('AZ-003 · size actions', () => {
       expect(db.size.create).not.toHaveBeenCalled();
     });
 
+    it('exposes the size name limit as a named constant', () => {
+      expect(SIZE_NAME_MAX_LENGTH).toBe(50);
+    });
+
+    it('accepts a name of exactly SIZE_NAME_MAX_LENGTH characters', async () => {
+      const name = 'x'.repeat(SIZE_NAME_MAX_LENGTH);
+      const res = await createSize({ name, categoryId: CATEGORY_ID });
+      expect(res.success).toBe(true);
+      expect(db.size.create).toHaveBeenCalledWith({ data: { name, categoryId: CATEGORY_ID } });
+    });
+
+    it('rejects a name of SIZE_NAME_MAX_LENGTH + 1 characters without touching the DB', async () => {
+      const res = await createSize({
+        name: 'x'.repeat(SIZE_NAME_MAX_LENGTH + 1),
+        categoryId: CATEGORY_ID,
+      });
+      expect(res.success).toBe(false);
+      expect(res.message).toContain(String(SIZE_NAME_MAX_LENGTH));
+      expect(db.category.findUnique).not.toHaveBeenCalled();
+      expect(db.size.create).not.toHaveBeenCalled();
+    });
+
+    it('trims the name before checking the length', async () => {
+      const name = 'x'.repeat(SIZE_NAME_MAX_LENGTH);
+      const res = await createSize({ name: `  ${name}  `, categoryId: CATEGORY_ID });
+      expect(res.success).toBe(true);
+      expect(db.size.create).toHaveBeenCalledWith({ data: { name, categoryId: CATEGORY_ID } });
+    });
+
+    it('maps a P2003 race on create (category deleted meanwhile) to a readable message', async () => {
+      db.size.create.mockRejectedValue(
+        Object.assign(new Error('Foreign key constraint failed on the field: `categoryId`'), {
+          name: 'PrismaClientKnownRequestError',
+          code: 'P2003',
+        })
+      );
+      const res = await createSize({ name: 'M', categoryId: CATEGORY_ID });
+      expect(res).toEqual({ success: false, message: 'La categoría no existe' });
+    });
+
+    it('still reports success when revalidatePath throws after a successful create', async () => {
+      (revalidatePath as jest.Mock).mockImplementation(() => {
+        throw new Error('revalidate boom');
+      });
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      const res = await createSize({ name: 'M', categoryId: CATEGORY_ID });
+      expect(db.size.create).toHaveBeenCalledTimes(1);
+      expect(res.success).toBe(true);
+      expect(res.data).toMatchObject({ name: 'M' });
+      expect(errorSpy).toHaveBeenCalledWith('[sizes] revalidate failed', expect.any(Error));
+      errorSpy.mockRestore();
+    });
+
+    it('still reports success when revalidatePath throws after a successful delete', async () => {
+      (revalidatePath as jest.Mock).mockImplementation(() => {
+        throw new Error('revalidate boom');
+      });
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      const res = await deleteSize(SIZE_ID);
+      expect(db.size.delete).toHaveBeenCalledTimes(1);
+      expect(res.success).toBe(true);
+      expect(errorSpy).toHaveBeenCalledWith('[sizes] revalidate failed', expect.any(Error));
+      errorSpy.mockRestore();
+    });
+
+    it.each([
+      ['singular', 1, 'lo usa 1 variante de producto'],
+      ['plural', 3, 'lo usan 3 variantes de producto'],
+    ])('uses the %s message when the size is in use', async (_l, count, text) => {
+      db.productVariant.count.mockResolvedValue(count);
+      const res = await deleteSize(SIZE_ID);
+      expect(res.message).toContain(text);
+    });
+
+    it('uses the count-less message on a P2003 race', async () => {
+      db.size.delete.mockRejectedValue(
+        Object.assign(new Error('fk'), { name: 'PrismaClientKnownRequestError', code: 'P2003' })
+      );
+      const res = await deleteSize(SIZE_ID);
+      expect(res.message).toContain('lo usan variantes de producto');
+      expect(res.message).not.toContain('"');
+    });
+
     it('deletes an unused size', async () => {
       const res = await deleteSize(SIZE_ID);
       expect(res.success).toBe(true);
@@ -219,6 +303,76 @@ describe('AZ-003 · size actions', () => {
       const res = await getSizesByCategory('nope');
       expect(res.success).toBe(false);
       expect(db.size.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error logging', () => {
+    let errorSpy: jest.SpyInstance;
+    beforeEach(() => {
+      errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    });
+    afterEach(() => errorSpy.mockRestore());
+
+    it.each([
+      ['no session', undefined],
+      ['role user', 'user'],
+    ])('does not log denied access (%s)', async (_l, role) => {
+      asRole(role);
+      await createSize({ name: 'M', categoryId: CATEGORY_ID });
+      await deleteSize(SIZE_ID);
+      await getSizesByCategory(CATEGORY_ID);
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not log validation errors', async () => {
+      asRole('admin');
+      await createSize({ name: '', categoryId: 'nope' });
+      await deleteSize('nope');
+      await getSizesByCategory('nope');
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not log the mapped Prisma races', async () => {
+      asRole('admin');
+      const prismaError = (code: string) =>
+        Object.assign(new Error(code), { name: 'PrismaClientKnownRequestError', code });
+      db.size.create.mockRejectedValue(prismaError('P2003'));
+      db.size.delete.mockRejectedValueOnce(prismaError('P2003'));
+      await createSize({ name: 'M', categoryId: CATEGORY_ID });
+      await deleteSize(SIZE_ID);
+      db.size.delete.mockRejectedValueOnce(prismaError('P2025'));
+      await deleteSize(SIZE_ID);
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('logs an unexpected getSizesByCategory failure once and still returns the shape', async () => {
+      asRole('admin');
+      const boom = new Error('db down');
+      db.size.findMany.mockRejectedValue(boom);
+      const res = await getSizesByCategory(CATEGORY_ID);
+      expect(res).toEqual({ success: false, message: 'db down' });
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy).toHaveBeenCalledWith('[sizes] getSizesByCategory failed', boom);
+    });
+
+    it('logs an unexpected createSize failure once and still returns the shape', async () => {
+      asRole('admin');
+      const boom = new Error('db down');
+      db.size.create.mockRejectedValue(boom);
+      const res = await createSize({ name: 'M', categoryId: CATEGORY_ID });
+      expect(res).toEqual({ success: false, message: 'db down' });
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy).toHaveBeenCalledWith('[sizes] createSize failed', boom);
+    });
+
+    it('logs an unexpected deleteSize failure once and still returns the shape', async () => {
+      asRole('admin');
+      const boom = new Error('db down');
+      db.size.delete.mockRejectedValue(boom);
+      const res = await deleteSize(SIZE_ID);
+      expect(res).toEqual({ success: false, message: 'db down' });
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy).toHaveBeenCalledWith('[sizes] deleteSize failed', boom);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { prisma } from '@/db/prisma';
 import { auth } from '@/auth';
-import { createSize, deleteSize } from '@/lib/actions/size.actions';
+import { createSize, deleteSize, getSizesByCategory } from '@/lib/actions/size.actions';
 import {
   createTestCategory,
   createTestBrand,
@@ -98,5 +98,36 @@ describe('AZ-003 · size actions against the real DB', () => {
 
     expect(res.success).toBe(true);
     expect(await prisma.size.findUnique({ where: { id: size.id } })).toBeNull();
+  });
+
+  it.each([
+    ['anonymous', undefined],
+    ['user', 'user'],
+  ])('%s cannot list sizes by category', async (_l, role) => {
+    asRole(role);
+    const category = await createTestCategory();
+    await createTestSize(category.id, 'SECRET');
+
+    const res = await getSizesByCategory(category.id);
+
+    expect(res.success).toBe(false);
+    expect(res).not.toHaveProperty('data');
+  });
+
+  it.each([
+    ['seller', 'seller'],
+    ['admin', 'admin'],
+  ])('%s lists the real sizes of the category', async (_l, role) => {
+    asRole(role);
+    const category = await createTestCategory();
+    const other = await createTestCategory();
+    await createTestSize(category.id, 'S');
+    await createTestSize(category.id, 'M');
+    await createTestSize(other.id, 'OTHER');
+
+    const res = await getSizesByCategory(category.id);
+
+    expect(res.success).toBe(true);
+    expect(res.data!.map((s) => s.name)).toEqual(['M', 'S']);
   });
 });

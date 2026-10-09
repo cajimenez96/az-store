@@ -11,13 +11,39 @@ function prismaCode(error: unknown): string | undefined {
   return e?.name === 'PrismaClientKnownRequestError' ? e.code : undefined;
 }
 
+function describeUsage(count?: number): string {
+  if (count === undefined) return 'lo usan variantes de producto';
+  if (count === 1) return 'lo usa 1 variante de producto';
+  return `lo usan ${count} variantes de producto`;
+}
+
 function sizeInUseMessage(name: string | undefined, count?: number) {
   const label = name ? ` "${name}"` : '';
-  const usedBy =
-    count === undefined
-      ? 'lo usan variantes de producto'
-      : `lo ${count === 1 ? 'usa' : 'usan'} ${count} ${count === 1 ? 'variante' : 'variantes'} de producto`;
-  return `No se puede eliminar el talle${label}: ${usedBy}. Quitá esas variantes primero.`;
+  return `No se puede eliminar el talle${label}: ${describeUsage(count)}. Quitá esas variantes primero.`;
+}
+
+// Expected failures (access denied, validation, mapped Prisma races) are not logged
+function isExpectedFailure(error: unknown): boolean {
+  const name = (error as { name?: string })?.name;
+  if (name === 'UnauthorizedError' || name === 'ZodError') return true;
+  const code = prismaCode(error);
+  return code === 'P2003' || code === 'P2025';
+}
+
+function failureMessage(action: string, error: unknown): string {
+  if (!isExpectedFailure(error)) {
+    console.error(`[sizes] ${action} failed`, error);
+  }
+  return formatError(error);
+}
+
+// The write already succeeded: a stale cache must not turn it into a reported failure
+function revalidateSizes() {
+  try {
+    revalidatePath('/admin/categories');
+  } catch (error) {
+    console.error('[sizes] revalidate failed', error);
+  }
 }
 
 export async function getSizesByCategory(categoryId: string) {
@@ -30,7 +56,7 @@ export async function getSizesByCategory(categoryId: string) {
     });
     return { success: true, data: sizes };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: failureMessage('getSizesByCategory', error) };
   }
 }
 
@@ -46,10 +72,14 @@ export async function createSize(data: { name: string; categoryId: string }) {
     }
 
     const size = await prisma.size.create({ data: { name, categoryId } });
-    revalidatePath('/admin/categories'); // Because sizes will likely be managed on the categories page or similar
+    revalidateSizes(); // Because sizes will likely be managed on the categories page or similar
     return { success: true, message: 'Talle creado exitosamente', data: size };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    // Race: the category was deleted between the existence check and the create
+    if (prismaCode(error) === 'P2003') {
+      return { success: false, message: 'La categoría no existe' };
+    }
+    return { success: false, message: failureMessage('createSize', error) };
   }
 }
 
@@ -69,7 +99,7 @@ export async function deleteSize(id: string) {
     }
 
     await prisma.size.delete({ where: { id: sizeId } });
-    revalidatePath('/admin/categories');
+    revalidateSizes();
     return { success: true, message: 'Talle eliminado exitosamente' };
   } catch (error) {
     // Races between the checks above and the delete itself
@@ -80,6 +110,6 @@ export async function deleteSize(id: string) {
     if (code === 'P2025') {
       return { success: false, message: 'El talle no existe' };
     }
-    return { success: false, message: formatError(error) };
+    return { success: false, message: failureMessage('deleteSize', error) };
   }
 }
