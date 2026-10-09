@@ -268,7 +268,7 @@ const OrderDetailsTable = ({
                   <div className='mt-4 border-t border-[#e5e5e5] pt-4 space-y-4'>
                     {!receiptUrl ? (
                       <>
-                        <div className='p-4 rounded-xl bg-[#f5f5f5] border border-[#e5e5e5] space-y-2 text-xs text-[#484848]'>
+                        <div className='p-4 rounded-nike-md bg-nike-soft-cloud space-y-2 text-xs text-nike-charcoal'>
                           <h3 className='font-bold uppercase tracking-wider text-nike-ink text-xs'>
                             Datos para la Transferencia
                           </h3>
@@ -291,7 +291,7 @@ const OrderDetailsTable = ({
                           </div>
                         </div>
 
-                        <div className='p-6 border border-[#e5e5e5] rounded-xl bg-[#fafafa]'>
+                        <div className='p-6 border border-nike-hairline-soft rounded-nike-md bg-nike-canvas'>
                           <FileUploadField
                             files={receiptUrl ? [receiptUrl] : []}
                             onChange={async (files) => {
@@ -309,25 +309,26 @@ const OrderDetailsTable = ({
                               }
                             }}
                             endpoint='receiptUploader'
-                            accept='image/*,.pdf'
+                            uploadInput={{ orderId: id }}
+                            accept='image/jpeg,image/png,image/webp'
                             multiple={false}
                             maxFiles={1}
                             placeholder='Arrastrá tu comprobante o hacé clic para seleccionar'
-                            description='PNG, JPG, WEBP o PDF — máximo 8MB'
+                            description='PNG, JPG o WEBP — máximo 8MB'
                             fileType='document'
                           />
                         </div>
                       </>
                     ) : (
-                      <div className='bg-[#f5f5f5] text-nike-ink p-4 rounded-xl border border-[#e5e5e5]'>
+                      <div className='bg-nike-soft-cloud text-nike-ink p-4 rounded-nike-md'>
                         <p className='text-sm font-semibold text-nike-ink'>¡Comprobante enviado!</p>
-                        <p className='text-xs mt-1 text-[#757575]'>
+                        <p className='text-xs mt-1 text-nike-mute'>
                           Tu comprobante ha sido subido.{' '}
                           <a
                             href={receiptUrl}
                             target='_blank'
                             rel='noopener noreferrer'
-                            className='inline-block underline text-nike-ink font-semibold'
+                            className='inline-flex items-center min-h-[44px] underline text-nike-ink font-semibold'
                           >
                             Ver comprobante enviado
                           </a>

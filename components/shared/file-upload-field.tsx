@@ -20,6 +20,11 @@ interface FileUploadFieldProps {
   placeholder?: string;
   description?: string;
   fileType?: 'image' | 'document';
+  /**
+   * Input forwarded to the upload endpoint. `receiptUploader` requires
+   * `{ orderId }` (validated server-side); `imageUploader` takes no input.
+   */
+  uploadInput?: { orderId: string };
 }
 
 export function FileUploadField({
@@ -33,6 +38,7 @@ export function FileUploadField({
   placeholder = 'Arrastrá archivos o hacé clic para seleccionar',
   description,
   fileType = 'image',
+  uploadInput,
 }: FileUploadFieldProps) {
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,9 +64,17 @@ export function FileUploadField({
 
       for (const file of filesToUpload) {
         try {
-          const result = await startUpload([file]);
+          // `endpoint` is a union, so the generated `startUpload` input type
+          // collapses to `undefined` (imageUploader) & `{ orderId }`
+          // (receiptUploader). The server validates the input per endpoint,
+          // hence the cast.
+          const result = await startUpload([file], uploadInput as never);
           if (result && result[0]) {
-            uploadedUrls.push(result[0].url);
+            // Keep the `utfs.io` form (`url`) first: next.config only allows that host
+            // for next/image, so preferring `ufsUrl` (`<appid>.ufs.sh`) would break the
+            // rendering of admin images. `url` is deprecated and removed in uploadthing
+            // v9; then switch to `ufsUrl` and add `*.ufs.sh` to `remotePatterns`.
+            uploadedUrls.push(result[0].url ?? result[0].ufsUrl);
           }
         } catch (error) {
           toast({
@@ -83,7 +97,7 @@ export function FileUploadField({
         });
       }
     },
-    [startUpload, files, files.length, maxFiles, multiple, onChange, toast]
+    [startUpload, uploadInput, files, files.length, maxFiles, multiple, onChange, toast]
   );
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -116,7 +130,7 @@ export function FileUploadField({
           {files.map((src, idx) => (
             <div
               key={`${src}-${idx}`}
-              className='relative w-24 h-24 group rounded-az-sm overflow-hidden border border-az-hairline-soft'
+              className='relative w-24 h-24 group rounded-nike-sm overflow-hidden border border-nike-hairline-soft bg-nike-soft-cloud'
             >
               {fileType === 'image' ? (
                 <Image
@@ -127,17 +141,18 @@ export function FileUploadField({
                   sizes='96px'
                 />
               ) : (
-                <div className='w-full h-full bg-az-surface-soft flex items-center justify-center text-center p-2'>
-                  <div className='az-caption text-az-steel truncate'>{`Archivo ${idx + 1}`}</div>
+                <div className='w-full h-full bg-nike-soft-cloud flex items-center justify-center text-center p-2'>
+                  <div className='text-xs font-medium text-nike-mute truncate'>{`Archivo ${idx + 1}`}</div>
                 </div>
               )}
               {!disabled && (
                 <button
                   type='button'
                   onClick={() => handleRemove(idx)}
-                  className='absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs'
+                  aria-label={`Quitar archivo ${idx + 1}`}
+                  className='absolute top-1 right-1 bg-nike-canvas text-nike-ink border border-nike-hairline w-8 h-8 rounded-nike-full flex items-center justify-center hover:bg-nike-soft-cloud focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nike-ink transition-colors'
                 >
-                  <X size={10} />
+                  <X size={14} />
                 </button>
               )}
             </div>
@@ -151,16 +166,22 @@ export function FileUploadField({
           role='button'
           tabIndex={0}
           onClick={() => inputRef.current?.click()}
-          onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
           onDragOver={handleDragOver}
           onDragEnter={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={[
-            'relative w-full border-2 border-dashed rounded-az-lg p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors select-none',
+            'relative w-full min-h-[44px] border border-dashed rounded-nike-md p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors select-none',
             isDragging
-              ? 'border-az-primary bg-az-primary/5'
-              : 'border-az-hairline hover:border-az-primary/50 hover:bg-az-surface-soft',
+              ? 'border-nike-ink bg-nike-soft-cloud'
+              : 'border-nike-hairline bg-nike-canvas hover:bg-nike-soft-cloud',
+            'focus-visible:outline-none focus-visible:border-nike-ink focus-visible:ring-4 focus-visible:ring-nike-soft-cloud',
           ].join(' ')}
         >
           <input
@@ -174,14 +195,14 @@ export function FileUploadField({
 
           {isUploading ? (
             <>
-              <Loader2 size={20} className='animate-spin text-az-stone' />
-              <p className='az-caption text-az-stone'>Subiendo...</p>
+              <Loader2 size={20} className='animate-spin text-nike-mute' />
+              <p className='text-sm font-medium text-nike-mute'>Subiendo...</p>
             </>
           ) : (
             <>
-              <Plus size={20} className='text-az-stone' />
-              <p className='az-caption text-az-ink text-center'>{placeholder}</p>
-              {description && <p className='az-caption text-az-stone'>{description}</p>}
+              <Plus size={20} className='text-nike-mute' />
+              <p className='text-sm font-medium text-nike-ink text-center'>{placeholder}</p>
+              {description && <p className='text-xs font-medium text-nike-mute text-center'>{description}</p>}
             </>
           )}
         </div>
