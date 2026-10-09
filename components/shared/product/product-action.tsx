@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import AddToCart from './add-to-cart';
 import { Cart, Product, ProductColor, ProductVariant } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { extractDualPrice } from '@/lib/duo-pricing';
-import { formatArs } from './dual-price';
 
 type ProductWithVariants = Omit<Product, 'variants' | 'colors'> & {
   variants: ProductVariant[];
@@ -59,8 +58,8 @@ export default function ProductAction({
   const { priceCash, priceMercadoPago } = extractDualPrice(product);
   const cashNum = Number(priceCash);
   const mpNum = Number(priceMercadoPago);
-  const formattedCash = formatArs(cashNum);
-  const formattedMp = formatArs(mpNum);
+  const formattedCash = formatCurrency(cashNum);
+  const formattedMp = formatCurrency(mpNum);
   const showDual = mpNum > 0 && mpNum !== cashNum;
   const mainPrice = showDual ? formattedMp : formattedCash;
 
@@ -190,16 +189,16 @@ export default function ProductAction({
 
       {/* Mobile sticky bottom bar */}
       <div className='md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white shadow-nike-hairline-inset border-t border-nike-hairline-soft px-4 py-3 flex items-center justify-between gap-4'>
-        <div className='flex-1'>
-          <p className='font-sans text-xs text-nike-mute font-medium'>Total</p>
+        <div className='flex-1 min-w-0'>
+          <p className='font-sans text-xs text-nike-mute font-medium'>Precio</p>
           <p className='font-sans text-lg font-medium text-nike-ink leading-tight'>{mainPrice}</p>
           {showDual && (
-            <p className='font-sans text-[11px] font-medium text-nike-success leading-tight'>
-              Transferencia o efectivo: {formattedCash}
+            <p className='whitespace-nowrap font-sans text-[11px] font-medium text-nike-success leading-tight'>
+              Transf./efectivo {formattedCash}
             </p>
           )}
         </div>
-        <div className='flex-1 max-w-[200px]'>
+        <div className='flex-1 max-w-[180px]'>
           {hasStock && selectedSize ? (
             <AddToCart
               cart={cart}

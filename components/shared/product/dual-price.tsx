@@ -1,16 +1,8 @@
 import { extractDualPrice } from '@/lib/duo-pricing';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import ProductPrice from './product-price';
 
 type MaybePrices = { prices?: { paymentMethod: string; value: string }[] };
-
-const ARS_FORMATTER = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-  minimumFractionDigits: 0,
-});
-
-export const formatArs = (amount: number) => ARS_FORMATTER.format(amount);
 
 /**
  * Pill that sells the cash/transfer benefit. Flat soft-cloud surface with the
@@ -30,7 +22,7 @@ export const CashPricePill = ({
     )}
   >
     <span>Transferencia o efectivo:</span>
-    <span className='font-semibold'>{formatArs(amount)}</span>
+    <span className='font-semibold'>{formatCurrency(amount)}</span>
   </span>
 );
 
@@ -62,7 +54,7 @@ const DualPrice = ({
       <div className={`flex flex-col gap-0.5 ${className}`}>
         <ProductPrice value={cashNum} />
         <p className='az-caption text-az-stone'>
-          Lista: <span>{formatArs(mpNum)}</span>
+          Lista: <span>{formatCurrency(mpNum)}</span>
         </p>
       </div>
     );

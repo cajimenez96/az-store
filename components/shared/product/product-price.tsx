@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn, formatCurrencyParts } from '@/lib/utils';
 
 const ProductPrice = ({
   value,
@@ -7,16 +7,19 @@ const ProductPrice = ({
   value: number;
   className?: string;
 }) => {
-  // Ensure two decimal places
-  const stringValue = value.toFixed(2);
-  // Get the int/float
-  const [intValue, floatValue] = stringValue.split('.');
+  // Argentine format: thousands dots, decimal comma, 2 decimals
+  const { sign, integer, decimals } = formatCurrencyParts(value) ?? {
+    sign: '',
+    integer: '0',
+    decimals: '00',
+  };
 
   return (
     <p className={cn('text-2xl', className)}>
+      {sign}
       <span className='text-xs align-super'>$</span>
-      {intValue}
-      <span className='text-xs align-super'>.{floatValue}</span>
+      {integer}
+      <span className='text-xs align-super'>,{decimals}</span>
     </p>
   );
 };
