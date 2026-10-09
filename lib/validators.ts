@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { formatNumberWithDecimal } from './utils';
-import { PAYMENT_METHODS } from './constants';
+import { PAYMENT_METHODS, SIZE_NAME_MAX_LENGTH } from './constants';
 
 const currency = z
   .string()
@@ -222,9 +222,17 @@ export const updateCategorySchema = insertCategorySchema.extend({
 });
 
 // Size Schemas
+// AZ-003: also the server-side contract of createSize; only these fields are persisted
 export const insertSizeSchema = z.object({
-  name: z.string().min(1, 'El nombre debe tener al menos 1 caracter'),
-  categoryId: z.string().min(1, 'La categoría es requerida'),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'El nombre debe tener al menos 1 caracter')
+    .max(
+      SIZE_NAME_MAX_LENGTH,
+      `El nombre del talle no puede superar los ${SIZE_NAME_MAX_LENGTH} caracteres`
+    ),
+  categoryId: z.string().uuid('La categoría es inválida'),
 });
 
 // Brand Schemas
@@ -288,3 +296,5 @@ export const updatePromoBannerSchema = insertPromoBannerSchema.extend({
   id: z.string().uuid('ID inválido'),
 });
 
+
+export const uuidSchema = z.string().uuid('El identificador es inválido');
