@@ -24,7 +24,11 @@ import {
 import { Preference } from 'mercadopago';
 import { getMercadoPagoClient } from '../mercadopago';
 import { getBankSettings } from './settings.actions';
-import { deleteUTFiles } from '../uploadthing-helpers';
+import {
+  deleteRegisteredReceiptFile,
+  findRegisteredReceipt,
+  parseUploadThingUrl,
+} from '../uploads/registry';
 import { priceMethodFor } from '../pricing/price-method';
 import { InsufficientStockError, quoteItems, type QuoteInput } from '../pricing/quote';
 import { calcTax } from '../pricing/totals';
@@ -923,6 +927,8 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
   try {
     const session = await auth();
     if (!session) throw new Error('Usuario no autenticado');
+    const sessionUserId = session.user.id;
+    if (!sessionUserId) throw new Error('Usuario no autenticado');
 
     const order = await prisma.order.findFirst({
       where: { id: orderId },
@@ -931,11 +937,44 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
     if (!order) throw new Error('Orden no encontrada');
 
     if (
-      order.userId !== session.user.id &&
+      order.userId !== sessionUserId &&
       session.user.role !== 'admin' &&
       session.user.role !== 'seller'
     ) {
       throw new Error('No autorizado');
+    }
+
+    if (order.paymentMethod !== 'TransferenciaBancaria') {
+      throw new Error('El método de pago no es transferencia bancaria');
+    }
+
+    if (order.isPaid) throw new Error('La orden ya fue pagada');
+
+    // rejectBankTransfer marks cancelled orders as paymentResult.status = 'CANCELLED'.
+    if ((order.paymentResult as { status?: string } | null)?.status === 'CANCELLED') {
+      throw new Error('La orden fue cancelada');
+    }
+
+    // Re-submitting the stored receipt changes nothing.
+    if (order.receiptUrl === receiptUrl) {
+      return {
+        success: true,
+        message: 'Comprobante de pago guardado correctamente',
+      };
+    }
+
+    // The URL must be an UploadThing file URL registered as a receipt that
+    // THIS user uploaded for THIS order (AZ-005).
+    const parsed = parseUploadThingUrl(receiptUrl);
+    if (!parsed) throw new Error('Comprobante inválido');
+
+    const registered = await findRegisteredReceipt({
+      key: parsed.key,
+      userId: sessionUserId,
+      orderId,
+    });
+    if (!registered) {
+      throw new Error('El comprobante no corresponde a una subida tuya para esta orden');
     }
 
     await prisma.order.update({
@@ -944,9 +983,10 @@ export async function updateOrderReceipt(orderId: string, receiptUrl: string) {
     });
 
     // Si el usuario reemplazó un comprobante anterior, liberamos el asset viejo
-    // en UploadThing para no acumular archivos huérfanos.
-    if (order.receiptUrl && order.receiptUrl !== receiptUrl) {
-      await deleteUTFiles([order.receiptUrl]);
+    // en UploadThing para no acumular archivos huérfanos. The helper only
+    // deletes files registered as receipts of this order.
+    if (order.receiptUrl) {
+      await deleteRegisteredReceiptFile({ orderId, url: order.receiptUrl });
     }
 
     revalidatePath(`/order/${orderId}`);
@@ -1073,7 +1113,7 @@ export async function rejectBankTransfer(orderId: string) {
 
     // Liberar el comprobante rechazado de UploadThing (si existía).
     if (previousReceiptUrl) {
-      await deleteUTFiles([previousReceiptUrl]);
+      await deleteRegisteredReceiptFile({ orderId, url: previousReceiptUrl });
     }
 
     revalidatePath(`/order/${orderId}`);
