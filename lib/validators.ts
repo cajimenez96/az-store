@@ -222,9 +222,14 @@ export const updateCategorySchema = insertCategorySchema.extend({
 });
 
 // Size Schemas
+// AZ-003: also the server-side contract of createSize; only these fields are persisted
 export const insertSizeSchema = z.object({
-  name: z.string().min(1, 'El nombre debe tener al menos 1 caracter'),
-  categoryId: z.string().min(1, 'La categoría es requerida'),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'El nombre debe tener al menos 1 caracter')
+    .max(50, 'El nombre del talle no puede superar los 50 caracteres'),
+  categoryId: z.string().uuid('La categoría es inválida'),
 });
 
 // Brand Schemas
@@ -288,3 +293,5 @@ export const updatePromoBannerSchema = insertPromoBannerSchema.extend({
   id: z.string().uuid('ID inválido'),
 });
 
+
+export const uuidSchema = z.string().uuid('El identificador es inválido');

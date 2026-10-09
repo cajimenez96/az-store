@@ -207,22 +207,31 @@ Un POST anónimo a cualquiera de las tres acciones modifica al primer usuario de
 
 ### AZ-003 · Acciones de talles sin autenticación
 
-- **Prioridad:** P0 (expedite) · **Tipo:** Seguridad · **Est.:** S · **Sprint:** 1
+- **Prioridad:** P0 (expedite) · **Tipo:** Seguridad · **Est.:** S · **Sprint:** 1 · **Estado:** ✅ Hecho (rama `fix/AZ-003-acciones-talles-sin-autenticacion`)
 - **Evidencia:** ✔ [lib/actions/size.actions.ts](../lib/actions/size.actions.ts). `createSize` y `deleteSize` no tienen guarda y `createSize` pasa el objeto `data` directo a `prisma.size.create`. *Reportado:* ambas están referenciadas desde componentes cliente (`components/admin/size-form.tsx`, `app/admin/categories/[id]/page.tsx`).
 
 **Historia de usuario**
 Como **administrador** quiero que solo yo pueda crear y eliminar talles para que **el catálogo no se altere desde fuera**.
 
 **Criterios de aceptación**
-- [ ] `createSize` y `deleteSize` exigen `assertAdmin()`.
-- [ ] `createSize` valida con zod `{ name, categoryId }` y solo persiste esos campos (sin escrituras anidadas).
-- [ ] Se decide y documenta si `getSizesByCategory` es público o requiere sesión.
-- [ ] Un talle usado por una variante no puede borrarse y el error es comprensible.
+- [x] `createSize` y `deleteSize` exigen `assertAdmin()`.
+- [x] `createSize` valida con zod `{ name, categoryId }` y solo persiste esos campos (sin escrituras anidadas).
+- [x] Se decide y documenta si `getSizesByCategory` es público o requiere sesión. *Decisión: exige admin o vendedor (ver Resolución).*
+- [x] Un talle usado por una variante no puede borrarse y el error es comprensible.
 
 **Pruebas necesarias**
 - **Unit:** sin sesión y con rol `user` → error; con rol `admin` → ok.
 - **Unit:** payload con campos extra (`products: { create: ... }`) → rechazado o ignorado.
 - **Integración:** borrar un talle en uso devuelve error y el talle sigue existiendo.
+
+**Resolución**
+- **Guardas:** `createSize` y `deleteSize` llaman a `assertAdmin()` dentro del `try/catch` (igual que `createCategory`), por lo que devuelven `{ success: false, message }` en lugar de lanzar. Un vendedor tampoco puede crear ni borrar talles.
+- **Decisión sobre `getSizesByCategory`:** **no es público**; exige `assertAdminOrSeller()`. Solo lo usa `components/admin/product-form.tsx`, que abren administradores y vendedores, y ningún flujo público lo necesita.
+- **Entrada validada:** `insertSizeSchema` (`name` recortado de 1 a 50 caracteres, `categoryId` UUID) es ahora el contrato del servidor. `createSize` arma el objeto con `{ name, categoryId }` explícitamente, así que `id`, `variants`, `category` u otros campos enviados se descartan. Una categoría inexistente devuelve "La categoría no existe" en lugar de un error de clave foránea.
+- **Borrado seguro:** `deleteSize` valida el id, comprueba que el talle exista y cuenta las variantes que lo usan; si hay alguna responde "No se puede eliminar el talle "M": lo usan N variantes de producto. Quitá esas variantes primero." sin llamar a `prisma.size.delete`. Una carrera con el borrado (`P2003` o `P2025`) se traduce al mismo tipo de mensaje.
+- **Nota sobre UUID:** la categoría de respaldo "Sin categoría" (`DEFAULT_CATEGORY_ID`, `00000000-0000-0000-0000-000000000002`) no es un UUID estricto según RFC. Con zod 3 `.uuid()` lo acepta; con zod 4 no. Un test lo fija para que una futura actualización no rompa esa categoría en silencio.
+- **Verificación:** 185 tests unitarios (21 nuevos de talles) y 7 de integración con la base real (anónimo, usuario y vendedor sin permiso; administrador crea solo `name` y `categoryId`; borrar un talle en uso devuelve error y el talle sigue existiendo; borrar uno sin uso funciona). No hay cambios de interfaz.
+- **Pendientes y seguimiento:** la página `/admin/categories/[id]` sigue abierta a vendedores (`requireAdminOrSeller`) aunque `deleteSize` ahora exige administrador, de modo que un vendedor ve el botón y recibe "Acceso denegado" (se resuelve en AZ-029); `formatError` solo traduce `P2002`, el resto de errores de Prisma sigue sin traducirse; no hay regla contra talles con nombre duplicado en una categoría; no se auditaron otras Server Actions por exports sin guarda.
 
 ---
 
