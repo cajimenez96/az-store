@@ -19,7 +19,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { updateUserPaymentMethod } from '@/lib/actions/user.actions';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
+import { paymentOptionTotals, type PriceComparisonInput } from '@/lib/pricing/payment-options';
 
 const DISPLAY_NAMES: Record<string, string> = {
   MercadoPago: 'Mercado Pago (Online)',
@@ -33,9 +34,11 @@ const DISPLAY_NAMES: Record<string, string> = {
 const PaymentMethodForm = ({
   preferredPaymentMethod,
   userRole,
+  comparison = null,
 }: {
   preferredPaymentMethod: string | null;
   userRole?: string;
+  comparison?: PriceComparisonInput | null;
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -69,15 +72,22 @@ const PaymentMethodForm = ({
     return true;
   });
 
+  const totals = paymentOptionTotals(comparison);
+  const selectedMethod = form.watch('type');
+  const selectedTotal =
+    totals && selectedMethod in totals
+      ? totals[selectedMethod as keyof typeof totals].total
+      : null;
+
   return (
     <div className='max-w-xl mx-auto'>
-      <div className='bg-white rounded-2xl border border-[#e5e5e5] p-6 md:p-8 space-y-6 shadow-sm'>
+      <div className='bg-white border border-nike-hairline-soft p-6 md:p-8 space-y-6'>
         {/* Header */}
-        <div className='space-y-1 border-b border-[#e5e5e5] pb-5'>
+        <div className='space-y-1 border-b border-nike-hairline-soft pb-5'>
           <h1 className='font-marder-display font-medium text-3xl tracking-tight text-nike-ink'>
             Método de Pago
           </h1>
-          <p className='text-sm text-[#757575]'>
+          <p className='text-sm text-nike-mute'>
             Seleccioná la opción que prefieras para realizar el pago de tu
             pedido.
           </p>
@@ -102,15 +112,23 @@ const PaymentMethodForm = ({
                     >
                       {visibleMethods.map((method) => {
                         const isSelected = field.value === method;
+                        const option =
+                          totals && method in totals
+                            ? totals[method as keyof typeof totals]
+                            : null;
+                        const savings =
+                          method === 'TransferenciaBancaria'
+                            ? totals?.TransferenciaBancaria.savings
+                            : null;
                         return (
                           <FormItem key={method} className='space-y-0'>
                             <FormLabel
                               htmlFor={`payment-${method}`}
                               className={cn(
-                                'flex items-center gap-4 rounded-xl border p-4 cursor-pointer transition-all duration-150',
+                                'flex items-center gap-4 border p-4 min-h-14 cursor-pointer transition-colors duration-150',
                                 isSelected
-                                  ? 'border-nike-ink bg-[#f5f5f5]'
-                                  : 'border-[#e5e5e5] bg-white hover:bg-[#fafafa]'
+                                  ? 'border-nike-ink bg-nike-soft-cloud'
+                                  : 'border-nike-hairline-soft bg-white'
                               )}
                             >
                               <FormControl>
@@ -119,24 +137,37 @@ const PaymentMethodForm = ({
                                   value={method}
                                   checked={isSelected}
                                   className={cn(
-                                    'border-[#cacacb]',
+                                    'border-nike-hairline',
                                     isSelected &&
                                       'border-nike-ink text-nike-ink'
                                   )}
                                 />
                               </FormControl>
-                              <span
-                                className={cn(
-                                  'text-sm font-medium flex-1 select-none',
-                                  isSelected
-                                    ? 'text-nike-ink font-semibold'
-                                    : 'text-[#484848]'
+                              <span className='flex flex-1 flex-col gap-1 select-none'>
+                                <span
+                                  className={cn(
+                                    'text-sm',
+                                    isSelected
+                                      ? 'text-nike-ink font-semibold'
+                                      : 'text-nike-charcoal font-medium'
+                                  )}
+                                >
+                                  {DISPLAY_NAMES[method] ?? method}
+                                </span>
+                                {savings && (
+                                  <span className='inline-flex w-fit rounded-nike-lg bg-nike-soft-cloud px-2 py-0.5 text-xs font-medium text-nike-success'>
+                                    Ahorrás {formatCurrency(savings.amount)} ·{' '}
+                                    {savings.percent} %
+                                  </span>
                                 )}
-                              >
-                                {DISPLAY_NAMES[method] ?? method}
                               </span>
-                              {isSelected && (
-                                <span className='text-xs text-nike-ink font-semibold bg-white border border-[#e5e5e5] px-2.5 py-1 rounded-full'>
+                              {option && (
+                                <span className='text-sm font-semibold text-nike-ink tabular-nums text-right'>
+                                  {formatCurrency(option.total)}
+                                </span>
+                              )}
+                              {isSelected && !option && (
+                                <span className='text-xs text-nike-ink font-semibold bg-white border border-nike-hairline-soft px-2.5 py-1 rounded-nike-lg'>
                                   Seleccionado
                                 </span>
                               )}
@@ -151,10 +182,29 @@ const PaymentMethodForm = ({
               )}
             />
 
+            {selectedTotal !== null && (
+              <div
+                id='payment-summary'
+                className='bg-nike-soft-cloud p-4 space-y-1'
+              >
+                <div className='flex justify-between items-baseline'>
+                  <span className='text-sm text-nike-charcoal'>
+                    Total de productos
+                  </span>
+                  <span className='text-xl font-medium text-nike-ink tabular-nums'>
+                    {formatCurrency(selectedTotal)}
+                  </span>
+                </div>
+                <p className='text-xs text-nike-mute'>
+                  El cupón y el envío se calculan en el siguiente paso.
+                </p>
+              </div>
+            )}
+
             <Button
               id='payment-submit'
               type='submit'
-              className='w-full h-12 rounded-full bg-nike-ink text-white hover:bg-black font-medium transition-colors'
+              className='w-full h-12 rounded-nike-lg bg-nike-ink text-white hover:bg-nike-charcoal font-medium transition-colors'
               disabled={isPending}
             >
               {isPending ? (

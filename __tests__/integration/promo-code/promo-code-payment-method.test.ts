@@ -49,7 +49,8 @@ function makeCartItem(
     slug,
     qty,
     image: '/images/test.jpg',
-    price: '100.00',
+    priceUsed: '100.00',
+    paymentMethod: 'CASH',
     size,
   };
 }
@@ -118,6 +119,11 @@ describe('createOrder — promo code split by payment method', () => {
     const size = await createTestSize(category.id, 'M');
     const product = await createTestProduct(category.id, brand.id);
     await createTestVariant(product.id, size.id, 10);
+    // Same price for both methods so the percentages are asserted against 100.00
+    await prisma.price.updateMany({
+      where: { productId: product.id, paymentMethod: 'MERCADOPAGO' },
+      data: { value: new Decimal(100) },
+    });
     sharedProduct = { id: product.id, name: product.name, slug: product.slug };
   });
 

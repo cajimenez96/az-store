@@ -58,21 +58,50 @@ export function round2(value: number | string) {
   }
 }
 
-const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
-  currency: 'USD',
-  style: 'currency',
-  minimumFractionDigits: 2,
-});
+export type CurrencyParts = {
+  sign: '' | '-';
+  integer: string;
+  decimals: string;
+};
 
-// Format currency using the formatter above
+/**
+ * Splits an amount into the pieces of the Argentine money format
+ * (`$59.990,00`): sign, integer part grouped with dots and 2 decimals.
+ *
+ * Grouping is done by hand (no Intl) so the output is identical in Node and
+ * in browsers, regardless of the ICU data available (SSR vs hydration).
+ * Returns null for null, empty/blank strings and non-finite numbers.
+ */
+export function formatCurrencyParts(
+  amount: number | string | null
+): CurrencyParts | null {
+  if (amount === null) return null;
+  if (typeof amount === 'string' && amount.trim() === '') return null;
+
+  const value = Number(amount);
+  if (!Number.isFinite(value)) return null;
+
+  const abs = Math.abs(value);
+  // Round on the decimal representation (1.005 -> 1.01, like Intl does);
+  // fall back to plain rounding for exponent notation (e.g. 1e-7).
+  const decimalRounded = Math.round(Number(`${abs}e2`));
+  const cents = Number.isNaN(decimalRounded)
+    ? Math.round(abs * 100)
+    : decimalRounded;
+
+  const integer = Math.floor(cents / 100)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const decimals = (cents % 100).toString().padStart(2, '0');
+
+  return { sign: value < 0 && cents > 0 ? '-' : '', integer, decimals };
+}
+
+// Format an amount as `$59.990,00` (Argentine format, 2 decimals)
 export function formatCurrency(amount: number | string | null) {
-  if (typeof amount === 'number') {
-    return CURRENCY_FORMATTER.format(amount);
-  } else if (typeof amount === 'string') {
-    return CURRENCY_FORMATTER.format(Number(amount));
-  } else {
-    return 'NaN';
-  }
+  const parts = formatCurrencyParts(amount);
+  if (!parts) return 'NaN';
+  return `${parts.sign}$${parts.integer},${parts.decimals}`;
 }
 
 // Format Number

@@ -2,6 +2,8 @@
  * Email templates as HTML strings
  */
 
+import { formatCurrency } from '@/lib/utils';
+
 const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000';
 
 const emailHeader = () => `
@@ -100,8 +102,8 @@ export function orderConfirmationTemplate(
     <tr>
       <td>${item.name}${item.size ? `<br><span style="font-size: 12px; color: #9ca3af;">Talle: ${item.size}</span>` : ''}</td>
       <td>${item.qty}</td>
-      <td>$${item.price}</td>
-      <td>$${(parseFloat(item.price) * item.qty).toFixed(2)}</td>
+      <td>${formatCurrency(item.price)}</td>
+      <td>${formatCurrency(parseFloat(item.price) * item.qty)}</td>
     </tr>
   `
     )
@@ -348,8 +350,8 @@ export function saleNotificationTemplate(
       <div class="info-box">
         <strong>${productName}</strong><br>
         <span style="color: #6b7280;">Cantidad: ${qty}</span><br>
-        <span style="color: #6b7280;">Precio unitario: $${parseFloat(price).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span><br>
-        <strong style="color: #059669; font-size: 16px;">Monto total: $${(parseFloat(price) * qty).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+        <span style="color: #6b7280;">Precio unitario: ${formatCurrency(price)}</span><br>
+        <strong style="color: #059669; font-size: 16px;">Monto total: ${formatCurrency(parseFloat(price) * qty)}</strong>
       </div>
 
       <p>Este monto será transferido a tu cuenta bancaria de acuerdo con nuestros términos de pago.</p>
@@ -375,7 +377,7 @@ export function abandonedCartTemplate(
       <tr>
         <td>${item.name}</td>
         <td style="text-align: center;">${item.qty}</td>
-        <td style="text-align: right;">$${parseFloat(item.price).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td style="text-align: right;">${formatCurrency(item.price)}</td>
       </tr>
     `
     )

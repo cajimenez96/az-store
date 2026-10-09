@@ -8,6 +8,10 @@ import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import PlaceOrderContent from './place-order-content';
+import { priceMethodFor } from '@/lib/pricing/price-method';
+import { quoteItems } from '@/lib/pricing/quote';
+import { getPriceComparison } from '@/lib/pricing/compare';
+import { calcTax } from '@/lib/pricing/totals';
 
 export const metadata: Metadata = {
   title: 'Confirmar Compra',
@@ -29,6 +33,45 @@ const PlaceOrderPage = async () => {
 
   const userAddress = user.address as ShippingAddress;
 
+  // The server quote is the source of truth for what createOrder will charge:
+  // only the identity and qty of the cart lines are used, never stored prices.
+  let quote;
+  try {
+    quote = await quoteItems(
+      cart.items.map((item) => ({
+        productId: item.productId,
+        size: item.size,
+        productColorId: item.productColorId,
+        qty: item.qty,
+      })),
+      priceMethodFor('web', user.paymentMethod)
+    );
+  } catch {
+    // Stock shortage, inactive product, unknown variant or invalid payment method.
+    redirect('/cart');
+  }
+  const quotedLines = quote.lines.map((line) => ({
+    productId: line.productId,
+    name: line.name,
+    slug: line.slug,
+    image: line.image,
+    size: line.size,
+    qty: line.qty,
+    priceUsed: line.priceUsed,
+  }));
+  const quotedItemsPrice = quote.itemsPrice;
+  const quotedTaxPrice = calcTax(quotedItemsPrice);
+
+  // Informational only (savings line); null on any failure.
+  const comparison = await getPriceComparison(
+    cart.items.map((item) => ({
+      productId: item.productId,
+      size: item.size,
+      productColorId: item.productColorId,
+      qty: item.qty,
+    }))
+  ).catch(() => null);
+
   // Read the activeBanner cookie (set client-side in the search page — not httpOnly)
   const cookieStore = await cookies();
   const activeBannerId = cookieStore.get('activeBanner')?.value;
@@ -48,6 +91,10 @@ const PlaceOrderPage = async () => {
   return (
     <PlaceOrderContent
       cart={cart}
+      quotedLines={quotedLines}
+      quotedItemsPrice={quotedItemsPrice}
+      quotedTaxPrice={quotedTaxPrice}
+      comparison={comparison}
       userAddress={userAddress}
       userEmail={user.email || ''}
       paymentMethod={user.paymentMethod}
