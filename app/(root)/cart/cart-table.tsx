@@ -16,6 +16,7 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { formatCurrency } from '@/lib/utils';
+import { paymentOptionTotals, type PriceComparisonInput } from '@/lib/pricing/payment-options';
 
 function QtyButton({
   item,
@@ -65,9 +66,17 @@ function QtyButton({
   );
 }
 
-const CartTable = ({ cart }: { cart?: Cart }) => {
+const CartTable = ({
+  cart,
+  comparison = null,
+}: {
+  cart?: Cart;
+  comparison?: PriceComparisonInput | null;
+}) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+
+  const transfer = paymentOptionTotals(comparison)?.TransferenciaBancaria;
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -149,7 +158,6 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                           <span className='block text-sm font-medium text-nike-ink'>
                             {formatCurrency(item.priceUsed)}
                           </span>
-                          <span className='block text-xs text-nike-mute'>precio transferencia</span>
                         </div>
                       </div>
                     </Link>
@@ -167,7 +175,6 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
                     <span className='block text-sm sm:text-base font-medium text-nike-ink'>
                       {formatCurrency(item.priceUsed)}
                     </span>
-                    <span className='block text-xs text-nike-mute'>precio transferencia</span>
                   </TableCell>
                 </TableRow>
               ))}
@@ -192,6 +199,18 @@ const CartTable = ({ cart }: { cart?: Cart }) => {
               <p className='font-sans text-xs text-nike-mute'>
                 El total final se calcula según el método de pago que elijas.
               </p>
+              {transfer?.savings && (
+                <p
+                  id='cart-transfer-savings'
+                  className='bg-white text-nike-success font-sans text-sm font-medium rounded-nike-sm px-4 py-3'
+                >
+                  Pagando por transferencia:{' '}
+                  <span className='tabular-nums'>{formatCurrency(transfer.total)}</span>
+                  {' · '}Ahorrás{' '}
+                  <span className='tabular-nums'>{formatCurrency(transfer.savings.amount)}</span>{' '}
+                  ({transfer.savings.percent} %)
+                </p>
+              )}
               <div className='border-t border-nike-hairline-soft pt-3.5 flex justify-between items-baseline'>
                 <span className='font-sans text-base font-medium text-nike-ink'>Total estimado</span>
                 <span className='font-sans text-xl sm:text-2xl font-medium text-nike-ink tabular-nums'>

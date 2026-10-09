@@ -21,6 +21,7 @@ import CheckoutSteps from '@/components/shared/checkout-steps';
 import { MapPin, CreditCard, Package } from 'lucide-react';
 import { Cart } from '@/types';
 import { ShippingMethodProvider } from '@/hooks/use-shipping-method';
+import { paymentOptionTotals, type PriceComparisonInput } from '@/lib/pricing/payment-options';
 import { PromoCodeInput } from '@/components/shared/promo-code-input';
 
 type ActiveBanner = {
@@ -46,6 +47,7 @@ interface PlaceOrderContentProps {
   quotedLines: QuotedLine[];
   quotedItemsPrice: number;
   quotedTaxPrice: number;
+  comparison?: PriceComparisonInput | null;
   userAddress: ShippingAddress;
   userEmail: string;
   paymentMethod: string;
@@ -59,6 +61,7 @@ export default function PlaceOrderContent({
   quotedLines,
   quotedItemsPrice,
   quotedTaxPrice,
+  comparison = null,
   userAddress,
   userEmail,
   paymentMethod,
@@ -78,6 +81,11 @@ export default function PlaceOrderContent({
       .reduce((sum, item) => sum + Number(item.priceUsed) * item.qty, 0);
     return (bannerItemsTotal * activeBanner.discountPercent) / 100;
   }, [activeBanner, cart, quotedLines]);
+
+  const transferSavings =
+    paymentMethod === 'TransferenciaBancaria'
+      ? paymentOptionTotals(comparison)?.TransferenciaBancaria.savings
+      : null;
 
   const itemsPrice = quotedItemsPrice;
   const discountAmount = (itemsPrice * appliedDiscount) / 100;
@@ -267,6 +275,16 @@ export default function PlaceOrderContent({
                       : formatCurrency(cart.shippingPrice)}
                   </span>
                 </div>
+                {transferSavings && (
+                  <p
+                    id='place-order-transfer-savings'
+                    className='bg-white text-nike-success text-sm font-medium rounded-nike-sm px-4 py-3'
+                  >
+                    Estás ahorrando{' '}
+                    <span className='tabular-nums'>{formatCurrency(transferSavings.amount)}</span> (
+                    {transferSavings.percent} %) por pagar con transferencia
+                  </p>
+                )}
                 {discountAmount > 0 && (
                   <div className='flex justify-between text-sm text-nike-success font-medium'>
                     <span>

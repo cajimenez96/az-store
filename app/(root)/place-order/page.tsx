@@ -10,6 +10,7 @@ import { cookies } from 'next/headers';
 import PlaceOrderContent from './place-order-content';
 import { priceMethodFor } from '@/lib/pricing/price-method';
 import { quoteItems } from '@/lib/pricing/quote';
+import { getPriceComparison } from '@/lib/pricing/compare';
 import { calcTax } from '@/lib/pricing/totals';
 
 export const metadata: Metadata = {
@@ -61,6 +62,16 @@ const PlaceOrderPage = async () => {
   const quotedItemsPrice = quote.itemsPrice;
   const quotedTaxPrice = calcTax(quotedItemsPrice);
 
+  // Informational only (savings line); null on any failure.
+  const comparison = await getPriceComparison(
+    cart.items.map((item) => ({
+      productId: item.productId,
+      size: item.size,
+      productColorId: item.productColorId,
+      qty: item.qty,
+    }))
+  ).catch(() => null);
+
   // Read the activeBanner cookie (set client-side in the search page — not httpOnly)
   const cookieStore = await cookies();
   const activeBannerId = cookieStore.get('activeBanner')?.value;
@@ -83,6 +94,7 @@ const PlaceOrderPage = async () => {
       quotedLines={quotedLines}
       quotedItemsPrice={quotedItemsPrice}
       quotedTaxPrice={quotedTaxPrice}
+      comparison={comparison}
       userAddress={userAddress}
       userEmail={user.email || ''}
       paymentMethod={user.paymentMethod}
