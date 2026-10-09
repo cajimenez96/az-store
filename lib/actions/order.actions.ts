@@ -614,17 +614,17 @@ export async function getMyOrders({
   page: number;
 }) {
   const session = await auth();
-  if (!session) throw new Error('Usuario no autorizado');
+  if (!session?.user?.id) throw new Error('Usuario no autorizado');
 
   const data = await prisma.order.findMany({
-    where: { userId: session?.user?.id },
+    where: { userId: session.user.id },
     orderBy: { createdAt: 'desc' },
     take: limit,
     skip: (page - 1) * limit,
   });
 
   const dataCount = await prisma.order.count({
-    where: { userId: session?.user?.id },
+    where: { userId: session.user.id },
   });
 
   return {
@@ -1247,7 +1247,7 @@ export async function createPosOrder(data: {
     }
 
     if (!customerUser && customerEmail && customerEmail.trim() !== '') {
-      customerUser = await prisma.user.findFirst({
+      customerUser = await prisma.user.findUnique({
         where: { email: customerEmail.trim().toLowerCase() },
       });
     }
@@ -1264,7 +1264,7 @@ export async function createPosOrder(data: {
 
     if (!customerUser) {
       // Look up default email user or create a new one
-      customerUser = await prisma.user.findFirst({
+      customerUser = await prisma.user.findUnique({
         where: { email: emailToUse },
       });
       if (!customerUser) {
