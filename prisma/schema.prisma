@@ -151,6 +151,7 @@ model User {
   Review         Review[]
   products       Product[]
   PromoCodeUsage PromoCodeUsage[]
+  uploadedFiles  UploadedFile[]
 }
 
 model Account {
@@ -266,6 +267,7 @@ model Order {
   commissionAmount Decimal?    @db.Decimal(12, 2)
   user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderitems       OrderItem[]
+  uploadedFiles    UploadedFile[]
 }
 
 model OrderItem {
@@ -337,4 +339,27 @@ model PromoCodeUsage {
 
   promoCode PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UploadPurpose {
+  RECEIPT
+  IMAGE
+}
+
+// Registry of every file uploaded through UploadThing. A receipt URL is only
+// accepted (and its file only deleted) when its key is registered here for the
+// same user and order.
+model UploadedFile {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key       String        @unique
+  url       String
+  userId    String        @db.Uuid
+  orderId   String?       @db.Uuid
+  purpose   UploadPurpose
+  createdAt DateTime      @default(now()) @db.Timestamp(6)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order     Order?        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([orderId])
 }

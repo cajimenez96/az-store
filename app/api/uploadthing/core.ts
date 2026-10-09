@@ -1,31 +1,66 @@
 import { createUploadthing, type FileRouter } from 'uploadthing/next';
 import { UploadThingError } from 'uploadthing/server';
+import { z } from 'zod';
 import { auth } from '@/auth';
+import { authorizeImageUpload, authorizeReceiptUpload } from '@/lib/uploadthing-guards';
+import { registerUpload } from '@/lib/uploads/registry';
 
 const f = createUploadthing();
 
+// Both endpoints list explicit MIME types (jpeg, png, webp): SVG and GIF are
+// intentionally excluded.
+
+function toUploadThingError(error: unknown): UploadThingError {
+  return new UploadThingError(error instanceof Error ? error.message : 'No autorizado');
+}
+
 export const ourFileRouter = {
   imageUploader: f({
-    image: { maxFileSize: '16MB', maxFileCount: 10 },
+    'image/jpeg': { maxFileSize: '16MB', maxFileCount: 10 },
+    'image/png': { maxFileSize: '16MB', maxFileCount: 10 },
+    'image/webp': { maxFileSize: '16MB', maxFileCount: 10 },
   })
     .middleware(async () => {
       const session = await auth();
-      if (!session) throw new UploadThingError('Unauthorized');
-      return { userId: session?.user?.id };
+      try {
+        return authorizeImageUpload(session);
+      } catch (error) {
+        throw toUploadThingError(error);
+      }
     })
-    .onUploadComplete(async ({ metadata }) => {
+    .onUploadComplete(async ({ metadata, file }) => {
+      await registerUpload({
+        key: file.key,
+        url: file.ufsUrl,
+        userId: metadata.userId,
+        orderId: null,
+        purpose: 'IMAGE',
+      });
       return { uploadedBy: metadata.userId };
     }),
 
   receiptUploader: f({
-    image: { maxFileSize: '8MB' },
+    'image/jpeg': { maxFileSize: '8MB', maxFileCount: 1 },
+    'image/png': { maxFileSize: '8MB', maxFileCount: 1 },
+    'image/webp': { maxFileSize: '8MB', maxFileCount: 1 },
   })
-    .middleware(async () => {
+    .input(z.object({ orderId: z.string().uuid() }))
+    .middleware(async ({ input }) => {
       const session = await auth();
-      if (!session) throw new UploadThingError('Unauthorized');
-      return { userId: session?.user?.id };
+      try {
+        return await authorizeReceiptUpload(session, input.orderId);
+      } catch (error) {
+        throw toUploadThingError(error);
+      }
     })
-    .onUploadComplete(async ({ metadata }) => {
+    .onUploadComplete(async ({ metadata, file }) => {
+      await registerUpload({
+        key: file.key,
+        url: file.ufsUrl,
+        userId: metadata.userId,
+        orderId: metadata.orderId,
+        purpose: 'RECEIPT',
+      });
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
