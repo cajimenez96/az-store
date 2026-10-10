@@ -274,25 +274,34 @@ Como **dueño de la tienda** quiero que una orden solo se marque pagada si el pa
 
 ### AZ-005 · Borrado arbitrario de archivos vía `receiptUrl` y subidas sin rol
 
-- **Prioridad:** P0 · **Tipo:** Seguridad · **Est.:** M · **Sprint:** 1
+- **Prioridad:** P0 · **Tipo:** Seguridad · **Est.:** M · **Sprint:** 1 · **Estado:** ✅ Hecho (rama `fix/AZ-005-comprobantes-y-subidas`)
 - **Evidencia:** *Reportado por dos revisores.* [order.actions.ts:899-927](../lib/actions/order.actions.ts#L899-L927) guarda un `receiptUrl` sin validar host ni dueño y, al reemplazarlo, llama a `deleteUTFiles` con el último segmento de la URL ([lib/uploadthing-helpers.ts:12-17](../lib/uploadthing-helpers.ts#L12-L17)). [app/api/uploadthing/core.ts](../app/api/uploadthing/core.ts) permite `imageUploader` (16 MB × 10) a cualquier usuario con sesión.
 
 **Historia de usuario**
 Como **dueño de la tienda** quiero que un cliente solo pueda adjuntar y reemplazar su propio comprobante para que **no pueda borrar imágenes de productos ni consumir mi almacenamiento**.
 
 **Criterios de aceptación**
-- [ ] `receiptUrl` solo acepta URLs de `utfs.io` o `*.ufs.sh` del app ID del proyecto.
-- [ ] Solo se borran archivos cuya key fue registrada como subida por ese usuario para esa orden.
-- [ ] Nunca se borra un archivo referenciado por otra fila (producto, banner, otra orden).
-- [ ] No se puede cambiar el comprobante de una orden ya pagada.
-- [ ] `imageUploader` requiere rol admin o vendedor. `receiptUploader` exige un `orderId` propio.
-- [ ] Tipos MIME permitidos explícitos (sin SVG).
+- [x] `receiptUrl` solo acepta URLs de `utfs.io` o `*.ufs.sh` del app ID del proyecto. *El host se valida de forma estricta y, además, la clave debe estar en el registro de subidas; eso cubre el app ID sin leer el token.*
+- [x] Solo se borran archivos cuya key fue registrada como subida por ese usuario para esa orden.
+- [x] Nunca se borra un archivo referenciado por otra fila (producto, banner, otra orden).
+- [x] No se puede cambiar el comprobante de una orden ya pagada (ni de una cancelada).
+- [x] `imageUploader` requiere rol admin o vendedor. `receiptUploader` exige un `orderId` propio.
+- [x] Tipos MIME permitidos explícitos (sin SVG).
 
 **Pruebas necesarias**
 - **Unit:** URL externa → rechazada. URL de la key de una imagen de producto → rechazada y no se llama a `deleteUTFiles`.
 - **Unit:** cliente intenta usar `imageUploader` → 403.
 - **Integración:** reemplazar comprobante propio borra el anterior; orden pagada → rechazo.
 - **Manual:** subir y reemplazar un comprobante desde la pantalla de la orden.
+
+**Resolución**
+- **Registro de subidas (decisión: tabla nueva):** modelo `UploadedFile` (clave, URL, usuario, orden, propósito `RECEIPT` o `IMAGE`) con migración escrita a mano en `prisma/migrations/20261009000000_uploaded_file` (se aplica con `migrate deploy` en el deploy). Lo llena el servidor al terminar cada subida y **la primera inscripción de una clave gana**: volver a registrarla no cambia su dueño.
+- **Endpoints de subida** (`app/api/uploadthing/core.ts`, con las reglas en `lib/uploadthing-guards.ts`): `imageUploader` exige administrador o vendedor; `receiptUploader` recibe un `orderId` y exige una orden propia (o de un administrador/vendedor), de transferencia bancaria, sin pagar y sin cancelar. Ambos aceptan solo JPEG, PNG y WEBP (sin SVG ni GIF).
+- **`updateOrderReceipt`:** además de la sesión y la propiedad de la orden, exige método de transferencia, orden no pagada ni cancelada, una URL de UploadThing válida (`https` y `utfs.io` o `<appid>.ufs.sh`, ruta `/f/<clave>`) y una clave **registrada para ese usuario y esa orden**. Al reemplazar un comprobante, borra el anterior solo a través del registro.
+- **Borrado seguro** (`lib/uploads/registry.ts`): `deleteRegisteredReceiptFile` solo borra si la clave está registrada como comprobante de esa orden **y** ninguna otra fila la referencia (`Product.images`, `ProductColor.images`, `PromoBanner.image`, `User.image` u otra orden). Nunca lanza. El mismo helper se usa al rechazar una transferencia, por lo que un dato viejo con una URL ajena guardada como comprobante ya no dispara ningún borrado.
+- **Interfaz** (según `docs/DESIGN.md`): el campo de subida envía el `orderId`, la zona de arrastre y el bloque del comprobante usan los tokens del sistema, y el texto ya no promete PDF (el servidor nunca lo aceptó).
+- **Verificación:** 222 tests unitarios y de integración con la base real (producto → comprobante rechazado sin borrar nada, orden pagada rechazada, archivo de otro usuario rechazado, reemplazo propio que borra el anterior, rechazo de transferencia con dato viejo). **No se probó una subida real** a UploadThing (servicio externo con credenciales del proyecto) **ni se vio la pantalla de la orden en el navegador**; las pruebas E2E de Playwright no se ejecutaron.
+- **Pendientes y deuda conocida:** los comprobantes subidos **antes** del registro no están inscriptos: reemplazarlos o rechazarlos no borra el archivo viejo (queda huérfano en UploadThing, es seguro) y no se pueden reenviar como comprobante nuevo; `maxFileCount` de `imageUploader` rige por tipo MIME, no en total; `lib/uploadthing-guards.ts` podría exponer el texto de un error de base de datos al cliente; `product.actions.ts` y `promo-banner.actions.ts` siguen borrando por URL sin pasar por el registro (borran imágenes que ellos mismos guardaron); al migrar a uploadthing v9 hay que pasar de `url` a `ufsUrl` y agregar `*.ufs.sh` a `remotePatterns`. Un script de relleno del registro para los comprobantes anteriores es una mejora posible.
 
 ---
 
