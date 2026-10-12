@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { Payment } from 'mercadopago';
 import { getMercadoPagoClient } from '@/lib/mercadopago';
 import { updateOrderToPaid } from '@/lib/actions/order.actions';
+import { prisma } from '@/db/prisma';
 
 function verifyMPSignature(
   xSignature: string,
@@ -97,8 +98,112 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+      });
+
+      if (!order) {
+        return NextResponse.json(
+          { success: false, message: 'Orden no encontrada' },
+          { status: 404 }
+        );
+      }
+
+      if (order.isPaid) {
+        return NextResponse.json({ success: true, message: 'Order already paid' });
+      }
+
       const email = payment.payer?.email || '';
-      const amount = payment.transaction_amount || 0;
+      const amount = Number(payment.transaction_amount) || 0;
+      const orderTotal = Number(order.totalPrice);
+      const currency = payment.currency_id;
+
+      // Validar moneda ARS
+      if (currency !== 'ARS') {
+        console.warn(`[MP Webhook] Discrepancia de moneda para orden ${orderId}: esperada ARS, recibida ${currency}`);
+        await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            paymentResult: {
+              id: String(paymentId),
+              status: 'DISCREPANCY_CURRENCY',
+              email_address: email,
+              pricePaid: String(amount),
+              currency,
+              reason: `Moneda inválida: esperada ARS, recibida ${currency}`,
+            },
+          },
+        });
+        return NextResponse.json({
+          success: true,
+          message: 'Payment currency discrepancy; flagged for manual review',
+        });
+      }
+
+      // Validar método de pago de la orden
+      const isMP = order.paymentMethod.toLowerCase().includes('mercadopago');
+      if (!isMP) {
+        console.warn(`[MP Webhook] Discrepancia de método de pago para orden ${orderId}: método en orden ${order.paymentMethod}`);
+        await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            paymentResult: {
+              id: String(paymentId),
+              status: 'DISCREPANCY_PAYMENT_METHOD',
+              email_address: email,
+              pricePaid: String(amount),
+              reason: `Método de pago de la orden no es Mercado Pago: ${order.paymentMethod}`,
+            },
+          },
+        });
+        return NextResponse.json({
+          success: true,
+          message: 'Payment method discrepancy; flagged for manual review',
+        });
+      }
+
+      // Validar si la orden está cancelada
+      if (order.shippingStatus === 'Cancelado') {
+        console.warn(`[MP Webhook] Pago recibido para orden cancelada ${orderId}`);
+        await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            paymentResult: {
+              id: String(paymentId),
+              status: 'DISCREPANCY_ORDER_CANCELLED',
+              email_address: email,
+              pricePaid: String(amount),
+              reason: 'Pago recibido para una orden cancelada',
+            },
+          },
+        });
+        return NextResponse.json({
+          success: true,
+          message: 'Order cancelled; flagged for manual review',
+        });
+      }
+
+      // Validar monto al centavo
+      if (Math.abs(orderTotal - amount) >= 0.01) {
+        console.warn(`[MP Webhook] Discrepancia de monto para orden ${orderId}: esperada ${orderTotal}, recibida ${amount}`);
+        await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            paymentResult: {
+              id: String(paymentId),
+              status: 'DISCREPANCY_AMOUNT',
+              email_address: email,
+              pricePaid: String(amount),
+              orderTotal: String(orderTotal),
+              reason: `Monto discrepante: orden requiere ${orderTotal}, recibido ${amount}`,
+            },
+          },
+        });
+        return NextResponse.json({
+          success: true,
+          message: 'Payment amount discrepancy; flagged for manual review',
+        });
+      }
 
       await updateOrderToPaid({
         orderId,
