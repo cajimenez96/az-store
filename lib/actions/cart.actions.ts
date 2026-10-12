@@ -5,22 +5,22 @@ import { CartItem } from '@/types';
 import { convertToPlainObject, formatError, round2 } from '../utils';
 import { auth } from '@/auth';
 import { prisma } from '@/db/prisma';
-import { cartItemSchema, insertCartSchema } from '../validators';
+import { addToCartSchema, insertCartSchema } from '../validators';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 import { getShippingSettings } from './settings.actions';
 import { v4 as uuidv4 } from 'uuid';
+import { InsufficientStockError, resolveLine } from '../pricing/quote';
+import { calcTax } from '../pricing/totals';
 
 // Calculate cart prices
 // Note: shippingPrice is always 0 in cart. It's calculated in checkout based on shipping method (retiro/envío)
 const calcPrice = async (items: CartItem[]) => {
-  const taxRate = parseFloat(process.env.TAX_RATE ?? '0');
-
   const itemsPrice = round2(
       items.reduce((acc, item) => acc + Number(item.priceUsed) * item.qty, 0)
     ),
     shippingPrice = 0, // Always 0 in cart, adjusted during checkout
-    taxPrice = round2(taxRate * itemsPrice),
+    taxPrice = calcTax(itemsPrice),
     totalPrice = round2(itemsPrice + taxPrice + shippingPrice);
 
   return {
@@ -31,7 +31,43 @@ const calcPrice = async (items: CartItem[]) => {
   };
 };
 
-export async function addItemToCart(data: CartItem) {
+const cartItemKey = (item: { productId: string; size?: string; productColorId?: string }) =>
+  [item.productId, item.size ?? '', item.productColorId ?? ''].join('|');
+
+// Re-resolves every item from the database (web cart always shows the LIST/MERCADOPAGO price).
+// Same variant lines are combined; qty is clamped to the variant stock; items that
+// cannot be resolved any more (inactive product, variant gone, no price) are dropped.
+// NOT exported: this file is 'use server', every export is a public Server Action.
+const reconcileItems = async (items: CartItem[]): Promise<CartItem[]> => {
+  const desired = new Map<string, CartItem>();
+  for (const item of items) {
+    const key = cartItemKey(item);
+    const current = desired.get(key);
+    if (current) current.qty += item.qty;
+    else desired.set(key, { ...item });
+  }
+
+  const reconciled: CartItem[] = [];
+  for (const item of desired.values()) {
+    const input = {
+      productId: item.productId,
+      size: item.size,
+      productColorId: item.productColorId,
+    };
+    try {
+      reconciled.push(await resolveLine({ ...input, qty: item.qty }, 'MERCADOPAGO'));
+    } catch (error) {
+      if (error instanceof InsufficientStockError && error.available > 0) {
+        reconciled.push(await resolveLine({ ...input, qty: error.available }, 'MERCADOPAGO'));
+      }
+      // Any other failure (or no stock at all): drop the item.
+    }
+  }
+  return reconciled;
+};
+
+// Only productId / size / productColorId are read from the client; everything else is resolved server-side.
+export async function addItemToCart(data: { productId: string; size?: string; productColorId?: string }) {
   try {
     // Get cart session ID and user ID
     let sessionCartId = (await cookies()).get('sessionCartId')?.value;
@@ -60,44 +96,25 @@ export async function addItemToCart(data: CartItem) {
     // Get cart
     const cart = await getMyCart();
 
-    // Parse and validate item
-    const item = cartItemSchema.parse(data);
+    // Parse the client input: unknown fields (price, name, qty...) are stripped
+    const input = addToCartSchema.parse(data);
 
-    // Find product in database
-    const product = await prisma.product.findFirst({
-      where: { id: item.productId },
-      include: { variants: { include: { size: true, productColor: { include: { color: true } } } } },
-    });
-    if (!product) throw new Error('Producto no encontrado');
-    if (!product.isActive) {
-      throw new Error('Este producto no está disponible actualmente');
-    }
+    // Qty is never client-controlled: one more unit than what the cart already holds
+    const existItem = (cart?.items as CartItem[] | undefined)?.find(
+      (x) => cartItemKey(x) === cartItemKey(input)
+    );
+    const targetQty = (existItem?.qty ?? 0) + 1;
 
-    let maxStock = 0;
-    if (item.size && product.variants && product.variants.length > 0) {
-      const variant = product.variants.find((v) => {
-        const sizeMatches = v.size?.name === item.size;
-        // Si el producto tiene variantes de color y el cart trae productColorId,
-        // exigimos match por color también. Si no, matchear por size solamente.
-        if (product.hasColorVariants && item.productColorId) {
-          return sizeMatches && v.colorId === item.productColorId;
-        }
-        return sizeMatches;
-      });
-      if (!variant) throw new Error('Variante (talle/color) no encontrada');
-      maxStock = variant.stock;
-    } else {
-      // If no variants, maybe just fallback to a generic stock or assume 0
-      maxStock = 0; // Or whatever fallback
-    }
+    // Name, slug, image, price and stock come from the database
+    const line = await resolveLine({ ...input, qty: targetQty }, 'MERCADOPAGO');
 
     if (!cart) {
       // Create new cart object
       const newCart = insertCartSchema.parse({
         userId: userId,
-        items: [item],
+        items: [line],
         sessionCartId: sessionCartId,
-        ...(await calcPrice([item])),
+        ...(await calcPrice([line])),
       });
 
       // Add to database
@@ -107,64 +124,28 @@ export async function addItemToCart(data: CartItem) {
           updatedAt: new Date(),
         },
       });
-
-      // Revalidate product page
-      revalidatePath(`/product/${product.slug}`);
-
-      return {
-        success: true,
-        message: `${product.name} agregado al carrito`,
-      };
     } else {
-      // Check if item is already in cart (match por size + color)
-      const existItem = (cart.items as CartItem[]).find(
-        (x) =>
-          x.productId === item.productId &&
-          x.size === item.size &&
-          x.productColorId === item.productColorId
-      );
-
-      if (existItem) {
-        // Check stock
-        if (maxStock < existItem.qty + 1) {
-          throw new Error('No hay suficiente stock');
-        }
-
-        // Increase the quantity
-        (cart.items as CartItem[]).find(
-          (x) =>
-            x.productId === item.productId &&
-            x.size === item.size &&
-            x.productColorId === item.productColorId
-        )!.qty = existItem.qty + 1;
-      } else {
-        // If item does not exist in cart
-        // Check stock
-        if (maxStock < 1) throw new Error('No hay suficiente stock');
-
-        // Add item to the cart.items
-        cart.items.push(item);
-      }
+      const items = existItem
+        ? (cart.items as CartItem[]).map((x) => (x === existItem ? line : x))
+        : [...(cart.items as CartItem[]), line];
 
       // Save to database
       await prisma.cart.update({
         where: { id: cart.id },
         data: {
-          items: cart.items as Prisma.CartUpdateitemsInput[],
-          ...(await calcPrice(cart.items as CartItem[])),
+          items: items as Prisma.CartUpdateitemsInput[],
+          ...(await calcPrice(items)),
           updatedAt: new Date(),
         },
       });
-
-      revalidatePath(`/product/${product.slug}`);
-
-      return {
-        success: true,
-        message: `${product.name} ${
-          existItem ? 'actualizado en el' : 'agregado al'
-        } carrito`,
-      };
     }
+
+    revalidatePath(`/product/${line.slug}`);
+
+    return {
+      success: true,
+      message: `${line.name} ${existItem ? 'actualizado en el' : 'agregado al'} carrito`,
+    };
   } catch (error) {
     return {
       success: false,
@@ -296,58 +277,30 @@ export async function mergeCart(userId: string, sessionCartId: string) {
     if (!sessionCart) return;
 
     if (!userCart) {
-      // If user has no cart, associate the session cart to the user
+      // If user has no cart, adopt the session cart (re-priced from the database)
+      const items = await reconcileItems(sessionCart.items as CartItem[]);
       await prisma.cart.update({
         where: { id: sessionCart.id },
-        data: { userId, updatedAt: new Date() },
+        data: {
+          userId,
+          items: items as Prisma.CartUpdateitemsInput[],
+          ...(await calcPrice(items)),
+          updatedAt: new Date(),
+        },
       });
     } else {
-      const userItems = userCart.items as CartItem[];
-      const sessionItems = sessionCart.items as CartItem[];
-
-      for (const sessionItem of sessionItems) {
-        const existItem = userItems.find(
-          (x) =>
-            x.productId === sessionItem.productId &&
-            x.size === sessionItem.size &&
-            x.productColorId === sessionItem.productColorId
-        );
-
-        // Fetch product to verify stock
-        const product = await prisma.product.findFirst({
-          where: { id: sessionItem.productId },
-          include: { variants: { include: { size: true, productColor: { include: { color: true } } } } }
-        });
-
-        let maxStock = 0;
-        if (sessionItem.size && product?.variants && product.variants.length > 0) {
-          const variant = product.variants.find(
-            (v) => v.size?.name === sessionItem.size
-          );
-          if (variant) {
-            maxStock = variant.stock;
-          }
-        }
-
-        if (existItem) {
-          const newQty = existItem.qty + sessionItem.qty;
-          existItem.qty = newQty > maxStock ? maxStock : newQty;
-        } else {
-          // Limit qty to stock
-          const newQty = sessionItem.qty > maxStock ? maxStock : sessionItem.qty;
-          userItems.push({
-            ...sessionItem,
-            qty: newQty,
-          });
-        }
-      }
+      // Combine both carts and re-resolve every line from the database
+      const items = await reconcileItems([
+        ...(userCart.items as CartItem[]),
+        ...(sessionCart.items as CartItem[]),
+      ]);
 
       // Update user cart with consolidated items and recalculated prices
       await prisma.cart.update({
         where: { id: userCart.id },
         data: {
-          items: userItems as Prisma.CartUpdateitemsInput[],
-          ...(await calcPrice(userItems)),
+          items: items as Prisma.CartUpdateitemsInput[],
+          ...(await calcPrice(items)),
           updatedAt: new Date(),
         },
       });

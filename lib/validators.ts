@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { formatNumberWithDecimal } from './utils';
-import { PAYMENT_METHODS } from './constants';
+import { PAYMENT_METHODS, SIZE_NAME_MAX_LENGTH } from './constants';
 
 const currency = z
   .string()
@@ -96,6 +96,13 @@ export const cartItemSchema = z.object({
   productColorId: z.string().optional(),
   colorName: z.string().optional(),
   colorHex: z.string().optional(),
+});
+
+// The only fields the client may choose when adding to the cart; zod strips anything else.
+export const addToCartSchema = z.object({
+  productId: z.string().min(1, 'El producto es requerido'),
+  size: z.string().optional(),
+  productColorId: z.string().optional(),
 });
 
 export const insertCartSchema = z.object({
@@ -215,9 +222,17 @@ export const updateCategorySchema = insertCategorySchema.extend({
 });
 
 // Size Schemas
+// AZ-003: also the server-side contract of createSize; only these fields are persisted
 export const insertSizeSchema = z.object({
-  name: z.string().min(1, 'El nombre debe tener al menos 1 caracter'),
-  categoryId: z.string().min(1, 'La categoría es requerida'),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'El nombre debe tener al menos 1 caracter')
+    .max(
+      SIZE_NAME_MAX_LENGTH,
+      `El nombre del talle no puede superar los ${SIZE_NAME_MAX_LENGTH} caracteres`
+    ),
+  categoryId: z.string().uuid('La categoría es inválida'),
 });
 
 // Brand Schemas
@@ -281,3 +296,5 @@ export const updatePromoBannerSchema = insertPromoBannerSchema.extend({
   id: z.string().uuid('ID inválido'),
 });
 
+
+export const uuidSchema = z.string().uuid('El identificador es inválido');

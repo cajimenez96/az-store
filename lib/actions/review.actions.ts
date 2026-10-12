@@ -13,12 +13,12 @@ export async function createUpdateReview(
 ) {
   try {
     const session = await auth();
-    if (!session) throw new Error('Usuario no autenticado');
+    if (!session?.user?.id) throw new Error('Usuario no autenticado');
 
     // Validate and store the review
     const review = insertReviewSchema.parse({
       ...data,
-      userId: session?.user?.id,
+      userId: session.user.id,
     });
 
     // Get product that is being reviewed
@@ -113,12 +113,12 @@ export async function getReviewByProductId({
 }) {
   const session = await auth();
 
-  if (!session) throw new Error('Usuario no autenticado');
+  if (!session?.user?.id) throw new Error('Usuario no autenticado');
 
   return await prisma.review.findFirst({
     where: {
       productId,
-      userId: session?.user?.id,
+      userId: session.user.id,
     },
   });
 }

@@ -82,5 +82,8 @@ export const reviewFormDefaultValues = {
 
 export const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
 
+// Max length of a size name; shared by the zod schema and the admin form's maxLength
+export const SIZE_NAME_MAX_LENGTH = 50;
+
 export const DEFAULT_BRAND_ID = '00000000-0000-0000-0000-000000000001';
 export const DEFAULT_CATEGORY_ID = '00000000-0000-0000-0000-000000000002';

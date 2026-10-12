@@ -51,32 +51,40 @@ const DeleteDialog = ({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         {trigger ?? (
-          <Button size='sm' variant='destructive' className='ml-2'>
+          <Button
+            size='sm'
+            variant='ghost'
+            className='ml-2 min-h-9 rounded-nike-full bg-nike-soft-cloud px-4 font-medium text-nike-ink shadow-none hover:bg-nike-hairline-soft'
+          >
             Eliminar
           </Button>
         )}
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className='rounded-nike-md border-nike-hairline-soft bg-white shadow-none'>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+          <AlertDialogTitle className='font-sans text-nike-ink'>
+            ¿Estás absolutamente seguro?
+          </AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div>
+            <div className='text-nike-mute'>
               <span>Esta acción no se puede deshacer.</span>
               {warningMessage && (
-                <span className='mt-2 block font-medium text-amber-600 dark:text-amber-400'>
+                <span className='mt-3 block rounded-nike-sm bg-nike-soft-cloud px-4 py-3 font-medium text-nike-ink'>
                   {warningMessage}
                 </span>
               )}
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        <AlertDialogFooter className='gap-2'>
+          <AlertDialogCancel className='mt-0 min-h-11 rounded-nike-full border-0 bg-nike-soft-cloud px-5 font-medium text-nike-ink shadow-none hover:bg-nike-hairline-soft'>
+            Cancelar
+          </AlertDialogCancel>
           <Button
-            variant='destructive'
             size='sm'
             disabled={isPending}
             onClick={handleDeleteClick}
+            className='min-h-11 rounded-nike-full bg-nike-ink px-5 font-medium text-white shadow-none hover:bg-nike-charcoal'
           >
             {isPending ? 'Eliminando...' : 'Eliminar'}
           </Button>
