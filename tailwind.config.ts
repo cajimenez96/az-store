@@ -128,53 +128,13 @@ export default {
   			}
   		},
   		fontFamily: {
-  			sans: [
-  				'var(--font-inter)',
-  				'var(--font-geist)',
-  				'Inter',
-  				'Helvetica Neue',
-  				'Helvetica',
-  				'Arial',
-  				'sans-serif'
-  			],
-  			serif: [
-  				'var(--font-cormorant)',
-  				'Cormorant Garamond',
-  				'Georgia',
-  				'serif'
-  			],
-  			display: [
-  				'var(--font-cormorant)',
-  				'Cormorant Garamond',
-  				'Georgia',
-  				'serif'
-  			],
-  			'marder-display': [
-  				'var(--font-cormorant)',
-  				'Cormorant Garamond',
-  				'Georgia',
-  				'serif'
-  			],
-  			'marder-body': [
-  				'var(--font-inter)',
-  				'var(--font-geist)',
-  				'Inter',
-  				'sans-serif'
-  			],
-  			'nike-display': [
-  				'var(--font-cormorant)',
-  				'Cormorant Garamond',
-  				'Georgia',
-  				'serif'
-  			],
-  			'nike-body': [
-  				'var(--font-inter)',
-  				'Inter',
-  				'Helvetica Now Text',
-  				'Helvetica',
-  				'Arial',
-  				'sans-serif'
-  			]
+  			sans: ['var(--font-jost)', 'Jost', 'Futura', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  			serif: ['var(--font-jost)', 'Jost', 'Futura', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  			display: ['var(--font-jost)', 'Jost', 'Futura', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  			'marder-display': ['var(--font-jost)', 'Jost', 'Futura', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  			'marder-body': ['var(--font-jost)', 'Jost', 'Futura', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  			'nike-display': ['var(--font-jost)', 'Jost', 'Futura', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+  			'nike-body': ['var(--font-jost)', 'Jost', 'Futura', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif']
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

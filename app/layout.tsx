@@ -1,32 +1,13 @@
 import type { Metadata } from 'next';
-import { Geist, Cormorant_Garamond, Inter, Bebas_Neue } from 'next/font/google';
+import { Jost } from 'next/font/google';
 import '@/assets/styles/globals.css';
 import { APP_DESCRIPTION, APP_NAME, SERVER_URL } from '@/lib/constants';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/toaster';
 
-const geist = Geist({
+const jost = Jost({
   subsets: ['latin'],
-  variable: '--font-geist',
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-cormorant',
-  display: 'swap',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const bebasNeue = Bebas_Neue({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-bebas',
+  variable: '--font-jost',
   display: 'swap',
 });
 
@@ -72,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang='es' suppressHydrationWarning>
       <body
-        className={`${geist.variable} ${cormorant.variable} ${inter.variable} ${bebasNeue.variable} ${inter.className} antialiased`}
+        className={`${jost.variable} ${jost.className} antialiased`}
       >
         <ThemeProvider
           attribute='class'

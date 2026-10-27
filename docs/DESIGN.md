@@ -31,81 +31,81 @@ colors:
 
 typography:
   display-campaign:
-    fontFamily: Nike Futura ND
+    fontFamily: Jost
     fontSize: 96px
     fontWeight: 500
     lineHeight: 0.9
     letterSpacing: 0
     textTransform: uppercase
   heading-xl:
-    fontFamily: Helvetica Now Display Medium
+    fontFamily: Jost
     fontSize: 32px
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: 0
   heading-lg:
-    fontFamily: Helvetica Now Display Medium
+    fontFamily: Jost
     fontSize: 24px
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: 0
   heading-md:
-    fontFamily: Helvetica Now Display Medium
+    fontFamily: Jost
     fontSize: 16px
     fontWeight: 500
     lineHeight: 1.75
     letterSpacing: 0
   body-md:
-    fontFamily: Helvetica Now Text
+    fontFamily: Jost
     fontSize: 16px
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: 0
   body-strong:
-    fontFamily: Helvetica Now Text Medium
+    fontFamily: Jost
     fontSize: 16px
     fontWeight: 500
     lineHeight: 1.5
     letterSpacing: 0
   button-lg:
-    fontFamily: Helvetica Now Display Medium
+    fontFamily: Jost
     fontSize: 24px
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: 0
   button-md:
-    fontFamily: Helvetica Now Text Medium
+    fontFamily: Jost
     fontSize: 16px
     fontWeight: 500
     lineHeight: 1.5
     letterSpacing: 0
   button-sm:
-    fontFamily: Helvetica Now Text Medium
+    fontFamily: Jost
     fontSize: 14px
     fontWeight: 500
     lineHeight: 1.5
     letterSpacing: 0
   link-md:
-    fontFamily: Helvetica Now Text
+    fontFamily: Jost
     fontSize: 16px
     fontWeight: 500
     lineHeight: 1.75
     letterSpacing: 0
     textDecoration: underline
   caption-md:
-    fontFamily: Helvetica Now Text Medium
+    fontFamily: Jost
     fontSize: 14px
     fontWeight: 500
     lineHeight: 1.5
     letterSpacing: 0
   caption-sm:
-    fontFamily: Helvetica Now Text Medium
+    fontFamily: Jost
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.5
     letterSpacing: 0
   utility-xs:
-    fontFamily: Helvetica Neue
+    fontFamily: Jost
     fontSize: 9px
     fontWeight: 500
     lineHeight: 1.75
@@ -268,7 +268,7 @@ Across `/men`, the trail-running listing, the Zegama PDP, `/membership`, and Jor
 
 **Key Characteristics:**
 
-- Editorial campaign hero with `{typography.display-campaign}` (Nike Futura ND, 96px, line-height 0.9, uppercase) burned directly into full-bleed photography
+- Editorial campaign hero with `{typography.display-campaign}` (Jost, 96px, line-height 0.9, uppercase) burned directly into full-bleed photography
 - Pure black/white/single-gray UI palette: `{colors.ink}`, `{colors.canvas}`, and `{colors.soft-cloud}` carry ~95% of the chrome surface area
 - Pill geometry everywhere: every CTA, search field, filter chip, and badge uses `{rounded.full}` (30px) or `{rounded.md}` (24px) — there are no sharp-cornered buttons in the system
 - Product cards have zero radius, zero shadow, sit directly on `{colors.soft-cloud}` swatch backgrounds — the photograph is the card
@@ -323,14 +323,9 @@ These appear sparingly — almost exclusively as small chip backgrounds, swatch 
 
 ### Font Family
 
-- **Nike Futura ND** (display campaign only) — proprietary geometric sans for the towering uppercase headlines burned into campaign hero photography. Falls back to Helvetica Now Text Medium → Helvetica → Arial.
-- **Helvetica Now Display Medium** (headings 16–32px) — modern Helvetica cut tuned for display sizes; carries every section title, PDP product name, and dialog headline.
-- **Helvetica Now Text Medium** (UI 12–16px) — buttons, captions, swatch labels, badge text. The system's UI workhorse.
-- **Helvetica Now Text** (body and links) — long-form body and underlined inline links.
-- **Neue Frutiger Arabic** — RTL pairing for Arabic locales at `{typography.heading-lg}` and caption sizes.
-- **Helvetica Neue 9px** — legal-fine-print utility row only (`{typography.utility-xs}`).
-
-When substituting on systems without proprietary Nike fonts: pair **Inter** (Display 700 for body chrome, Display 500 for buttons) with **Bebas Neue** or **Anton** at 96px/0.9 line-height for the campaign headline tier. Tighten letter-spacing slightly (-0.5%) on the substitute to approximate Futura ND's optical weight.
+- **Jost** — the single typeface for the whole storefront. A free geometric sans in the Futura lineage (variable, weights 100–900, loaded through `next/font/google`), used for every tier: campaign headlines, section titles, UI chrome, body copy and links. Falls back to Futura → Helvetica Neue → Helvetica → Arial.
+- Weight carries the hierarchy instead of a second family: **500** for display, headings, buttons and captions; **400** for body copy and links.
+- Tailwind exposes it under every font token (`font-sans`, `font-display`, `font-nike-display`, `font-marder-display`, …), so changing the family is a one-place edit in `tailwind.config.ts` and `app/layout.tsx`.
 
 ### Hierarchy
 
@@ -352,11 +347,11 @@ When substituting on systems without proprietary Nike fonts: pair **Inter** (Dis
 
 ### Principles
 
-The system runs on extreme typographic contrast: a single 96px uppercase display tier reserved for editorial campaign moments, and a quiet 12–16px Helvetica Now Text/Medium tier carrying everything else. There is almost no middle ground — the jump from `{typography.heading-xl}` (32px) directly to `{typography.body-strong}` (16px) is intentional and creates the "billboard above, catalog below" effect across every page. Letter-spacing is left at 0 (Futura ND and Helvetica Now are both cut for tight optical fit at scale).
+The system runs on extreme typographic contrast: a single 96px uppercase display tier reserved for editorial campaign moments, and a quiet 12–16px Jost 400/500 tier carrying everything else. There is almost no middle ground — the jump from `{typography.heading-xl}` (32px) directly to `{typography.body-strong}` (16px) is intentional and creates the "billboard above, catalog below" effect across every page. Letter-spacing is left at 0 (Jost, like Futura, is cut for tight optical fit at scale).
 
-### Note on Font Substitutes
+### Note on Font Choice
 
-The closest open-source path to Nike's display tier is **Bebas Neue** (free, geometric condensed) at 96px / 0.9 / uppercase / 500. For UI text, **Inter** is the safest substitute — match weights 400/500 and the system reads almost identically at button and caption sizes.
+The original Nike system pairs proprietary Futura ND (display) with Helvetica Now (UI). This project replaces both with **Jost**: it is the closest open geometric match to Futura ND, so the 96px uppercase campaign tier keeps its character, and at 400/500 it stays quiet and legible at button and caption sizes. Uppercase display text is naturally wide — keep line-height at 0.9–1.0 and leave letter-spacing at 0 (tighten to -0.5% only at 96px).
 
 ## Layout
 

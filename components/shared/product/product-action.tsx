@@ -65,7 +65,7 @@ export default function ProductAction({
 
   return (
     <>
-      <div className='flex flex-col gap-6 w-full'>
+      <div className='flex flex-col gap-8 w-full'>
         {/* Color selector (solo si el producto tiene colores) */}
         {product.colors.length > 0 && (
           <div className='space-y-3'>

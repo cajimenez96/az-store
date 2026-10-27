@@ -212,7 +212,7 @@
 
   /* Legacy utilities (used by existing components — remove as redesign progresses) */
   .font-ss03       { font-feature-settings: "ss03" 1; }
-  .font-display    { font-family: var(--font-geist), Geist, sans-serif; }
+  .font-display    { font-family: var(--font-jost), Jost, sans-serif; }
   .font-weight-330 { font-weight: 300; }
 
   .display-xxl {
