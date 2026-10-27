@@ -5,10 +5,12 @@ import { getProductsByBanner } from '@/lib/actions/product.actions';
 import { getAllCategories } from '@/lib/actions/category.actions';
 import { getAllColors } from '@/lib/actions/color.actions';
 import Link from 'next/link';
-import { SlidersHorizontal, X, Tag } from 'lucide-react';
+import { SlidersHorizontal, X, Tag, ChevronDown } from 'lucide-react';
 import { Metadata } from 'next';
 import BannerActivator from '@/components/shared/banner-activator';
 import SearchPagination from '@/components/shared/search-pagination';
+import FiltersDisclosure from '@/components/shared/filters-disclosure';
+import { PAGE_SIZE } from '@/lib/constants';
 
 // --- Price ranges (ARS) ---
 const prices = [
@@ -26,6 +28,25 @@ const sortLabels: Record<string, string> = {
 };
 
 const sortOrders = ['newest', 'lowest', 'highest'];
+
+// Native <details> accordion: no JS needed, keyboard accessible
+const FilterGroup = ({
+  title,
+  defaultOpen,
+  children,
+}: {
+  title: string;
+  defaultOpen: boolean;
+  children: React.ReactNode;
+}) => (
+  <details open={defaultOpen} className='group border-t border-az-hairline-soft'>
+    <summary className='flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden py-4 az-body-sm-bold text-az-ink-deep'>
+      {title}
+      <ChevronDown className='w-4 h-4 text-az-steel transition-transform duration-150 group-open:rotate-180' />
+    </summary>
+    <div className='pb-4'>{children}</div>
+  </details>
+);
 
 // --- Metadata ---
 export async function generateMetadata(props: {
@@ -161,150 +182,136 @@ const SearchPage = async (props: {
     .filter(Boolean)
     .join(' · ');
 
+  const resultCount = (products.data as unknown[]).length;
+  const rangeStart = banner ? 1 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = rangeStart + resultCount - 1;
+
+  const rowClass = (active: boolean) =>
+    `az-body-sm block py-1.5 transition-colors duration-150 ${
+      active
+        ? 'text-az-ink-deep font-semibold underline underline-offset-4'
+        : 'text-az-steel hover:text-az-ink-deep'
+    }`;
+
+
   return (
     <>
       {/* Sets the activeBanner cookie client-side when banner param is present */}
       {banner && <BannerActivator bannerId={banner} />}
 
-      <div className='grid md:grid-cols-[220px_1fr] gap-8 items-start'>
-        {/* ── Sidebar filters ── */}
-        <aside className='bg-az-canvas rounded-az-xl border border-az-hairline-soft p-5 space-y-7 md:sticky md:top-24'>
-          <div className='flex items-center gap-2 border-b border-az-hairline-soft pb-4'>
-            <SlidersHorizontal className='w-4 h-4 text-az-steel' />
-            <h2 className='az-body-sm-bold text-az-ink-deep'>Filtros</h2>
-          </div>
+      {/* Breadcrumb */}
+      <nav aria-label='Breadcrumb' className='az-caption text-az-stone mb-6'>
+        <Link href='/' className='hover:text-az-ink-deep transition-colors'>
+          Inicio
+        </Link>
+        <span className='mx-2'>/</span>
+        <span className='text-az-ink-deep'>Productos</span>
+      </nav>
 
-          {/* Categories */}
-          {!banner && (
-            <div className='space-y-3'>
-              <p className='az-caption-bold text-az-stone uppercase tracking-wider'>Categoría</p>
-              <ul className='space-y-1'>
-                <li>
-                  <Link
-                    href={getFilterUrl({ c: 'all' })}
-                    className={`az-body-sm block px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
-                      category === 'all' || category === ''
-                        ? 'bg-az-primary text-white font-semibold'
-                        : 'text-az-charcoal hover:bg-az-surface-soft'
-                    }`}
+      <div className='grid md:grid-cols-[220px_1fr] gap-8 lg:gap-12 items-start'>
+        {/* ── Filters ── */}
+        <aside className='md:sticky md:top-24'>
+          <FiltersDisclosure
+            footer={
+              hasActiveFilters ? (
+                <Link href='/search' className='block'>
+                  <Button
+                    variant='outlineLight'
+                    size='sm'
+                    className='w-full rounded-az-full gap-1.5'
                   >
-                    Todas
-                  </Link>
-                </li>
-                {categories.map((x) => (
-                  <li key={x.id}>
-                    <Link
-                      href={getFilterUrl({ c: x.slug })}
-                      className={`az-body-sm block px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
-                        category === x.slug
-                          ? 'bg-az-primary text-white font-semibold'
-                          : 'text-az-charcoal hover:bg-az-surface-soft'
-                      }`}
-                    >
-                      {x.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Price — hide when browsing a banner (fixed product set) */}
-          {!banner && (
-            <div className='space-y-3'>
-              <p className='az-caption-bold text-az-stone uppercase tracking-wider'>Precio</p>
-              <ul className='space-y-1'>
-                <li>
-                  <Link
-                    href={getFilterUrl({ p: 'all' })}
-                    className={`az-body-sm block px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
-                      price === 'all'
-                        ? 'bg-az-primary text-white font-semibold'
-                        : 'text-az-charcoal hover:bg-az-surface-soft'
-                    }`}
-                  >
-                    Cualquier precio
-                  </Link>
-                </li>
-                {prices.map((pr) => (
-                  <li key={pr.value}>
-                    <Link
-                      href={getFilterUrl({ p: pr.value })}
-                      className={`az-body-sm block px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
-                        price === pr.value
-                          ? 'bg-az-primary text-white font-semibold'
-                          : 'text-az-charcoal hover:bg-az-surface-soft'
-                      }`}
-                    >
-                      {pr.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Color filter */}
-          {colors.length > 0 && (
-            <div className='space-y-3'>
-              <p className='az-caption-bold text-az-steel uppercase tracking-widest'>Color</p>
-              <ul className='space-y-1.5'>
-                <li>
-                  <Link
-                    href={getFilterUrl({ col: 'all' })}
-                    className={`az-body-sm block px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
-                      color === 'all'
-                        ? 'bg-az-primary text-white font-semibold'
-                        : 'text-az-charcoal hover:bg-az-surface-soft'
-                    }`}
-                  >
-                    Todos
-                  </Link>
-                </li>
-                {colors.map((co: { id: string; name: string; hex: string }) => {
-                  const slug = co.name.toLowerCase().replace(/\s+/g, '-');
-                  const isActive = color === slug;
-                  return (
-                    <li key={co.id}>
+                    <X className='w-3.5 h-3.5' />
+                    Limpiar filtros
+                  </Button>
+                </Link>
+              ) : null
+            }
+          >
+            <div>
+              {/* Categories */}
+              {!banner && (
+                <FilterGroup title='Categoría' defaultOpen>
+                  <ul>
+                    <li>
                       <Link
-                        href={getFilterUrl({ col: slug })}
-                        className={`az-body-sm flex items-center gap-2 px-3 py-1.5 rounded-az-lg transition-colors duration-150 ${
-                          isActive
-                            ? 'bg-az-primary text-white font-semibold'
-                            : 'text-az-charcoal hover:bg-az-surface-soft'
-                        }`}
+                        href={getFilterUrl({ c: 'all' })}
+                        className={rowClass(category === 'all' || category === '')}
                       >
-                        <span
-                          className='inline-block w-4 h-4 rounded-full border border-az-hairline'
-                          style={{ backgroundColor: co.hex }}
-                          aria-hidden
-                        />
-                        {co.name}
+                        Todas
                       </Link>
                     </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+                    {categories.map((x) => (
+                      <li key={x.id}>
+                        <Link
+                          href={getFilterUrl({ c: x.slug })}
+                          className={rowClass(category === x.slug)}
+                        >
+                          {x.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </FilterGroup>
+              )}
 
-          {/* Clear all */}
-          {hasActiveFilters && (
-            <Link href='/search'>
-              <Button
-                variant='outlineLight'
-                size='sm'
-                className='w-full rounded-az-full gap-1.5'
-              >
-                <X className='w-3.5 h-3.5' />
-                Limpiar filtros
-              </Button>
-            </Link>
-          )}
+              {/* Price — hide when browsing a banner (fixed product set) */}
+              {!banner && (
+                <FilterGroup title='Precio' defaultOpen={price !== 'all'}>
+                  <ul>
+                    <li>
+                      <Link
+                        href={getFilterUrl({ p: 'all' })}
+                        className={rowClass(price === 'all')}
+                      >
+                        Cualquier precio
+                      </Link>
+                    </li>
+                    {prices.map((pr) => (
+                      <li key={pr.value}>
+                        <Link
+                          href={getFilterUrl({ p: pr.value })}
+                          className={rowClass(price === pr.value)}
+                        >
+                          {pr.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </FilterGroup>
+              )}
+
+              {/* Color swatches */}
+              {colors.length > 0 && (
+                <FilterGroup title='Color' defaultOpen={color !== 'all'}>
+                  <ul className='flex flex-wrap gap-2.5 p-1'>
+                    {colors.map((co: { id: string; name: string; hex: string }) => {
+                      const slug = co.name.toLowerCase().replace(/\s+/g, '-');
+                      const isActive = color === slug;
+                      return (
+                        <li key={co.id}>
+                          <Link
+                            href={getFilterUrl({ col: isActive ? 'all' : slug })}
+                            title={co.name}
+                            aria-label={`${co.name}${isActive ? ' (quitar filtro)' : ''}`}
+                            aria-current={isActive ? 'true' : undefined}
+                            className={`block w-7 h-7 rounded-full border border-az-hairline ring-offset-2 transition-shadow ${
+                              isActive ? 'ring-2 ring-az-ink-deep' : ''
+                            }`}
+                            style={{ backgroundColor: co.hex }}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </FilterGroup>
+              )}
+
+            </div>
+          </FiltersDisclosure>
         </aside>
 
         {/* ── Results ── */}
-        <div className='space-y-5'>
+        <div className='space-y-6'>
           {/* Banner promo notice */}
           {banner && bannerData && (
             <div className='flex items-center gap-3 bg-az-primary/10 border border-az-primary/20 rounded-az-xl px-5 py-4'>
@@ -320,26 +327,17 @@ const SearchPage = async (props: {
             </div>
           )}
 
-          {/* Top bar: active filters + sort */}
-          <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3'>
-            <div className='flex items-center flex-wrap gap-2'>
-              {hasActiveFilters ? (
-                <>
-                  <span className='az-body-sm text-az-steel'>Resultados para:</span>
-                  <span className='az-body-sm-bold text-az-ink-deep'>{activeFilterLabel}</span>
-                  <Link href='/search'>
-                    <button className='inline-flex items-center gap-1 az-caption text-az-stone hover:text-az-critical transition-colors'>
-                      <X className='w-3 h-3' />
-                      Limpiar
-                    </button>
-                  </Link>
-                </>
-              ) : (
-                <span className='az-heading-sm text-az-ink-deep'>Todos los productos</span>
-              )}
-              <span className='az-caption text-az-stone'>
-                ({products.totalCount} resultado{products.totalCount !== 1 ? 's' : ''})
-              </span>
+          {/* Title + count + sort */}
+          <div className='flex flex-col sm:flex-row sm:items-end justify-between gap-3'>
+            <div>
+              <h1 className='az-heading-md text-az-ink-deep'>
+                {hasActiveFilters ? activeFilterLabel : 'Todos los productos'}
+              </h1>
+              <p className='az-caption text-az-stone mt-1'>
+                {resultCount > 0
+                  ? `Mostrando ${rangeStart}–${rangeEnd} de ${products.totalCount} producto${products.totalCount !== 1 ? 's' : ''}`
+                  : '0 productos'}
+              </p>
             </div>
 
             {/* Sort — hide when browsing a banner */}
@@ -366,7 +364,7 @@ const SearchPage = async (props: {
           </div>
 
           {/* Product grid */}
-          {(products.data as unknown[]).length === 0 ? (
+          {resultCount === 0 ? (
             <div className='flex flex-col items-center justify-center py-24 text-center'>
               <div className='w-16 h-16 rounded-az-xxxl bg-az-surface-soft flex items-center justify-center mb-4'>
                 <SlidersHorizontal className='w-7 h-7 text-az-stone' />
@@ -382,7 +380,7 @@ const SearchPage = async (props: {
               </Link>
             </div>
           ) : (
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {(products.data as any[]).map((product) => (
                 <ProductCard key={product.id} product={product} />
