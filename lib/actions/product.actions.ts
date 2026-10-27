@@ -164,59 +164,53 @@ export async function getAllProducts({
         }
       : {};
 
-  const data = await prisma.product.findMany({
-    where: {
-      ...queryFilter,
-      ...categoryFilter,
-      ...subCategoryFilter,
-      ...priceFilter,
-      ...ratingFilter,
-      ...sellerFilter,
-      ...colorFilter,
-      ...activeFilter,
-    },
-    include: productIncludes,
-    // Fase 2: el orden por precio (`priceCash`) se hace en memoria abajo,
-    // porque `Product.price` ya no existe y Prisma no soporta `orderBy` por
-    // relación anidada (`prices.paymentMethod = 'CASH'`).
-    orderBy:
-      sort === 'rating'
-        ? { rating: 'desc' }
-        : { createdAt: 'desc' },
-    skip: (page - 1) * limit,
-    take: limit,
-  });
+  const where: Prisma.ProductWhereInput = {
+    ...queryFilter,
+    ...categoryFilter,
+    ...subCategoryFilter,
+    ...priceFilter,
+    ...ratingFilter,
+    ...sellerFilter,
+    ...colorFilter,
+    ...activeFilter,
+  };
 
-  // Sort en memoria por priceCash (solo aplica si sort === 'lowest' | 'highest')
+  const dataCount = await prisma.product.count({ where });
+
+  let data;
   if (sort === 'lowest' || sort === 'highest') {
-    const dir = sort === 'lowest' ? 1 : -1;
-    data.sort((a, b) => {
-      const pa = Number(
-        a.prices.find((p) => p.paymentMethod === 'CASH')?.value ?? 0,
-      );
-      const pb = Number(
-        b.prices.find((p) => p.paymentMethod === 'CASH')?.value ?? 0,
-      );
-      return (pa - pb) * dir;
+    // Price lives in a relation (`Price.paymentMethod = 'CASH'`), which Product
+    // cannot orderBy. Order and paginate over Price rows instead, so the sort
+    // is global across pages, then load the products for that page.
+    const dir = sort === 'lowest' ? 'asc' : 'desc';
+    const priceRows = await prisma.price.findMany({
+      where: { paymentMethod: 'CASH', product: where },
+      orderBy: [{ value: dir }, { productId: 'asc' }],
+      select: { productId: true },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    const ids = priceRows.map((r) => r.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: ids } },
+      include: productIncludes,
+    });
+    const byId = new Map(products.map((p) => [p.id, p]));
+    data = ids.flatMap((id) => byId.get(id) ?? []);
+  } else {
+    data = await prisma.product.findMany({
+      where,
+      include: productIncludes,
+      orderBy: sort === 'rating' ? { rating: 'desc' } : { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
-
-  const dataCount = await prisma.product.count({
-    where: {
-      ...queryFilter,
-      ...categoryFilter,
-      ...subCategoryFilter,
-      ...priceFilter,
-      ...ratingFilter,
-      ...sellerFilter,
-      ...colorFilter,
-      ...activeFilter,
-    }
-  });
 
   return {
     data: convertToPlainObject(data),
     totalPages: Math.ceil(dataCount / limit),
+    totalCount: dataCount,
   };
 }
 

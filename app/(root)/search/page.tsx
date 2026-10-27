@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { SlidersHorizontal, X, Tag } from 'lucide-react';
 import { Metadata } from 'next';
 import BannerActivator from '@/components/shared/banner-activator';
+import SearchPagination from '@/components/shared/search-pagination';
 
 // --- Price ranges (ARS) ---
 const prices = [
@@ -95,7 +96,8 @@ const SearchPage = async (props: {
   }: {
     c?: string; sc?: string; p?: string; col?: string; s?: string; pg?: string;
   }) => {
-    const params: Record<string, string> = { q, category, subCategory, price, color, sort, page };
+    // Any filter/sort change resets to page 1; only explicit `pg` moves pages
+    const params: Record<string, string> = { q, category, subCategory, price, color, sort, page: '1' };
     if (banner) params.banner = banner;
     if (c) params.category = c;
     if (c && c !== category && !sc) params.subCategory = 'all';
@@ -109,7 +111,12 @@ const SearchPage = async (props: {
 
   // If a banner param is present, load banner products; otherwise use regular search
   let bannerData: Awaited<ReturnType<typeof getProductsByBanner>> | null = null;
-  let products: { data: ReturnType<typeof Array<unknown>>; totalPages: number } = { data: [], totalPages: 1 };
+  let products: { data: ReturnType<typeof Array<unknown>>; totalPages: number; totalCount: number } = {
+    data: [],
+    totalPages: 1,
+    totalCount: 0,
+  };
+  const currentPage = Math.max(1, Math.floor(Number(page)) || 1);
 
   if (banner) {
     bannerData = await getProductsByBanner(banner);
@@ -118,6 +125,7 @@ const SearchPage = async (props: {
     products = {
       data: bannerProducts as unknown[],
       totalPages: 1,
+      totalCount: bannerProducts.length,
     };
   } else {
     products = await getAllProducts({
@@ -126,7 +134,7 @@ const SearchPage = async (props: {
       subCategory,
       price,
       sort,
-      page: Number(page),
+      page: currentPage,
       color,
     });
   }
@@ -330,7 +338,7 @@ const SearchPage = async (props: {
                 <span className='az-heading-sm text-az-ink-deep'>Todos los productos</span>
               )}
               <span className='az-caption text-az-stone'>
-                ({(products.data as unknown[]).length} resultado{(products.data as unknown[]).length !== 1 ? 's' : ''})
+                ({products.totalCount} resultado{products.totalCount !== 1 ? 's' : ''})
               </span>
             </div>
 
@@ -381,6 +389,12 @@ const SearchPage = async (props: {
               ))}
             </div>
           )}
+
+          <SearchPagination
+            page={currentPage}
+            totalPages={products.totalPages}
+            getPageUrl={(pg) => getFilterUrl({ pg: String(pg) })}
+          />
         </div>
       </div>
     </>
