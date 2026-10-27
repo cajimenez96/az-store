@@ -7,7 +7,7 @@ const LoadingPage = () => {
         src='/images/logo-nombre.png'
         width={350}
         height={250}
-        alt='AZ Store'
+        alt='Marder Hombres'
         priority
         className='dark:invert'
       />

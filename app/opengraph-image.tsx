@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'nodejs';
-export const alt = 'AZ Store';
+export const alt = 'Marder Hombres';
 export const size = {
   width: 1200,
   height: 630,
@@ -36,7 +36,7 @@ export default async function Image() {
             textAlign: 'center',
           }}
         >
-          <h1 style={{ margin: 0, fontSize: '96px' }}>AZ Store</h1>
+          <h1 style={{ margin: 0, fontSize: '96px' }}>Marder Hombres</h1>
           <p style={{ margin: 0, fontSize: '36px', opacity: 0.7 }}>
             Moda Argentina Online
           </p>

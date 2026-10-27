@@ -59,7 +59,7 @@ export function passwordResetTemplate(
     ${emailHeader()}
     <div class="content">
       <h1>Restablece tu contraseña</h1>
-      <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en AZ Store. Si no fuiste vos, podés ignorar este email de forma segura.</p>
+      <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Marder Hombres. Si no fuiste vos, podés ignorar este email de forma segura.</p>
       <p>Para restablecer tu contraseña, hacé clic en el botón de abajo. Este link es válido por 1 hora.</p>
       <div style="text-align: center;">
         <a href="${resetLink}" class="button">Restablecer contraseña</a>
@@ -224,7 +224,7 @@ export function transferApprovedTemplate(
       </div>
 
       <p>Te avisaremos por email cuando tu orden esté lista para enviar.</p>
-      <p>Gracias por tu compra,<br>Equipo de AZ Store</p>
+      <p>Gracias por tu compra,<br>Equipo de Marder Hombres</p>
     </div>
     ${emailFooter()}
   `;
@@ -307,7 +307,7 @@ export function welcomeTemplate(customerName: string, email: string): string {
   return `
     ${emailHeader()}
     <div class="content">
-      <h1>¡Bienvenido a AZ Store!</h1>
+      <h1>¡Bienvenido a Marder Hombres!</h1>
       <p>Hola ${customerName},</p>
       <p>Tu cuenta ha sido creada exitosamente. Estamos emocionados de tenerte en nuestra comunidad.</p>
 
@@ -412,4 +412,3 @@ export function abandonedCartTemplate(
     ${emailFooter()}
   `;
 }
-

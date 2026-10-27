@@ -32,12 +32,12 @@ const bebasNeue = Bebas_Neue({
 
 export const metadata: Metadata = {
   title: {
-    template: `%s | AZ Store`,
+    template: `%s`,
     default: APP_NAME,
   },
   description: APP_DESCRIPTION,
   metadataBase: new URL(SERVER_URL),
-  keywords: ['ropa', 'indumentaria', 'tienda online', 'moda argentina', 'AZ Store'],
+  keywords: ['ropa', 'indumentaria', 'tienda online', 'moda argentina'],
   icons: {
     icon: '/images/logo-m-negro.png',
   },
@@ -71,7 +71,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='es' suppressHydrationWarning>
-      <body className={`${geist.variable} ${cormorant.variable} ${inter.variable} ${bebasNeue.variable} ${inter.className} antialiased`}>
+      <body
+        className={`${geist.variable} ${cormorant.variable} ${inter.variable} ${bebasNeue.variable} ${inter.className} antialiased`}
+      >
         <ThemeProvider
           attribute='class'
           defaultTheme='light'

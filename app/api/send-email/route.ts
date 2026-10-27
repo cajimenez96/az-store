@@ -19,10 +19,7 @@ export async function POST(request: Request) {
     // Verify internal secret to prevent unauthorized email sending
     const internalSecret = request.headers.get('x-internal-secret');
     if (internalSecret !== process.env.INTERNAL_API_SECRET) {
-      return Response.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
+      return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -104,7 +101,7 @@ export async function POST(request: Request) {
         break;
 
       case 'welcome':
-        subject = '¡Bienvenido a AZ Store!';
+        subject = '¡Bienvenido a Marder Hombres!';
         html = welcomeTemplate(data.customerName, data.email);
         recipientEmail = data.email;
         break;
@@ -131,10 +128,7 @@ export async function POST(request: Request) {
         break;
 
       default:
-        return Response.json(
-          { error: 'Unknown email type' },
-          { status: 400 }
-        );
+        return Response.json({ error: 'Unknown email type' }, { status: 400 });
     }
 
     if (!html || !subject || !recipientEmail) {
@@ -153,18 +147,12 @@ export async function POST(request: Request) {
 
     if (result.error) {
       console.error(`Email send error (${type}):`, result.error);
-      return Response.json(
-        { error: result.error },
-        { status: 500 }
-      );
+      return Response.json({ error: result.error }, { status: 500 });
     }
 
     return Response.json({ success: true, data: result.data });
   } catch (error) {
     console.error('Send email API error:', error);
-    return Response.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

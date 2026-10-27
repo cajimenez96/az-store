@@ -38,7 +38,8 @@ export async function generateMetadata(props: {
     return { title: 'Producto no encontrado' };
   }
 
-  const description = product.description || `Compra ${product.name} en AZ Store`;
+  const description =
+    product.description || `Compra ${product.name} en Marder Hombres`;
   const imageUrl = product.images[0] || '/opengraph-image.png';
 
   return {
@@ -88,7 +89,7 @@ const ProductDetailsPage = async (props: {
     image: product.images,
     brand: {
       '@type': 'Brand',
-      name: product.brand?.name || 'AZ Store',
+      name: product.brand?.name || 'Marder Hombres',
     },
     offers: {
       '@type': 'Offer',
@@ -116,7 +117,10 @@ const ProductDetailsPage = async (props: {
               Inicio
             </Link>
             <span>/</span>
-            <Link href='/search' className='hover:text-nike-ink transition-colors'>
+            <Link
+              href='/search'
+              className='hover:text-nike-ink transition-colors'
+            >
               Productos
             </Link>
             <span>/</span>
@@ -151,7 +155,8 @@ const ProductDetailsPage = async (props: {
                   Envíos y Devoluciones
                 </h4>
                 <p className='font-sans text-xs sm:text-sm text-nike-mute leading-relaxed'>
-                  Despachamos a todo el país. Pagos 100% seguros con Mercado Pago y transferencia bancaria.
+                  Despachamos a todo el país. Pagos 100% seguros con Mercado
+                  Pago y transferencia bancaria.
                 </p>
               </div>
             </div>
